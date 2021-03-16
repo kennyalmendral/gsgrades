@@ -53,7 +53,12 @@ function gsg_enqueue() {
 	wp_localize_script('gsg-script', 'gsg', array(
 		'ajaxUrl' => admin_url('admin-ajax.php'),
         'homeUrl' => home_url('/'),
-        'isLoginPage' => is_page(13) ? 1 : 0
+        'loginUrl' => LOGIN_PAGE_URL,
+        'registerUrl' => REGISTER_PAGE_URL,
+        'accountUrl' => ACCOUNT_PAGE_URL,
+        'isLoginPage' => is_page(13) ? 1 : 0,
+        'isRegisterPage' => is_page(16) ? 1 : 0,
+        'logoutNonce' => wp_create_nonce('logout-nonce'),
     ));
 
 	wp_enqueue_script('gsg-script');
