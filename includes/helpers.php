@@ -37,3 +37,16 @@ function gsg_is_grades_page() {
 function gsg_is_students_page() {
     return is_page(STUDENTS_PAGE_ID);
 }
+
+function gsg_get_current_page() {
+    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+        $url = 'https://';
+    } else {
+        $url = 'http://'; 
+    }
+
+    $url .= $_SERVER['HTTP_HOST']; 
+    $url .= $_SERVER['REQUEST_URI']; 
+
+    return basename($url);
+}
