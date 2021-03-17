@@ -12,7 +12,7 @@
 </head>
 
 <body <?php body_class(); ?>>
-    <div id="preloader">
+    <div id="loader">
         <!-- By Sam Herbert (@sherb), for everyone. More @ http://goo.gl/7AJzbL -->
         <svg width="38" height="38" viewBox="0 0 38 38" xmlns="http://www.w3.org/2000/svg" stroke="#212529">
             <g fill="none" fill-rule="evenodd">
@@ -31,7 +31,7 @@
         <?php if (!gsg_is_login_page()): ?>
             <header>
                 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-                    <div class="container-fluid">
+                    <div class="container">
                         <a class="navbar-brand" href="<?php echo home_url(); ?>"><img src="<?php echo GSG_IMAGES_URL; ?>/logo.png" width="32" height="32" alt="Gottes Segen Grades"></a>
 
                         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">

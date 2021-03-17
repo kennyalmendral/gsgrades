@@ -1,6 +1,8 @@
 (function($) {
+    const loader = $('#loader');
+
     $(window).on('load', function() {/*{{{*/
-        $('#preloader').fadeOut('slow', function() {
+        loader.fadeOut('slow', function() {
             $(this).remove();
         });
     });/*}}}*/

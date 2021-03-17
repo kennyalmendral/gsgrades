@@ -4,7 +4,11 @@ Description: WordPress theme for Gottes Segen Grades website.
 Version: 1.0
 */
 
-#preloader {
+html, body {
+    background-color: #f5f5f5;
+}
+
+#loader {
     position: fixed;
     left: 0;
     top: 0;
@@ -15,4 +19,8 @@ Version: 1.0
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.page-id-17 #main-content {
+    max-width: 800px;
 }
