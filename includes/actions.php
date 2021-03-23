@@ -75,6 +75,8 @@ add_action('wp_ajax_gsg_logout', 'gsg_logout');
 add_action('wp_ajax_nopriv_gsg_logout', 'gsg_logout');
 
 function gsg_register() {
+    global $wpdb;
+
     if (!isset($_POST['register_nonce']) || !wp_verify_nonce($_POST['register_nonce'], 'gsg_register')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
     }
@@ -111,6 +113,12 @@ function gsg_register() {
             if ($_POST[$key] != '') {
                 if (!filter_var($_POST[$key], FILTER_VALIDATE_EMAIL)) {
                     $errors[$key] = "$field_name field must contain a valid email address.";
+                }
+
+                $email_exists = $wpdb->get_var($wpdb->prepare("SELECT ID FROM $wpdb->prefix" . "users WHERE user_email = '%s' LIMIT 1", $_POST[$key]));
+
+                if ($email_exists > 0) {
+                    $errors[$key] = "$field_name already exists.";
                 }
             }
         }
@@ -149,7 +157,7 @@ function gsg_register() {
     }
 
     $user_id = wp_insert_user(array(
-        'user_login' => strtolower(preg_replace('/[^a-zA-Z0-9-_\.]/', '', $name)),
+        'user_login' => strtolower(explode('@', $email_address)[0]),
         'user_pass' => $password,
         'user_email' => $email_address,
         'first_name' => $first_name,
@@ -160,19 +168,19 @@ function gsg_register() {
 
     update_user_meta($user_id, 'contact_number', $contact_number);
 
-    $login_data = array();
+    $to = $email_address;
+    $subject = 'Account Registration';
 
-    $login_data['user_login'] = $email_address;
-    $login_data['user_password'] = $password;
-    $login_data['remember'] = true;
+    $body = "<p>Here's your login credentials:</p><p><strong>Email address:</strong> $email_address<br><strong>Password:</strong> $password</p>";
+    $body .= '<p>You may login here: ' . LOGIN_PAGE_URL . '</p>';
 
-    $login = wp_signon($login_data, false);
+    $headers = array();
+    $headers[] = 'Content-Type: text/html; charset=UTF-8';
+    $headers[] = 'From: Gottes Segen Grades <info@grades.gottes-segen.com>';
+     
+    wp_mail($to, $subject, $body, $headers);
 
-    if (is_wp_error($login)) {
-        wp_send_json_error(array('login_error' => 'Invalid email address and/or password.'), 401);
-    }
-
-    wp_send_json_success(array('message' => "Your account has been created successfully.<br>Please wait while you're being logged in."));
+    wp_send_json_success();
 }
 
 add_action('wp_ajax_gsg_register', 'gsg_register');

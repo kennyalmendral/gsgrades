@@ -20,6 +20,10 @@ get_header();
                 <div class="alert alert-success fs-8 px-3 py-2">You have been logged out successfully.</div>
             <?php endif; ?>
 
+            <?php if (isset($_GET['account_created'])): ?>
+                <div class="alert alert-success fs-8 px-3 py-2">Your account has been created successfully. Please check your email address for your login credentials.</div>
+            <?php endif; ?>
+
             <div class="input-group mb-3">
                 <label for="email" class="input-group-text"><i class="bi bi-person-fill"></i></label>
                 <input type="email" id="email" class="form-control" placeholder="Email address" autofocus>
@@ -39,7 +43,7 @@ get_header();
             <button class="w-100 btn btn-lg btn-primary mt-3 position-relative" type="submit"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span>Login</span></button>
         </div>
 
-        <p class="mt-4 mb-0 text-center"><a href="<?php echo REGISTER_PAGE_URL; ?>" class="text-muted text-decoration-none">Create an account</a> <span class="mx-2 nav-separator">|</span> <a href="#" class="text-muted text-decoration-none">Forgot password</a></p>
+        <p class="mt-4 mb-0 text-center"><a href="<?php echo REGISTER_PAGE_URL; ?>" class="text-muted text-decoration-none">Create an account</a> <span class="mx-2 nav-separator">|</span> <a href="<?php echo FORGOT_PASSWORD_PAGE_URL; ?>" class="text-muted text-decoration-none">Forgot password</a></p>
     </form>
 </div>
 

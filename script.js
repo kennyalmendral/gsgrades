@@ -148,17 +148,16 @@
                                     }
                                 }
                             }
+
+                            window.scrollTo({
+                                top: registerForm.offset().top,
+                                behavior: 'smooth'
+                            });
                         }
                     },
                     success: function(response) {
-                        console.log(response);
-
                         if (response.success) {
-                            $('.gsg-auth-form > div').prepend(`<div id="register-success" class="alert alert-success fs-8 px-3 py-2">${response.data.message}</div>`);
-
-                            setTimeout(function() {
-                                location.href = gsg.gradesUrl;
-                            }, 1000);
+                            location.href = `${gsg.loginUrl}?account_created=true`;
                         }
                     },
                     complete: function() {

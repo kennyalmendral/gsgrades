@@ -38,7 +38,7 @@ function gsg_enqueue() {
 	wp_register_style('gsg-style', "$uri/style.css", array(), $version);
 	wp_enqueue_style('gsg-style');
 
-    if (gsg_is_login_page() || gsg_is_register_page()) {
+    if (gsg_is_login_page() || gsg_is_register_page() || gsg_is_forgot_password_page()) {
         wp_register_style('gsg-auth-style', "$uri/css/auth.css", array(), $version);
         wp_enqueue_style('gsg-auth-style');
     }

@@ -26,6 +26,10 @@ function gsg_is_register_page() {
     return is_page(REGISTER_PAGE_ID);
 }
 
+function gsg_is_forgot_password_page() {
+    return is_page(FORGOT_PASSWORD_PAGE_ID);
+}
+
 function gsg_is_account_page() {
     return is_page(ACCOUNT_PAGE_ID);
 }
