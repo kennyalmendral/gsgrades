@@ -13,8 +13,11 @@ function gsg_ajax_login_redirect() {
     if (in_array('administrator', $current_user->roles)) {
         wp_redirect(admin_url());
         exit;
-    } else if (in_array('teacher', $current_user->roles)) {
+    } else if (in_array('student', $current_user->roles)) {
         wp_redirect(GRADES_PAGE_URL);
+        exit;
+    } else if (in_array('teacher', $current_user->roles)) {
+        wp_redirect(RECORDS_PAGE_URL);
         exit;
     }
 }

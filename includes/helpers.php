@@ -30,6 +30,10 @@ function gsg_is_account_page() {
     return is_page(ACCOUNT_PAGE_ID);
 }
 
+function gsg_is_records_page() {
+    return is_page(RECORDS_PAGE_ID);
+}
+
 function gsg_is_grades_page() {
     return is_page(GRADES_PAGE_ID);
 }

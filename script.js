@@ -11,8 +11,8 @@
         console.log(gsg);
 
         if (gsg.isLoginPage) {/*{{{*/
-            let loginForm = $('.gsg-auth-form'),
-                loginBtn = loginForm.find('button');
+            const loginForm = $('.gsg-auth-form');
+            const loginBtn = loginForm.find('button');
 
             loginForm.submit(function(e) {
                 e.preventDefault();
@@ -59,7 +59,7 @@
 
                                     if (key === 'login_error') {
                                         if ($('#login-error').length === 0) {
-                                            $(`<div id="login-error" class="alert alert-danger fs-8 px-2 py-2">${responseData[key]}</div>`).insertAfter('.gsg-auth-form h1');
+                                            $('.gsg-auth-form > div').prepend(`<div id="login-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
                                         }
                                     }
                                 }
@@ -68,7 +68,7 @@
                     },
                     success: function(response) {
                         if (response.success) {
-                            $(`<div id="login-success" class="alert alert-success fs-8 px-2 py-2">${response.data.message}</div>`).insertAfter('.gsg-auth-form h1');
+                            $('.gsg-auth-form > div').prepend(`<div id="login-success" class="alert alert-success fs-8 px-3 py-2">${response.data.message}</div>`);
 
                             setTimeout(function() {
                                 location.href = gsg.homeUrl;
@@ -79,6 +79,92 @@
                         loginBtn.removeAttr('disabled');
                         loginBtn.find('span').text('Login');
                         loginBtn.find('i').addClass('d-none');
+                    }
+                });
+            });
+        }/*}}}*/
+
+        if (gsg.isRegisterPage) {/*{{{*/
+            const registerForm = $('.gsg-auth-form');
+            const registerBtn = registerForm.find('button');
+
+            registerForm.submit(function(e) {
+                e.preventDefault();
+
+                let formData = {
+                    first_name: registerForm.find('#first-name').val(),
+                    last_name: registerForm.find('#last-name').val(),
+                    email_address: registerForm.find('#email-address').val(),
+                    contact_number: registerForm.find('#contact-number').val(),
+                    password: registerForm.find('#password').val(),
+                    password_confirmation: registerForm.find('#password-confirmation').val()
+                };
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_register',
+                        register_nonce: registerForm.find('#gsg_register_nonce_field').val(),
+                        ...formData
+                    },
+                    beforeSend: function() {
+                        registerBtn.attr('disabled', true);
+                        registerBtn.find('span').text('Creating your account');
+                        registerBtn.find('i').removeClass('d-none');
+
+                        registerForm.find('#first-name').length > 0 && registerForm.find('#first-name').removeClass('is-invalid');
+                        registerForm.find('#last-name').length > 0 && registerForm.find('#last-name').removeClass('is-invalid');
+                        registerForm.find('#email-address').length > 0 && registerForm.find('#email-address').removeClass('is-invalid');
+                        registerForm.find('#contact-number').length > 0 && registerForm.find('#contact-number').removeClass('is-invalid');
+                        registerForm.find('#password').length > 0 && registerForm.find('#password').removeClass('is-invalid');
+                        registerForm.find('#password-confirmation').length > 0 && registerForm.find('#password-confirmation').removeClass('is-invalid');
+
+                        registerForm.find('#register-error').length > 0 && registerForm.find('#register-error').remove();
+                        registerForm.find('.alert-success').length > 0 && registerForm.find('.alert-success').remove();
+                        registerForm.find('.invalid-feedback').length > 0 && registerForm.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (let key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    keyId = key.replace('_', '-');
+
+                                    if ($(`#${keyId}-error-alert`).length === 0) {
+                                        $(`#${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(`.gsg-auth-form #${keyId}`);
+                                    }
+
+                                    if (key === 'register_error') {
+                                        if ($('#register-error').length === 0) {
+                                            $('.gsg-auth-form > div').prepend(`<div id="register-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    success: function(response) {
+                        console.log(response);
+
+                        if (response.success) {
+                            $('.gsg-auth-form > div').prepend(`<div id="register-success" class="alert alert-success fs-8 px-3 py-2">${response.data.message}</div>`);
+
+                            setTimeout(function() {
+                                location.href = gsg.gradesUrl;
+                            }, 1000);
+                        }
+                    },
+                    complete: function() {
+                        registerBtn.removeAttr('disabled');
+                        registerBtn.find('span').text('Submit');
+                        registerBtn.find('i').addClass('d-none');
                     }
                 });
             });

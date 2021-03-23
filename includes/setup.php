@@ -38,7 +38,7 @@ function gsg_enqueue() {
 	wp_register_style('gsg-style', "$uri/style.css", array(), $version);
 	wp_enqueue_style('gsg-style');
 
-    if (is_page(13)) {
+    if (gsg_is_login_page() || gsg_is_register_page()) {
         wp_register_style('gsg-auth-style', "$uri/css/auth.css", array(), $version);
         wp_enqueue_style('gsg-auth-style');
     }
@@ -56,8 +56,10 @@ function gsg_enqueue() {
         'loginUrl' => LOGIN_PAGE_URL,
         'registerUrl' => REGISTER_PAGE_URL,
         'accountUrl' => ACCOUNT_PAGE_URL,
-        'isLoginPage' => is_page(13) ? 1 : 0,
-        'isRegisterPage' => is_page(16) ? 1 : 0,
+        'gradesUrl' => GRADES_PAGE_URL,
+        'recordsUrl' => RECORDS_PAGE_URL,
+        'isLoginPage' => gsg_is_login_page() ? true : false,
+        'isRegisterPage' => gsg_is_register_page() ? true : false,
         'logoutNonce' => wp_create_nonce('logout-nonce'),
     ));
 
