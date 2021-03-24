@@ -21,6 +21,8 @@ html, body {
     justify-content: center;
 }
 
-.page-id-17 #main-content {
-    max-width: 800px;
+@media (min-width: 993px) {
+    .page-id-17 #main-content {
+        max-width: 800px;
+    }
 }

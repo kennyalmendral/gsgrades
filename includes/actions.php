@@ -24,14 +24,14 @@ function gsg_login() {
 
     $errors = array();
 
-    $email = $_POST['email'];
+    $email_address = $_POST['email_address'];
     $password = $_POST['password'];
     $remember = $_POST['remember'];
 
-    if (empty($email)) {
-        $errors['email'] = 'The email address field is required.';
-    } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errors['email'] = 'Please enter a valid email address.';
+    if (empty($email_address)) {
+        $errors['email_address'] = 'The email address field is required.';
+    } else if (!filter_var($email_address, FILTER_VALIDATE_EMAIL)) {
+        $errors['email_address'] = 'Please enter a valid email address.';
     }
 
     if (empty($password)) {
@@ -44,7 +44,7 @@ function gsg_login() {
 
     $login_data = array();
 
-    $login_data['user_login'] = $email;
+    $login_data['user_login'] = $email_address;
     $login_data['user_password'] = $password;
     $login_data['remember'] = $remember;
 
@@ -75,8 +75,6 @@ add_action('wp_ajax_gsg_logout', 'gsg_logout');
 add_action('wp_ajax_nopriv_gsg_logout', 'gsg_logout');
 
 function gsg_register() {
-    global $wpdb;
-
     if (!isset($_POST['register_nonce']) || !wp_verify_nonce($_POST['register_nonce'], 'gsg_register')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
     }
@@ -115,9 +113,7 @@ function gsg_register() {
                     $errors[$key] = "$field_name field must contain a valid email address.";
                 }
 
-                $email_exists = $wpdb->get_var($wpdb->prepare("SELECT ID FROM $wpdb->prefix" . "users WHERE user_email = '%s' LIMIT 1", $_POST[$key]));
-
-                if ($email_exists > 0) {
+                if (gsg_is_email_exists($_POST[$key])) {
                     $errors[$key] = "$field_name already exists.";
                 }
             }
@@ -168,7 +164,6 @@ function gsg_register() {
 
     update_user_meta($user_id, 'contact_number', $contact_number);
 
-    $to = $email_address;
     $subject = 'Account Registration';
 
     $body = "<p>Here's your login credentials:</p><p><strong>Email address:</strong> $email_address<br><strong>Password:</strong> $password</p>";
@@ -178,10 +173,104 @@ function gsg_register() {
     $headers[] = 'Content-Type: text/html; charset=UTF-8';
     $headers[] = 'From: Gottes Segen Grades <info@grades.gottes-segen.com>';
      
-    wp_mail($to, $subject, $body, $headers);
+    wp_mail($email_address, $subject, $body, $headers);
 
     wp_send_json_success();
 }
 
 add_action('wp_ajax_gsg_register', 'gsg_register');
 add_action('wp_ajax_nopriv_gsg_register', 'gsg_register');
+
+function gsg_forgot_password() {
+    if (!isset($_POST['forgot_password_nonce']) || !wp_verify_nonce($_POST['forgot_password_nonce'], 'gsg_forgot_password')) {
+        wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
+    }
+
+    $errors = array();
+
+    $email_address = $_POST['email_address'];
+
+    if (empty($email_address)) {
+        $errors['email_address'] = 'The email address field is required.';
+    } else if (!filter_var($email_address, FILTER_VALIDATE_EMAIL)) {
+        $errors['email_address'] = 'Please enter a valid email address.';
+    } else if (!gsg_is_email_exists($email_address)) {
+        $errors['email_address'] = 'Email address not found.';
+    }
+
+    if (!empty($errors)) {
+        wp_send_json_error($errors, 400);
+    }
+
+    $user = get_user_by('email', $email_address);
+
+    $first_name = $user->first_name;
+    $user_login = $user->user_login;
+
+    $password_reset_key = get_password_reset_key($user);
+
+    $reset_password_link = RESET_PASSWORD_PAGE_URL . "?key=$password_reset_key&login=$user_login";
+
+    $subject = 'Forgot Password';
+
+    $body = "<p>Hello $first_name,</p>";
+    $body .= "<p>Click the following link to set a new password for your account: $reset_password_link</p>";
+
+    $headers = array();
+    $headers[] = 'Content-Type: text/html; charset=UTF-8';
+    $headers[] = 'From: Gottes Segen Grades <info@grades.gottes-segen.com>';
+
+    wp_mail($email_address, $subject, $body, $headers);
+
+    wp_send_json_success();
+}
+
+add_action('wp_ajax_gsg_forgot_password', 'gsg_forgot_password');
+add_action('wp_ajax_nopriv_gsg_forgot_password', 'gsg_forgot_password');
+
+function gsg_reset_password() {
+    if (!isset($_POST['reset_password_nonce']) || !wp_verify_nonce($_POST['reset_password_nonce'], 'gsg_reset_password')) {
+        wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
+    }
+
+    $errors = array();
+
+    $user_login = $_POST['user_login'];
+    $reset_password_key = $_POST['reset_password_key'];
+
+    $user = check_password_reset_key($reset_password_key, $user_login);
+
+    if (is_wp_error($user)) {
+        wp_send_json_error(array('reset_password_error' => 'Something went wrong...'), 500);
+    }
+
+    $password = $_POST['password'];
+    $password_confirmation = $_POST['password_confirmation'];
+
+    if (empty($password)) {
+        $errors['password'] = 'The new password field is required.';
+    } else {
+        if (!preg_match('/^(?=.*\d)(?=.*[@#\-_$%^&+=§!\?])(?=.*[a-z])(?=.*[A-Z])[0-9A-Za-z@#\-_$%^&+=§!\?]{8,20}$/', $password)) {
+            $errors['password'] = "Password does not meet the requirements.";
+        }
+    }
+
+    if (empty($password_confirmation)) {
+        $errors['password_confirmation'] = 'The new password confirmation field is required.';
+    }
+
+    if ($password != $password_confirmation) {
+        $errors['password'] = 'Passwords do not match.';
+    }
+
+    if (!empty($errors)) {
+        wp_send_json_error($errors, 400);
+    }
+
+    wp_set_password($password, $user->ID);
+
+    wp_send_json_success();
+}
+
+add_action('wp_ajax_gsg_reset_password', 'gsg_reset_password');
+add_action('wp_ajax_nopriv_gsg_reset_password', 'gsg_reset_password');

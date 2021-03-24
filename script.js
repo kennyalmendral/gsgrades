@@ -18,7 +18,7 @@
                 e.preventDefault();
 
                 let formData = {
-                    email: loginForm.find('#email').val(),
+                    email_address: loginForm.find('#email-address').val(),
                     password: loginForm.find('#password').val(),
                     remember: loginForm.find('#remember').is(':checked')
                 };
@@ -37,7 +37,7 @@
                         loginBtn.find('span').text('Logging you in');
                         loginBtn.find('i').removeClass('d-none');
 
-                        loginForm.find('#email').length > 0 && loginForm.find('#email').removeClass('is-invalid');
+                        loginForm.find('#email-address').length > 0 && loginForm.find('#email-address').removeClass('is-invalid');
                         loginForm.find('#password').length > 0 && loginForm.find('#password').removeClass('is-invalid');
                         loginForm.find('#login-error').length > 0 && loginForm.find('#login-error').remove();
                         loginForm.find('.alert-success').length > 0 && loginForm.find('.alert-success').remove();
@@ -51,10 +51,12 @@
 
                             for (const key in responseData) {
                                 if (responseData.hasOwnProperty(key)) {
-                                    if ($(`#${key}-error-alert`).length === 0) {
-                                        $(`#${key}`).addClass('is-invalid');
+                                    keyId = key.replace('_', '-');
 
-                                        $(`<div id="${key}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(`.gsg-auth-form #${key}`);
+                                    if ($(`#${keyId}-error-alert`).length === 0) {
+                                        $(`#${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(`.gsg-auth-form #${keyId}`);
                                     }
 
                                     if (key === 'login_error') {
@@ -169,6 +171,141 @@
             });
         }/*}}}*/
 
+        if (gsg.isForgotPasswordPage) {/*{{{*/
+            const forgotPasswordForm = $('.gsg-auth-form');
+            const sendBtn = forgotPasswordForm.find('button');
+
+            forgotPasswordForm.submit(function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_forgot_password',
+                        forgot_password_nonce: forgotPasswordForm.find('#gsg_forgot_password_nonce_field').val(),
+                        email_address: forgotPasswordForm.find('#email-address').val()
+                    },
+                    beforeSend: function() {
+                        sendBtn.attr('disabled', true);
+                        sendBtn.find('span').text('Sending');
+                        sendBtn.find('i').removeClass('d-none');
+
+                        forgotPasswordForm.find('#email-address').length > 0 && forgotPasswordForm.find('#email-address').removeClass('is-invalid');
+                        forgotPasswordForm.find('#forgot-password-error').length > 0 && forgotPasswordForm.find('#forgot-password-error').remove();
+                        forgotPasswordForm.find('.alert-success').length > 0 && forgotPasswordForm.find('.alert-success').remove();
+                        forgotPasswordForm.find('.invalid-feedback').length > 0 && forgotPasswordForm.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (const key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    keyId = key.replace('_', '-');
+
+                                    if ($(`#${keyId}-error-alert`).length === 0) {
+                                        $(`#${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(`.gsg-auth-form #${keyId}`);
+                                    }
+
+                                    if (key === 'forgot_password_error') {
+                                        if ($('#forgot-password-error').length === 0) {
+                                            $('.gsg-auth-form > div').prepend(`<div id="forgot-password-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.href = `${gsg.forgotPasswordUrl}?sent=true`;
+                        }
+                    },
+                    complete: function() {
+                        sendBtn.removeAttr('disabled');
+                        sendBtn.find('span').text('Send');
+                        sendBtn.find('i').addClass('d-none');
+                    }
+                });
+            });
+        }/*}}}*/
+
+        if (gsg.isResetPasswordPage) {/*{{{*/
+            const resetPasswordForm = $('.gsg-auth-form');
+            const saveBtn = resetPasswordForm.find('button');
+
+            resetPasswordForm.submit(function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_reset_password',
+                        reset_password_nonce: resetPasswordForm.find('#gsg_reset_password_nonce_field').val(),
+                        reset_password_key: resetPasswordForm.find('#reset-password-key').val(),
+                        user_login: resetPasswordForm.find('#user-login').val(),
+                        password: resetPasswordForm.find('#password').val(),
+                        password_confirmation: resetPasswordForm.find('#password-confirmation').val()
+                    },
+                    beforeSend: function() {
+                        saveBtn.attr('disabled', true);
+                        saveBtn.find('span').text('Saving changes');
+                        saveBtn.find('i').removeClass('d-none');
+
+                        resetPasswordForm.find('#password').length > 0 && resetPasswordForm.find('#password').removeClass('is-invalid');
+                        resetPasswordForm.find('#password-confirmation').length > 0 && resetPasswordForm.find('#password-confirmation').removeClass('is-invalid');
+
+                        resetPasswordForm.find('#reset-password-error').length > 0 && resetPasswordForm.find('#reset-password-error').remove();
+                        resetPasswordForm.find('.alert-success').length > 0 && resetPasswordForm.find('.alert-success').remove();
+                        resetPasswordForm.find('.invalid-feedback').length > 0 && resetPasswordForm.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (const key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    keyId = key.replace('_', '-');
+
+                                    if ($(`#${keyId}-error-alert`).length === 0) {
+                                        $(`#${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(`.gsg-auth-form #${keyId}`);
+                                    }
+
+                                    if (key === 'reset_password_error') {
+                                        if ($('#reset-password-error').length === 0) {
+                                            $('.gsg-auth-form > div').prepend(`<div id="reset-password-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.href = `${gsg.loginUrl}?password_changed=true`;
+                        }
+                    },
+                    complete: function() {
+                        saveBtn.removeAttr('disabled');
+                        saveBtn.find('span').text('Save');
+                        saveBtn.find('i').addClass('d-none');
+                    }
+                });
+            });
+        }/*}}}*/
+
         $('#logout').click(function(e) {/*{{{*/
             e.preventDefault();
 
@@ -182,9 +319,6 @@
                     action: 'gsg_logout',
                     logout_nonce: gsg.logoutNonce
                 },
-                beforeSend: function() {
-                    console.log('beforeSend: logout');
-                },
                 error: function(xhr) {
                     let response = xhr.responseJSON;
 
@@ -194,9 +328,6 @@
                     if (response.success) {
                         location.href = `${gsg.loginUrl}?logged_out=true`;
                     }
-                },
-                complete: function() {
-                    console.log('complete: logout');
                 }
             });
         });/*}}}*/

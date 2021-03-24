@@ -17,11 +17,11 @@ get_header();
 
         <div class="bg-white p-4 p-sm-5 shadow-sm rounded">
             <?php if (isset($_GET['sent'])): ?>
-                <div class="alert alert-success fs-8 px-3 py-2">Your password has been sent to your email address.</div>
+                <div class="alert alert-success fs-8 px-3 py-2">A password reset link has been sent to your email address.</div>
             <?php endif; ?>
 
             <label for="email-address" class="d-block text-start mb-1 text-muted">Email address</label>
-            <input type="email" id="email-address" class="form-control">
+            <input type="email" id="email-address" class="form-control" required autofocus>
 
             <?php wp_nonce_field('gsg_forgot_password', 'gsg_forgot_password_nonce_field'); ?>
 

@@ -14,6 +14,9 @@ define('REGISTER_PAGE_URL', get_permalink(REGISTER_PAGE_ID));
 define('FORGOT_PASSWORD_PAGE_ID', 28);
 define('FORGOT_PASSWORD_PAGE_URL', get_permalink(FORGOT_PASSWORD_PAGE_ID));
 
+define('RESET_PASSWORD_PAGE_ID', 30);
+define('RESET_PASSWORD_PAGE_URL', get_permalink(RESET_PASSWORD_PAGE_ID));
+
 define('ACCOUNT_PAGE_ID', 17);
 define('ACCOUNT_PAGE_URL', get_permalink(ACCOUNT_PAGE_ID));
 

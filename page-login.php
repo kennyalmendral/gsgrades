@@ -24,14 +24,19 @@ get_header();
                 <div class="alert alert-success fs-8 px-3 py-2">Your account has been created successfully. Please check your email address for your login credentials.</div>
             <?php endif; ?>
 
+            <?php if (isset($_GET['password_changed'])): ?>
+                <div class="alert alert-success fs-8 px-3 py-2">Your password has been changed successfully.</div>
+            <?php endif; ?>
+
+
             <div class="input-group mb-3">
-                <label for="email" class="input-group-text"><i class="bi bi-person-fill"></i></label>
-                <input type="email" id="email" class="form-control" placeholder="Email address" autofocus>
+                <label for="email-address" class="input-group-text"><i class="bi bi-person-fill"></i></label>
+                <input type="email" id="email-address" class="form-control" placeholder="Email address" required autofocus>
             </div>
 
             <div class="input-group mb-3">
                 <label for="password" class="input-group-text"><i class="bi bi-lock-fill"></i></label>
-                <input type="password" id="password" class="form-control" placeholder="Password">
+                <input type="password" id="password" class="form-control" placeholder="Password" required>
             </div>
 
             <div class="checkbox mb-0 mt-3">

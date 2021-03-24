@@ -30,6 +30,10 @@ function gsg_is_forgot_password_page() {
     return is_page(FORGOT_PASSWORD_PAGE_ID);
 }
 
+function gsg_is_reset_password_page() {
+    return is_page(RESET_PASSWORD_PAGE_ID);
+}
+
 function gsg_is_account_page() {
     return is_page(ACCOUNT_PAGE_ID);
 }
@@ -57,4 +61,12 @@ function gsg_get_current_page() {
     $url .= $_SERVER['REQUEST_URI']; 
 
     return basename($url);
+}
+
+function gsg_is_email_exists($email_address) {
+    global $wpdb;
+
+    $email_exists = $wpdb->get_var($wpdb->prepare("SELECT ID FROM $wpdb->prefix" . "users WHERE user_email = '%s' LIMIT 1", $email_address));
+
+    return $email_exists > 0;
 }

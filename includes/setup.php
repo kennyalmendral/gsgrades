@@ -2,6 +2,7 @@
 
 function gsg_setup_theme() {
 	add_theme_support('post-thumbnails');
+
     add_theme_support('title-tag');
 
 	add_theme_support('html5', array(
@@ -38,7 +39,7 @@ function gsg_enqueue() {
 	wp_register_style('gsg-style', "$uri/style.css", array(), $version);
 	wp_enqueue_style('gsg-style');
 
-    if (gsg_is_login_page() || gsg_is_register_page() || gsg_is_forgot_password_page()) {
+    if (gsg_is_login_page() || gsg_is_register_page() || gsg_is_forgot_password_page() || gsg_is_reset_password_page()) {
         wp_register_style('gsg-auth-style', "$uri/css/auth.css", array(), $version);
         wp_enqueue_style('gsg-auth-style');
     }
@@ -55,11 +56,15 @@ function gsg_enqueue() {
         'homeUrl' => home_url('/'),
         'loginUrl' => LOGIN_PAGE_URL,
         'registerUrl' => REGISTER_PAGE_URL,
+        'forgotPasswordUrl' => FORGOT_PASSWORD_PAGE_URL,
+        'resetPasswordUrl' => RESET_PASSWORD_PAGE_URL,
         'accountUrl' => ACCOUNT_PAGE_URL,
         'gradesUrl' => GRADES_PAGE_URL,
         'recordsUrl' => RECORDS_PAGE_URL,
         'isLoginPage' => gsg_is_login_page() ? true : false,
         'isRegisterPage' => gsg_is_register_page() ? true : false,
+        'isForgotPasswordPage' => gsg_is_forgot_password_page() ? true : false,
+        'isResetPasswordPage' => gsg_is_reset_password_page() ? true : false,
         'logoutNonce' => wp_create_nonce('logout-nonce'),
     ));
 

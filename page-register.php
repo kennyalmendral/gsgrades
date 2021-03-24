@@ -12,32 +12,32 @@
             <div class="row">
                 <div class="col-sm mb-3">
                     <label for="first-name" class="d-block text-start mb-1 text-muted">First name <strong class="text-danger">*</strong></label>
-                    <input type="text" id="first-name" class="form-control" autofocus>
+                    <input type="text" id="first-name" class="form-control" required autofocus>
                 </div>
 
                 <div class="col-sm mb-3">
                     <label for="last-name" class="d-block text-start mb-1 text-muted">Last name <strong class="text-danger">*</strong></label>
-                    <input type="text" id="last-name" class="form-control">
+                    <input type="text" id="last-name" class="form-control" required>
                 </div>
             </div>
 
             <label for="email-address" class="d-block text-start mb-1 text-muted">Email address <strong class="text-danger">*</strong></label>
-            <input type="email" id="email-address" class="form-control">
+            <input type="email" id="email-address" class="form-control" required>
 
             <div class="mb-3">
                 <label for="contact-number" class="d-block text-start mt-3 mb-1 text-muted">Contact number <strong class="text-danger">*</strong></label>
-                <input type="text" id="contact-number" class="form-control" placeholder="09171234567">
+                <input type="text" id="contact-number" class="form-control" placeholder="09171234567" required>
             </div>
 
             <div class="row">
                 <div class="col-sm mb-3">
                     <label for="password" class="d-block text-start mb-1 text-muted">Password <strong class="text-danger">*</strong></label>
-                    <input type="password" id="password" class="form-control">
+                    <input type="password" id="password" class="form-control" required>
                 </div>
 
                 <div class="col-sm mb-3">
                     <label for="password-confirmation" class="d-block text-start mb-1 text-muted">Confirm password <strong class="text-danger">*</strong></label>
-                    <input type="password" id="password-confirmation" class="form-control">
+                    <input type="password" id="password-confirmation" class="form-control" required>
                 </div>
             </div>
 
