@@ -65,6 +65,7 @@ function gsg_enqueue() {
         'isRegisterPage' => gsg_is_register_page() ? true : false,
         'isForgotPasswordPage' => gsg_is_forgot_password_page() ? true : false,
         'isResetPasswordPage' => gsg_is_reset_password_page() ? true : false,
+        'isAccountPage' => gsg_is_account_page() ? true : false,
         'logoutNonce' => wp_create_nonce('logout-nonce'),
     ));
 

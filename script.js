@@ -306,6 +306,97 @@
             });
         }/*}}}*/
 
+        if (gsg.isAccountPage) {/*{{{*/
+            const accountInfoForm = $('#account-info-container form');
+            const saveChangesBtn = accountInfoForm.find('#save-changes-button');
+
+            if ($('#account-info-container .alert-success').length > 0) {
+                setTimeout(function() {
+                    $('#account-info-container .alert-success').fadeOut();
+                }, 2000);
+            }
+
+            accountInfoForm.submit(function(e) {
+                e.preventDefault();
+
+                let formData = {
+                    first_name: accountInfoForm.find('#first-name').val(),
+                    last_name: accountInfoForm.find('#last-name').val(),
+                    email_address: accountInfoForm.find('#email-address').val(),
+                    contact_number: accountInfoForm.find('#contact-number').val(),
+                    password: accountInfoForm.find('#password').val(),
+                    password_confirmation: accountInfoForm.find('#password-confirmation').val()
+                };
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_save_account_info',
+                        save_account_info_nonce: accountInfoForm.find('#gsg_save_account_info_nonce_field').val(),
+                        ...formData
+                    },
+                    beforeSend: function() {
+                        saveChangesBtn.attr('disabled', true);
+                        saveChangesBtn.find('span').text('Saving changes');
+                        saveChangesBtn.find('i').removeClass('d-none');
+
+                        accountInfoForm.find('#first-name').length > 0 && accountInfoForm.find('#first-name').removeClass('is-invalid');
+                        accountInfoForm.find('#last-name').length > 0 && accountInfoForm.find('#last-name').removeClass('is-invalid');
+                        accountInfoForm.find('#email-address').length > 0 && accountInfoForm.find('#email-address').removeClass('is-invalid');
+                        accountInfoForm.find('#contact-number').length > 0 && accountInfoForm.find('#contact-number').removeClass('is-invalid');
+                        accountInfoForm.find('#password').length > 0 && accountInfoForm.find('#password').removeClass('is-invalid');
+                        accountInfoForm.find('#password-confirmation').length > 0 && accountInfoForm.find('#password-confirmation').removeClass('is-invalid');
+
+                        accountInfoForm.find('#save-account-info-error').length > 0 && accountInfoForm.find('#save-account-info-error').remove();
+                        accountInfoForm.find('.alert-success').length > 0 && accountInfoForm.find('.alert-success').remove();
+                        accountInfoForm.find('.invalid-feedback').length > 0 && accountInfoForm.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (let key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    keyId = key.replace('_', '-');
+
+                                    if ($(`#${keyId}-error-alert`).length === 0) {
+                                        $(`#${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(`#account-info-container form #${keyId}`);
+                                    }
+
+                                    if (key === 'save_account_info_error') {
+                                        if ($('#save-account-info-error').length === 0) {
+                                            $('#account-info-container form').prepend(`<div id="save-account-info-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+
+                            window.scrollTo({
+                                top: accountInfoForm.offset().top,
+                                behavior: 'smooth'
+                            });
+                        }
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.href = `${gsg.accountUrl}?info_updated=true`;
+                        }
+                    },
+                    complete: function() {
+                        saveChangesBtn.removeAttr('disabled');
+                        saveChangesBtn.find('span').text('Save changes');
+                        saveChangesBtn.find('i').addClass('d-none');
+                    }
+                });
+            });
+        }/*}}}*/
+
         $('#logout').click(function(e) {/*{{{*/
             e.preventDefault();
 

@@ -30,7 +30,7 @@
     <div id="wrapper">
         <?php if (gsg_is_account_page() || gsg_is_records_page() || gsg_is_grades_page() || gsg_is_students_page()): ?>
             <header>
-                <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                <nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-gradient">
                     <div class="container">
                         <a class="navbar-brand" href="<?php echo home_url(); ?>"><img src="<?php echo GSG_IMAGES_URL; ?>/logo.png" width="32" height="32" alt="Gottes Segen Grades"></a>
 

@@ -45,7 +45,7 @@ get_header();
 
             <?php wp_nonce_field('gsg_login', 'gsg_login_nonce_field'); ?>
 
-            <button class="w-100 btn btn-lg btn-primary mt-3 position-relative" type="submit"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span>Login</span></button>
+            <button class="w-100 btn btn-lg btn-primary bg-gradient mt-3 position-relative" type="submit"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span>Login</span></button>
         </div>
 
         <p class="mt-4 mb-0 text-center"><a href="<?php echo REGISTER_PAGE_URL; ?>" class="text-muted text-decoration-none">Create an account</a> <span class="mx-2 nav-separator">|</span> <a href="<?php echo FORGOT_PASSWORD_PAGE_URL; ?>" class="text-muted text-decoration-none">Forgot password</a></p>

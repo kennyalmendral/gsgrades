@@ -21,6 +21,40 @@ html, body {
     justify-content: center;
 }
 
+.page-id-17 #main-content #placeholder {
+    height: 180px;
+    background: #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.page-id-17 #main-content #placeholder h4 {
+    letter-spacing: 2px;
+}
+
+.page-id-17 .notice {
+    font-size: 14px;
+}
+
+@media (max-width: 767px) {
+    .page-id-17 #main-content #save-changes-button {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 575px) {
+    #page-title {
+        padding: 1.5rem;
+        background: #f5f5f5 !important;
+        text-align: center;
+    }
+
+    #account-info-container {
+        border-radius: 0 !important;
+    }
+}
+
 @media (min-width: 993px) {
     .page-id-17 #main-content {
         max-width: 800px;

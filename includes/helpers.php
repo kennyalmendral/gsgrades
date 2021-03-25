@@ -70,3 +70,13 @@ function gsg_is_email_exists($email_address) {
 
     return $email_exists > 0;
 }
+
+function gsg_get_initials($string = null) {
+    return array_reduce(
+        explode(' ', $string),
+        function ($initials, $word) {
+            return sprintf('%s%s', $initials, substr($word, 0, 1));
+        },
+        ''
+    );
+}

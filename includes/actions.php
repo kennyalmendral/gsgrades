@@ -1,5 +1,6 @@
 <?php
 
+/*{{{wpse66094_no_admin_access*/ 
 function wpse66094_no_admin_access() {
     if (wp_doing_ajax()) {
         return;
@@ -16,7 +17,9 @@ function wpse66094_no_admin_access() {
 }
 
 add_action('admin_init', 'wpse66094_no_admin_access', 100);
+/*}}}*/
 
+/*{{{gsg_login*/ 
 function gsg_login() {
     if (!isset($_POST['login_nonce']) || !wp_verify_nonce($_POST['login_nonce'], 'gsg_login')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
@@ -59,7 +62,9 @@ function gsg_login() {
 
 add_action('wp_ajax_gsg_login', 'gsg_login');
 add_action('wp_ajax_nopriv_gsg_login', 'gsg_login');
+/*}}}*/
 
+/*{{{gsg_logout*/
 function gsg_logout() {
     check_ajax_referer('logout-nonce', 'logout_nonce');
 
@@ -73,7 +78,9 @@ function gsg_logout() {
 
 add_action('wp_ajax_gsg_logout', 'gsg_logout');
 add_action('wp_ajax_nopriv_gsg_logout', 'gsg_logout');
+/*}}}*/
 
+/*{{{gsg_register*/
 function gsg_register() {
     if (!isset($_POST['register_nonce']) || !wp_verify_nonce($_POST['register_nonce'], 'gsg_register')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
@@ -166,7 +173,7 @@ function gsg_register() {
 
     $subject = 'Account Registration';
 
-    $body = "<p>Here's your login credentials:</p><p><strong>Email address:</strong> $email_address<br><strong>Password:</strong> $password</p>";
+    $body = "<p>Hello $first_name, here's your login credentials:</p><p><strong>Email address:</strong> $email_address<br><strong>Password:</strong> $password</p>";
     $body .= '<p>You may login here: ' . LOGIN_PAGE_URL . '</p>';
 
     $headers = array();
@@ -180,7 +187,9 @@ function gsg_register() {
 
 add_action('wp_ajax_gsg_register', 'gsg_register');
 add_action('wp_ajax_nopriv_gsg_register', 'gsg_register');
+/*}}}*/
 
+/*{{{gsg_forgot_password*/
 function gsg_forgot_password() {
     if (!isset($_POST['forgot_password_nonce']) || !wp_verify_nonce($_POST['forgot_password_nonce'], 'gsg_forgot_password')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
@@ -227,7 +236,9 @@ function gsg_forgot_password() {
 
 add_action('wp_ajax_gsg_forgot_password', 'gsg_forgot_password');
 add_action('wp_ajax_nopriv_gsg_forgot_password', 'gsg_forgot_password');
+/*}}}*/
 
+/*{{{gsg_reset_password*/
 function gsg_reset_password() {
     if (!isset($_POST['reset_password_nonce']) || !wp_verify_nonce($_POST['reset_password_nonce'], 'gsg_reset_password')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
@@ -274,3 +285,109 @@ function gsg_reset_password() {
 
 add_action('wp_ajax_gsg_reset_password', 'gsg_reset_password');
 add_action('wp_ajax_nopriv_gsg_reset_password', 'gsg_reset_password');
+/*}}}*/
+
+function gsg_save_account_info() {
+    if (!isset($_POST['save_account_info_nonce']) || !wp_verify_nonce($_POST['save_account_info_nonce'], 'gsg_save_account_info')) {
+        wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
+    }
+
+    global $current_user;
+
+    $errors = array();
+
+    $required_fields = array(
+        'first_name',
+        'last_name',
+        'email_address',
+        'contact_number'
+    );
+
+    foreach ($_POST as $key => $value) {
+        $field_name = ucfirst(str_replace('_', ' ', $key));
+
+        if (in_array($key, $required_fields)) {
+            if (empty($value)) {
+                $errors[$key] = "$field_name field is required.";
+            }
+        }
+
+        if (($key == 'first_name') || ($key == 'last_name')) {
+            if ($_POST[$key] != '') {
+                if (!preg_match("/^([a-zA-Z' ]+)$/", $_POST[$key])) {
+                    $errors[$key] = "$field_name field contains invalid characters.";
+                }
+            }
+        }
+
+        if ($key == 'email_address') {
+            if ($_POST[$key] != '') {
+                if (!filter_var($_POST[$key], FILTER_VALIDATE_EMAIL)) {
+                    $errors[$key] = "$field_name field must contain a valid email address.";
+                }
+
+                if (gsg_is_email_exists($_POST[$key]) && ($current_user->user_email != $_POST[$key])) {
+                    $errors[$key] = "$field_name already exists.";
+                }
+            }
+        }
+
+        if ($key == 'contact_number') {
+            if ($_POST[$key] != '') {
+                if (!preg_match("/^((\+[0-9]{2})|0)[.\- ]?9[0-9]{2}[.\- ]?[0-9]{3}[.\- ]?[0-9]{4}$/", $_POST[$key])) {
+                    $errors[$key] = "$field_name field is invalid.";
+                }
+            }
+        }
+
+        if ($key == 'password') {
+            if ($_POST[$key] != '') {
+                if ($_POST[$key] != $_POST['password_confirmation']) {
+                    $errors[$key] = "Passwords do not match.";
+                }
+
+                if (!preg_match('/^(?=.*\d)(?=.*[@#\-_$%^&+=§!\?])(?=.*[a-z])(?=.*[A-Z])[0-9A-Za-z@#\-_$%^&+=§!\?]{8,20}$/', $_POST[$key])) {
+                    $errors[$key] = "Password does not meet the requirements.";
+                }
+            }
+        }
+    }
+
+    $first_name = $_POST['first_name'];
+    $last_name = $_POST['last_name'];
+    $name = $first_name . ' ' . $last_name;
+    $email_address = $_POST['email_address'];
+    $contact_number = $_POST['contact_number'];
+    $password = $_POST['password'];
+    $password_confirmation = $_POST['password_confirmation'];
+
+    if (!empty($errors)) {
+        wp_send_json_error($errors, 400);
+    }
+
+    wp_update_user(array(
+        'ID' => $current_user->ID,
+        'first_name' => $first_name,
+        'last_name' => $last_name,
+        'display_name' => $name
+    ));
+
+    if (!empty($password)) {
+        wp_update_user(array(
+            'ID' => $current_user->ID,
+            'user_pass' => $password
+        ));
+    }
+
+    if ($current_user->user_email != $email_address) {
+        wp_update_user(array(
+            'ID' => $current_user->ID,
+            'user_email' => $email_address
+        ));
+    }
+
+    wp_send_json_success();
+}
+
+add_action('wp_ajax_gsg_save_account_info', 'gsg_save_account_info');
+add_action('wp_ajax_nopriv_gsg_save_account_info', 'gsg_save_account_info');
