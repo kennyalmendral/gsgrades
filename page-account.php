@@ -8,12 +8,13 @@ if (!is_user_logged_in()) {
 global $current_user;
 
 $name = explode(' ', $current_user->display_name);
+$profile_picture_name = basename(gsg_current_user_profile_picture());
 
 get_header();
 
 ?>
 
-<div id="page-title" class="bg-white shadow-sm pt-xs-2 pt-sm-2 pb-sm-3">
+<div id="page-title" class="bg-white shadow-sm text-center text-sm-start py-3 py-sm-3 mb-3 mb-sm-0">
     <div class="container">
         <div class="row">
             <div class="col">
@@ -24,8 +25,8 @@ get_header();
 </div>
 
 <div id="main-content" class="container my-sm-5">
-    <div class="row align-items-start">
-        <div id="account-info-container" class="col-md-7 mb-md-0 mb-sm-4 bg-white shadow-sm p-4 rounded">
+    <div class="row mx-0 align-items-start">
+        <div id="account-info-container" class="col-md-7 mb-3 mb-sm-4 mb-md-0 bg-white shadow-sm p-4 rounded">
             <?php if (isset($_GET['info_updated'])): ?>
                 <div class="alert alert-success fs-8 px-3 py-2">Your account has been updated successfully.</div>
             <?php endif; ?>
@@ -34,21 +35,21 @@ get_header();
                 <div class="row">
                     <div class="col-sm mb-3">
                         <label for="first-name" class="d-block text-start mb-1 text-muted">First name</label>
-                        <input type="text" id="first-name" class="form-control" value="<?php echo esc_attr($name[0]); ?>">
+                        <input type="text" id="first-name" class="form-control" value="<?php echo esc_attr($name[0]); ?>" required>
                     </div>
 
                     <div class="col-sm mb-3">
                         <label for="last-name" class="d-block text-start mb-1 text-muted">Last name</label>
-                        <input type="text" id="last-name" class="form-control" value="<?php echo esc_attr($name[1]); ?>">
+                        <input type="text" id="last-name" class="form-control" value="<?php echo esc_attr($name[1]); ?>" required>
                     </div>
                 </div>
 
                 <label for="email-address" class="d-block text-start mb-1 text-muted">Email address</label>
-                <input type="email" id="email-address" class="form-control" value="<?php echo esc_attr($current_user->user_email); ?>">
+                <input type="email" id="email-address" class="form-control" value="<?php echo esc_attr($current_user->user_email); ?>" required>
 
                 <div class="mb-3">
                     <label for="contact-number" class="d-block text-start mt-3 mb-1 text-muted">Contact number</label>
-                    <input type="text" id="contact-number" class="form-control" placeholder="09171234567" value="<?php echo esc_attr(get_user_meta($current_user->ID, 'contact_number', true)); ?>">
+                    <input type="text" id="contact-number" class="form-control" placeholder="09171234567" value="<?php echo esc_attr(get_user_meta($current_user->ID, 'contact_number', true)); ?>" required>
                 </div>
 
                 <div class="row">
@@ -79,24 +80,44 @@ get_header();
             </form>
         </div>
 
-        <div id="profile-picture-container" class="card col-md-4 offset-md-1 border-0 p-0 bg-white shadow-sm rounded">
-            <form action="" method="POST">
-                <div id="placeholder" class="card-img-top">
-                    <h4 class="m-0 text-muted fs-1 fw-bold"><?php echo gsg_get_initials($current_user->display_name); ?></h4>
+        <div id="profile-picture-container" class="col-md-5 mb-3 mb-sm-0 border-0 p-0 bg-white shadow-sm rounded">
+            <?php if (gsg_current_user_has_profile_picture()): ?>
+                <div id="image-wrap" class="py-5">
+                    <img src="<?php echo gsg_current_user_profile_picture(); ?>" alt="<?php echo $current_user->display_name; ?>">
                 </div>
-    
-                <!--<img src="https://via.placeholder.com/286x180" alt="Profile Picture" class="card-img-top">-->
-
-                <div class="card-body p-4">
-                    <label for="profile-picture" class="card-title text-muted mb-1">Profile Picture</label>
-
-                    <input type="file" id="profile-picture" class="form-control fs-6">
-
-                    <?php wp_nonce_field('gsg_update_profile_picture', 'gsg_update_profile_picture_nonce_field'); ?>
-
-                    <button id="upload-update-button" class="btn btn-primary bg-gradient w-100 mt-3 position-relative"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span>Upload</span></button>
+            <?php else: ?>
+                <div id="image-wrap" class="py-5">
+                    <h4 class="m-0 text-muted"><?php echo gsg_get_initials($current_user->display_name); ?></h4>
                 </div>
-            </form>
+            <?php endif; ?>
+
+            <div id="control-group" class="p-4">
+                <?php if (isset($_GET['profile_picture_updated'])): ?>
+                    <div class="alert alert-success fs-8 px-3 py-2">Your profile picture has been updated successfully.</div>
+                <?php elseif (isset($_GET['profile_picture_uploaded'])): ?>
+                    <div class="alert alert-success fs-8 px-3 py-2">Your profile picture has been uploaded successfully.</div>
+                <?php elseif (isset($_GET['profile_picture_removed'])): ?>
+                    <div class="alert alert-success fs-8 px-3 py-2">Your profile picture has been removed successfully.</div>
+                <?php endif; ?>
+
+                <label for="profile-picture" class="text-muted mb-1">Profile Picture</label>
+
+                <input type="file" id="profile-picture" class="form-control fs-6">
+
+                <?php wp_nonce_field('gsg_upload_update_profile_picture', 'gsg_upload_update_profile_picture_nonce_field'); ?>
+                <?php wp_nonce_field('gsg_remove_profile_picture', 'gsg_remove_profile_picture_nonce_field'); ?>
+
+                <?php if (gsg_current_user_has_profile_picture()): ?>
+                    <?php $button_text = 'Update'; ?>
+                <?php else: ?>
+                    <?php $button_text = 'Upload'; ?>
+                <?php endif; ?>
+
+                <div class="btn-group mt-3 w-100">
+                    <button id="upload-update-button" class="btn btn-primary bg-gradient position-relative"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span><?php echo $button_text; ?></span></button>
+                    <button id="remove-button" class="btn btn-danger bg-gradient position-relative" data-filename="<?php echo esc_attr($profile_picture_name); ?>"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span>Remove</span></button>
+                </div>
+            </div>
         </div>
     </div>
 </div>

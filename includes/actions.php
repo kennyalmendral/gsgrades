@@ -287,6 +287,7 @@ add_action('wp_ajax_gsg_reset_password', 'gsg_reset_password');
 add_action('wp_ajax_nopriv_gsg_reset_password', 'gsg_reset_password');
 /*}}}*/
 
+/*{{{gsg_save_account_info*/
 function gsg_save_account_info() {
     if (!isset($_POST['save_account_info_nonce']) || !wp_verify_nonce($_POST['save_account_info_nonce'], 'gsg_save_account_info')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
@@ -391,3 +392,75 @@ function gsg_save_account_info() {
 
 add_action('wp_ajax_gsg_save_account_info', 'gsg_save_account_info');
 add_action('wp_ajax_nopriv_gsg_save_account_info', 'gsg_save_account_info');
+/*}}}*/
+
+/*{{{gsg_upload_update_profile_picture*/
+function gsg_upload_update_profile_picture() {
+    if (!isset($_POST['upload_update_profile_picture_nonce']) || !wp_verify_nonce($_POST['upload_update_profile_picture_nonce'], 'gsg_upload_update_profile_picture')) {
+        wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
+    }
+
+    global $current_user;
+
+    $errors = array();
+
+    $profile_picture = $_FILES['profile_picture'];
+    $filetype = mime_content_type($profile_picture['tmp_name']);
+
+    if (is_null($profile_picture)) {
+        $errors['profile_picture'] = 'Please select a file.';
+    } else if (floatval($profile_picture['size'] / 1024) > 3000) {
+        $errors['profile_picture'] = 'The file size must be less than 3MB.';
+    } else {
+        $allowed_filetypes = array('image/jpg', 'image/jpeg', 'image/png');
+
+        if (!in_array($filetype, $allowed_filetypes)) {
+            $errors['profile_picture'] = 'The file type must be an image and must be in JPG or PNG format only.';
+        }
+    }
+
+    if (!empty($errors)) {
+        wp_send_json_error($errors, 400);
+    }
+
+    $wp_upload_dir = wp_upload_dir();
+
+    $file = $wp_upload_dir['basedir'] . '/profile-pictures/' . $current_user->user_login . '.' . pathinfo($profile_picture['name'], PATHINFO_EXTENSION);
+
+    if (!move_uploaded_file($profile_picture['tmp_name'], $file)) {
+        wp_send_json_error(array('upload_update_profile_picture_error' => 'Upload failed.'), 500);
+    }
+
+    update_user_meta($current_user->ID, 'profile_picture', basename($file));
+
+    wp_send_json_success();
+}
+
+add_action('wp_ajax_gsg_upload_update_profile_picture', 'gsg_upload_update_profile_picture');
+add_action('wp_ajax_nopriv_gsg_upload_update_profile_picture', 'gsg_upload_update_profile_picture');
+/*}}}*/
+
+/*{{{gsg_remove_profile_picture*/
+function gsg_remove_profile_picture() {
+    if (!isset($_POST['remove_profile_picture_nonce']) || !wp_verify_nonce($_POST['remove_profile_picture_nonce'], 'gsg_remove_profile_picture')) {
+        wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
+    }
+
+    global $current_user;
+
+    $wp_upload_dir = wp_upload_dir();
+
+    $file = $wp_upload_dir['basedir'] . '/profile-pictures/' . get_user_meta($current_user->ID, 'profile_picture' , true);
+
+    if (!unlink($file)) {
+        wp_send_json_error(array('remove_profile_picture_error' => 'Upload failed.'), 500);
+    }
+
+    update_user_meta($current_user->ID, 'profile_picture', null);
+
+    wp_send_json_success();
+}
+
+add_action('wp_ajax_gsg_remove_profile_picture', 'gsg_remove_profile_picture');
+add_action('wp_ajax_nopriv_gsg_remove_profile_picture', 'gsg_remove_profile_picture');
+/*}}}*/

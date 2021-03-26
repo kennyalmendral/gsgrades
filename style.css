@@ -21,16 +21,41 @@ html, body {
     justify-content: center;
 }
 
-.page-id-17 #main-content #placeholder {
-    height: 180px;
-    background: #ddd;
+.page-id-17 #main-content #account-info-container {
+    border-top-right-radius: .25rem;
+}
+
+.page-id-17 #main-content #profile-picture-container {
+    border-top-left-radius: .25rem;
+    border-bottom-left-radius: .25rem;
+}
+
+.page-id-17 #main-content #profile-picture-container #control-group {
+    background: #fafafa;
+    border-bottom-left-radius: .25rem !important;
+    border-bottom-right-radius: .25rem !important;
+}
+
+.page-id-17 #main-content #image-wrap {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.page-id-17 #main-content #placeholder h4 {
+.page-id-17 #main-content #image-wrap h4 {
     letter-spacing: 2px;
+    background: #ddd;
+    padding: 60px 62px;
+    border-radius: 50%;
+    font-size: 80px;
+}
+
+.page-id-17 #main-content #image-wrap img {
+    border-radius: 50%;
+    width: 212px;
+    height: 212px;
+    object-fit: cover;
+    object-position: 50% 50%;
 }
 
 .page-id-17 .notice {
@@ -38,24 +63,30 @@ html, body {
 }
 
 @media (max-width: 767px) {
-    .page-id-17 #main-content #save-changes-button {
+    .page-id-17 #main-content #save-changes-button,
+    .page-id-17 #main-content #upload-update-button,
+    .page-id-17 #main-content #remove-button {
         width: 100% !important;
     }
 }
 
-@media (max-width: 575px) {
-    #page-title {
-        padding: 1.5rem;
-        background: #f5f5f5 !important;
-        text-align: center;
+@media (min-width: 768px) {
+    .page-id-17 #main-content #account-info-container {
+        border-top-right-radius: 0 !important;
+        position: relative;
+        z-index: 3;
     }
 
-    #account-info-container {
-        border-radius: 0 !important;
+    .page-id-17 #main-content #profile-picture-container {
+        position: relative;
+        z-index: 2;
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
     }
 }
 
 @media (min-width: 993px) {
+    .page-id-17 #page-title > .container,
     .page-id-17 #main-content {
         max-width: 800px;
     }

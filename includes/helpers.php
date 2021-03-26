@@ -80,3 +80,16 @@ function gsg_get_initials($string = null) {
         ''
     );
 }
+
+function gsg_current_user_has_profile_picture() {
+    $current_user = wp_get_current_user();
+
+    return empty(get_user_meta($current_user->ID, 'profile_picture', true)) ? false : true;
+}
+
+function gsg_current_user_profile_picture() {
+    $current_user = wp_get_current_user();
+    $wp_upload_dir = wp_upload_dir();
+
+    return $wp_upload_dir['baseurl'] . '/profile-pictures/' . get_user_meta($current_user->ID, 'profile_picture', true);
+}

@@ -51,6 +51,15 @@ function gsg_enqueue() {
 
 	//$entry_locations = $wpdb->get_results("SELECT * FROM `{$wpdb->prefix}entry_locations`");
 
+    $has_profile_picture = false;
+
+    if (is_user_logged_in()) {
+        global $current_user;
+
+        $has_profile_picture = empty(get_user_meta($current_user->ID, 'profile_picture', true)) ? false : true;
+        $current_user_name_initials = gsg_get_initials($current_user->display_name);
+    }
+
 	wp_localize_script('gsg-script', 'gsg', array(
 		'ajaxUrl' => admin_url('admin-ajax.php'),
         'homeUrl' => home_url('/'),
@@ -67,6 +76,9 @@ function gsg_enqueue() {
         'isResetPasswordPage' => gsg_is_reset_password_page() ? true : false,
         'isAccountPage' => gsg_is_account_page() ? true : false,
         'logoutNonce' => wp_create_nonce('logout-nonce'),
+        'currentUser' => is_user_logged_in() ? $current_user : null,
+        'currentUserNameInitials' => is_user_logged_in() ? $current_user_name_initials : null,
+        'currentUserHasProfilePicture' => $has_profile_picture
     ));
 
 	wp_enqueue_script('gsg-script');

@@ -308,13 +308,98 @@
 
         if (gsg.isAccountPage) {/*{{{*/
             const accountInfoForm = $('#account-info-container form');
+            const profilePictureContainer = $('#profile-picture-container');
             const saveChangesBtn = accountInfoForm.find('#save-changes-button');
+            const uploadUpdateBtn = profilePictureContainer.find('#upload-update-button');
+            const removeBtn = profilePictureContainer.find('#remove-button');
+            const profilePictureInput = $('#profile-picture');
+            const urlParams = new URLSearchParams(window.location.search);
 
             if ($('#account-info-container .alert-success').length > 0) {
                 setTimeout(function() {
                     $('#account-info-container .alert-success').fadeOut();
                 }, 2000);
             }
+
+            if ($('#profile-picture-container .alert-success').length > 0) {
+                setTimeout(function() {
+                    $('#profile-picture-container .alert-success').fadeOut();
+                }, 2000);
+            }
+
+            if (urlParams.has('profile_picture_removed') || urlParams.has('profile_picture_uploaded') || urlParams.has('profile_picture_updated')) {
+                window.scrollTo({
+                    top: profilePictureContainer.offset().top,
+                    behavior: 'smooth'
+                });
+            } else if (urlParams.has('info_updated')) {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+
+            if (profilePictureInput.get(0).files.length === 0) {
+                uploadUpdateBtn.attr('disabled', true);
+            }
+
+            if (!gsg.currentUserHasProfilePicture) {
+                removeBtn.attr('disabled', true);
+            }
+
+            profilePictureInput.change(function(e) {
+                const me = $(this);
+                const allowedFileTypes = ['jpg', 'jpeg', 'png', 'JPG', 'JPEG', 'PNG'];
+
+                if (profilePictureContainer.find('#profile-picture-error-alert').length > 0) {
+                    me.next().remove();
+                }
+
+                if ((me.get(0).files.length > 0) && me.get(0).files[0]) {
+                    const extension = me.get(0).files[0].name.split('.').pop().toLowerCase();
+                    const isExtensionAllowed = allowedFileTypes.indexOf(extension) > -1;
+
+                    if (isExtensionAllowed) {
+                        if ((parseFloat(me.get(0).files[0].size) / 1024) > 3000) {
+                            profilePictureContainer.find('#image-wrap').html(`<h4 class="m-0 text-muted">${gsg.currentUserNameInitials}</h4>`);
+
+                            $(`<div id="profile-picture-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">The file size must be less than 3MB.</div>`).insertAfter(me);
+
+                            !me.hasClass('is-invalid') && me.addClass('is-invalid');
+
+                            uploadUpdateBtn.attr('disabled', true);
+                        } else {
+                            const reader = new FileReader();
+
+                            reader.onload = function(e) {
+                                profilePictureContainer.find('#image-wrap').html(`<img src="${e.target.result}">`);
+                            };
+
+                            reader.readAsDataURL(me.get(0).files[0]);
+
+                            me.hasClass('is-invalid') && me.removeClass('is-invalid');
+
+                            uploadUpdateBtn.removeAttr('disabled');
+                        }
+                    } else {
+                        profilePictureContainer.find('#image-wrap').html(`<h4 class="m-0 text-muted">${gsg.currentUserNameInitials}</h4>`);
+                    
+                        $(`<div id="profile-picture-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">The file type must be an image and must be in JPG or PNG format only.</div>`).insertAfter(me);
+
+                        !me.hasClass('is-invalid') && me.addClass('is-invalid');
+
+                        uploadUpdateBtn.attr('disabled', true);
+                    }
+                } else {
+                    profilePictureContainer.find('#image-wrap').html(`<h4 class="m-0 text-muted">${gsg.currentUserNameInitials}</h4>`);
+
+                    $(`<div id="profile-picture-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">Please select a file.</div>`).insertAfter(me);
+
+                    !me.hasClass('is-invalid') && me.addClass('is-invalid');
+
+                    uploadUpdateBtn.attr('disabled', true);
+                }
+            });
 
             accountInfoForm.submit(function(e) {
                 e.preventDefault();
@@ -371,7 +456,7 @@
 
                                     if (key === 'save_account_info_error') {
                                         if ($('#save-account-info-error').length === 0) {
-                                            $('#account-info-container form').prepend(`<div id="save-account-info-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
+                                            accountInfoForm.prepend(`<div id="save-account-info-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
                                         }
                                     }
                                 }
@@ -392,6 +477,143 @@
                         saveChangesBtn.removeAttr('disabled');
                         saveChangesBtn.find('span').text('Save changes');
                         saveChangesBtn.find('i').addClass('d-none');
+                    }
+                });
+            });
+
+            uploadUpdateBtn.click(function() {
+                const me = $(this);
+                const formData = new FormData();
+
+                if (profilePictureInput.get(0).files.length > 0) {
+                    formData.append('profile_picture', profilePictureInput.get(0).files[0]);
+                }
+
+                formData.append('action', 'gsg_upload_update_profile_picture');
+                formData.append('upload_update_profile_picture_nonce', profilePictureContainer.find('#gsg_upload_update_profile_picture_nonce_field').val());
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    contentType: false,
+                    processData: false,
+                    data: formData,
+                    beforeSend: function() {
+                        me.attr('disabled', true);
+                        me.find('i').removeClass('d-none');
+
+                        let btnText = gsg.currentUserHasProfilePicture ? 'Updating' : 'Uploading';
+
+                        me.find('span').text(btnText);
+
+                        profilePictureInput.get(0).files.length > 0 && profilePictureInput.removeClass('is-invalid');
+
+                        profilePictureContainer.find('#upload-update-profile-picture-error').length > 0 && profilePictureContainer.find('#upload-update-profile-picture-error').remove();
+                        profilePictureContainer.find('.alert-success').length > 0 && profilePictureContainer.find('.alert-success').remove();
+                        profilePictureContainer.find('.invalid-feedback').length > 0 && profilePictureContainer.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (let key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    keyId = key.replace('_', '-');
+
+                                    if ($(`#${keyId}-error-alert`).length === 0) {
+                                        $(`#${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(`#profile-picture-container #${keyId}`);
+                                    }
+
+                                    if (key === 'upload_update_profile_picture_error') {
+                                        if ($('#upload-update-profile-picture-error').length === 0) {
+                                            profilePictureContainer.find('#control-group').prepend(`<div id="upload-update-profile-picture-error" class="alert alert-danger fs-8 px-3 py-2 mb-3">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+
+                            window.scrollTo({
+                                top: profilePictureContainer.offset().top,
+                                behavior: 'smooth'
+                            });
+                        }
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            let queryString = gsg.currentUserHasProfilePicture ? 'profile_picture_updated=true' : 'profile_picture_uploaded=true';
+
+                            location.href = `${gsg.accountUrl}?${queryString}`;
+                        }
+                    },
+                    complete: function() {
+                        me.removeAttr('disabled');
+                        me.find('i').addClass('d-none');
+
+                        let btnText = gsg.currentUserHasProfilePicture ? 'Update' : 'Upload';
+
+                        me.find('span').text(btnText);
+                    }
+                });
+            });
+
+            removeBtn.click(function(e) {
+                const me = $(this);
+                const filename = me.data('filename');
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_remove_profile_picture',
+                        remove_profile_picture_nonce: profilePictureContainer.find('#gsg_remove_profile_picture_nonce_field').val(),
+                        filename: filename
+                    },
+                    beforeSend: function() {
+                        me.attr('disabled', true);
+                        me.find('i').removeClass('d-none');
+                        me.find('span').text('Removing');
+
+                        profilePictureContainer.find('#remove-profile-picture-error').length > 0 && profilePictureContainer.find('#remove-profile-picture-error').remove();
+                        profilePictureContainer.find('.alert-success').length > 0 && profilePictureContainer.find('.alert-success').remove();
+                        profilePictureContainer.find('.invalid-feedback').length > 0 && profilePictureContainer.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (let key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    if (key === 'remove_profile_picture_error') {
+                                        if ($('#remove-profile-picture-error').length === 0) {
+                                            profilePictureContainer.find('#control-group').prepend(`<div id="remove-profile-picture-error" class="alert alert-danger fs-8 px-3 py-2 mb-3">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+
+                            window.scrollTo({
+                                top: profilePictureContainer.offset().top,
+                                behavior: 'smooth'
+                            });
+                        }
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.href = `${gsg.accountUrl}?profile_picture_removed=true`;
+                        }
+                    },
+                    complete: function() {
+                        me.removeAttr('disabled');
+                        me.find('i').addClass('d-none');
+                        me.find('span').text('Remove');
                     }
                 });
             });
