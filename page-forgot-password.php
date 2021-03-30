@@ -25,7 +25,7 @@ get_header();
 
             <?php wp_nonce_field('gsg_forgot_password', 'gsg_forgot_password_nonce_field'); ?>
 
-            <button class="w-100 btn btn-lg btn-primary bg-gradient mt-3 position-relative" type="submit"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span>Send</span></button>
+            <button class="w-100 btn btn-lg btn-primary mt-3 position-relative" type="submit"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span>Send</span></button>
         </div>
 
         <p class="mt-4 mb-0 text-muted text-center"><a href="<?php echo LOGIN_PAGE_URL; ?>" class="text-muted text-decoration-none">Back to login</a></p>

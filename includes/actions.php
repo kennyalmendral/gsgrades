@@ -179,7 +179,7 @@ function gsg_register() {
     $headers = array();
     $headers[] = 'Content-Type: text/html; charset=UTF-8';
     $headers[] = 'From: Gottes Segen Grades <info@grades.gottes-segen.com>';
-     
+
     wp_mail($email_address, $subject, $body, $headers);
 
     wp_send_json_success();
@@ -387,6 +387,12 @@ function gsg_save_account_info() {
         ));
     }
 
+    $current_contact_number = get_user_meta($current_user->ID, 'contact_number', true);
+
+    if ($current_contact_number != $contact_number) {
+        update_user_meta($current_user->ID, 'contact_number', $contact_number);
+    }
+
     wp_send_json_success();
 }
 
@@ -463,4 +469,102 @@ function gsg_remove_profile_picture() {
 
 add_action('wp_ajax_gsg_remove_profile_picture', 'gsg_remove_profile_picture');
 add_action('wp_ajax_nopriv_gsg_remove_profile_picture', 'gsg_remove_profile_picture');
+/*}}}*/
+
+/*{{{gsg_get_students*/
+function gsg_get_students() {
+    check_ajax_referer('get-students-nonce', 'get_students_nonce');
+
+    global $wpdb;
+
+    $draw = intval($_GET['draw']);
+    $offset = intval($_GET['start']);
+    $limit = intval($_GET['length']);
+    $search = trim($_GET['search']['value']);
+
+    $users = array();
+
+    $total_user_query_args = array('role' => 'student');
+    $total_user_query = new WP_User_Query($total_user_query_args);
+
+    $total_users = $total_user_query->get_total();
+    $total_filtered_users = $total_users;
+
+    $user_query = new WP_User_Query(array(
+        'role' => 'student',
+        'number' => $limit,
+        'offset' => $offset,
+        'orderby' => 'display_name',
+        'order' => 'ASC'
+    ));
+
+    if (!empty($search)) {
+        $total_user_query_search = new WP_User_Query(array(
+            'role' => 'student',
+            'search' => '*' . esc_attr($search) . '*'
+        ));
+
+        $total_user_query_meta_key = new WP_User_Query(array(
+            'role' => 'student',
+            'meta_query' => array(
+                'relation' => 'OR',
+                array(
+                    'key' => 'contact_number',
+                    'value' => $search,
+                    'compare' => 'LIKE'
+                )
+            )
+        ));
+
+        $total_user_query = new WP_User_Query();
+        $total_user_query->results = array_unique(array_merge($total_user_query_search->results, $total_user_query_meta_key->results), SORT_REGULAR);
+        $total_filtered_users = count($total_user_query->results);
+
+        $user_query_search = new WP_User_Query(array(
+            'role' => 'student',
+            'number' => $limit,
+            'offset' => $offset,
+            'orderby' => 'display_name',
+            'order' => 'ASC',
+            'search' => '*' . esc_attr($search) . '*'
+        ));
+
+        $user_query_meta_key = new WP_User_Query(array(
+            'role' => 'student',
+            'number' => $limit,
+            'offset' => $offset,
+            'orderby' => 'display_name',
+            'order' => 'ASC',
+            'meta_query' => array(
+                'relation' => 'OR',
+                array(
+                    'key' => 'contact_number',
+                    'value' => $search,
+                    'compare' => 'LIKE'
+                )
+            )
+        ));
+
+        $user_query = new WP_User_Query();
+        $user_query->results = array_unique(array_merge($user_query_search->results, $user_query_meta_key->results), SORT_REGULAR);
+    }
+
+    foreach ($user_query->results as $user) {
+        $users[] = array(
+            $user->display_name,
+            $user->user_email,
+            get_user_meta($user->ID, 'contact_number', true)
+        );
+    }
+
+    wp_send_json(array(
+        'draw' => $draw,
+        'recordsTotal' => $total_users,
+        'recordsFiltered' => $total_filtered_users,
+        'data' => $users
+    ));
+}
+
+add_action('wp_ajax_gsg_get_students', 'gsg_get_students');
+add_action('wp_ajax_nopriv_gsg_get_students', 'gsg_get_students');
 /*}}}*/

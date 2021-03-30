@@ -76,17 +76,17 @@ get_header();
 
                 <?php wp_nonce_field('gsg_save_account_info', 'gsg_save_account_info_nonce_field'); ?>
                 
-                <button id="save-changes-button" class="btn btn-primary bg-gradient mt-2 position-relative" type="submit"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span>Save changes</span></button>
+                <button id="save-changes-button" class="btn btn-primary mt-2 position-relative" type="submit"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span>Save changes</span></button>
             </form>
         </div>
 
         <div id="profile-picture-container" class="col-md-5 mb-3 mb-sm-0 border-0 p-0 bg-white shadow-sm rounded">
             <?php if (gsg_current_user_has_profile_picture()): ?>
-                <div id="image-wrap" class="py-5">
+                <div id="image-wrap" class="py-5 py-md-4">
                     <img src="<?php echo gsg_current_user_profile_picture(); ?>" alt="<?php echo $current_user->display_name; ?>">
                 </div>
             <?php else: ?>
-                <div id="image-wrap" class="py-5">
+                <div id="image-wrap" class="py-5 py-md-4">
                     <h4 class="m-0 text-muted"><?php echo gsg_get_initials($current_user->display_name); ?></h4>
                 </div>
             <?php endif; ?>
@@ -114,8 +114,8 @@ get_header();
                 <?php endif; ?>
 
                 <div class="btn-group mt-3 w-100">
-                    <button id="upload-update-button" class="btn btn-primary bg-gradient position-relative"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span><?php echo $button_text; ?></span></button>
-                    <button id="remove-button" class="btn btn-danger bg-gradient position-relative" data-filename="<?php echo esc_attr($profile_picture_name); ?>"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span>Remove</span></button>
+                    <button id="upload-update-button" class="btn btn-primary position-relative"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span><?php echo $button_text; ?></span></button>
+                    <button id="remove-button" class="btn btn-danger position-relative" data-filename="<?php echo esc_attr($profile_picture_name); ?>"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span>Remove</span></button>
                 </div>
             </div>
         </div>

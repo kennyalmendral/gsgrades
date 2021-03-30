@@ -36,6 +36,11 @@ function gsg_enqueue() {
 	wp_register_style('font-awesome', 'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css', array(), null);
     wp_enqueue_style('font-awesome');
 
+    if (gsg_is_students_page()) {
+        wp_register_style('bootstrap-datatables', 'https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css', array('bootstrap'), $version);
+        wp_enqueue_style('bootstrap-datatables');
+    }
+
 	wp_register_style('gsg-style', "$uri/style.css", array(), $version);
 	wp_enqueue_style('gsg-style');
 
@@ -46,6 +51,14 @@ function gsg_enqueue() {
 
 	wp_register_script('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js', array('jquery'), null, true);
 	wp_enqueue_script('bootstrap');
+
+    if (gsg_is_students_page()) {
+        wp_register_script('datatables', 'https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js', array('jquery'), null, true);
+        wp_enqueue_script('datatables');
+
+        wp_register_script('bootstrap-datatables', 'https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js', array('jquery', 'datatables'), null, true);
+        wp_enqueue_script('bootstrap-datatables');
+    }
 
 	wp_register_script('gsg-script', "$uri/script.js", array('jquery'), $version, true);
 
@@ -70,12 +83,15 @@ function gsg_enqueue() {
         'accountUrl' => ACCOUNT_PAGE_URL,
         'gradesUrl' => GRADES_PAGE_URL,
         'recordsUrl' => RECORDS_PAGE_URL,
+        'studentsUrl' => STUDENTS_PAGE_URL,
         'isLoginPage' => gsg_is_login_page() ? true : false,
         'isRegisterPage' => gsg_is_register_page() ? true : false,
         'isForgotPasswordPage' => gsg_is_forgot_password_page() ? true : false,
         'isResetPasswordPage' => gsg_is_reset_password_page() ? true : false,
         'isAccountPage' => gsg_is_account_page() ? true : false,
+        'isStudentsPage' => gsg_is_students_page() ? true : false,
         'logoutNonce' => wp_create_nonce('logout-nonce'),
+        'getStudentsNonce' => wp_create_nonce('get-students-nonce'),
         'currentUser' => is_user_logged_in() ? $current_user : null,
         'currentUserNameInitials' => is_user_logged_in() ? $current_user_name_initials : null,
         'currentUserHasProfilePicture' => $has_profile_picture

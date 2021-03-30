@@ -619,6 +619,27 @@
             });
         }/*}}}*/
 
+        if (gsg.isStudentsPage) {/*{{{*/
+            const studentsTable = $('#students-table');
+
+            studentsTable.DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: gsg.ajaxUrl,
+                    data: {
+                        action: 'gsg_get_students',
+                        get_students_nonce: gsg.getStudentsNonce
+                    },
+                    columns: [
+                        { data: 'display_name' },
+                        { data: 'user_email' },
+                        { data: 'contact_number' },
+                    ]
+                }
+            });
+        }/*}}}*/
+
         $('#logout').click(function(e) {/*{{{*/
             e.preventDefault();
 
