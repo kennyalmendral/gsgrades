@@ -21,6 +21,10 @@ html, body {
     justify-content: center;
 }
 
+.dataTables_length select {
+    margin: 0 3px;
+}
+
 .page-id-17 #main-content #account-info-container {
     border-top-right-radius: .25rem;
 }

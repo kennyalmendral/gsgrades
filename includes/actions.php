@@ -482,6 +482,27 @@ function gsg_get_students() {
     $limit = intval($_GET['length']);
     $search = trim($_GET['search']['value']);
 
+    $order_column_index = intval($_GET['order'][0]['column']);
+    $order_column = '';
+    $order_column_meta_key = '';
+
+    switch ($order_column_index) {
+        case 0:
+            $order_column = 'display_name';
+            break;
+        case 1:
+            $order_column = 'user_email';
+            break;
+        case 2:
+            $order_column = 'meta_value';
+            $order_column_meta_key = 'contact_number';
+            break;
+        default:
+            break;
+    }
+
+    $order_direction = $_GET['order'][0]['dir'];
+
     $users = array();
 
     $total_user_query_args = array('role' => 'student');
@@ -494,8 +515,9 @@ function gsg_get_students() {
         'role' => 'student',
         'number' => $limit,
         'offset' => $offset,
-        'orderby' => 'display_name',
-        'order' => 'ASC'
+        'orderby' => $order_column,
+        'order' => $order_direction,
+        'meta_key' => $order_column_meta_key
     ));
 
     if (!empty($search)) {
@@ -524,8 +546,9 @@ function gsg_get_students() {
             'role' => 'student',
             'number' => $limit,
             'offset' => $offset,
-            'orderby' => 'display_name',
-            'order' => 'ASC',
+            'orderby' => $order_column,
+            'order' => $order_direction,
+            'meta_key' => $order_column_meta_key,
             'search' => '*' . esc_attr($search) . '*'
         ));
 
@@ -533,8 +556,9 @@ function gsg_get_students() {
             'role' => 'student',
             'number' => $limit,
             'offset' => $offset,
-            'orderby' => 'display_name',
-            'order' => 'ASC',
+            'orderby' => $order_column,
+            'order' => $order_direction,
+            'meta_key' => $order_column_meta_key,
             'meta_query' => array(
                 'relation' => 'OR',
                 array(
