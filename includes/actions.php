@@ -488,12 +488,15 @@ function gsg_get_students() {
 
     switch ($order_column_index) {
         case 0:
-            $order_column = 'display_name';
+            $order_column = 'ID';
             break;
         case 1:
-            $order_column = 'user_email';
+            $order_column = 'display_name';
             break;
         case 2:
+            $order_column = 'user_email';
+            break;
+        case 3:
             $order_column = 'meta_value';
             $order_column_meta_key = 'contact_number';
             break;
@@ -515,8 +518,8 @@ function gsg_get_students() {
         'role' => 'student',
         'number' => $limit,
         'offset' => $offset,
-        'orderby' => $order_column,
-        'order' => $order_direction,
+        'orderby' => empty($order_column_index) ? 'display_name' : $order_column,
+        'order' => empty($order_direction) ? 'ASC' : $order_direction,
         'meta_key' => $order_column_meta_key
     ));
 
@@ -546,8 +549,8 @@ function gsg_get_students() {
             'role' => 'student',
             'number' => $limit,
             'offset' => $offset,
-            'orderby' => $order_column,
-            'order' => $order_direction,
+            'orderby' => empty($order_column_index) ? 'display_name' : $order_column,
+            'order' => empty($order_direction) ? 'ASC' : $order_direction,
             'meta_key' => $order_column_meta_key,
             'search' => '*' . esc_attr($search) . '*'
         ));
@@ -556,8 +559,8 @@ function gsg_get_students() {
             'role' => 'student',
             'number' => $limit,
             'offset' => $offset,
-            'orderby' => $order_column,
-            'order' => $order_direction,
+            'orderby' => empty($order_column_index) ? 'display_name' : $order_column,
+            'order' => empty($order_direction) ? 'ASC' : $order_direction,
             'meta_key' => $order_column_meta_key,
             'meta_query' => array(
                 'relation' => 'OR',
@@ -575,6 +578,7 @@ function gsg_get_students() {
 
     foreach ($user_query->results as $user) {
         $users[] = array(
+            $user->ID,
             $user->display_name,
             $user->user_email,
             get_user_meta($user->ID, 'contact_number', true)
@@ -591,4 +595,31 @@ function gsg_get_students() {
 
 add_action('wp_ajax_gsg_get_students', 'gsg_get_students');
 add_action('wp_ajax_nopriv_gsg_get_students', 'gsg_get_students');
+/*}}}*/
+
+/*{{{gsg_get_student*/
+function gsg_get_student() {
+    check_ajax_referer('get-student-nonce', 'get_student_nonce');
+
+    $user = get_user_by('ID', intval($_GET['student_id']));
+
+    if (!$user) {
+        wp_send_json_error('User not found.', 404);
+    }
+
+    $userdata = array(
+        'ID' => $user->ID,
+        'display_name' => $user->display_name,
+        'user_initials' => gsg_get_initials($user->display_name),
+        'user_email' => $user->user_email,
+        'contact_number' => get_user_meta($user->ID, 'contact_number', true),
+        'profile_picture' => !empty(get_user_meta($user->ID, 'profile_picture', true)) ? wp_upload_dir()['baseurl'] . '/profile-pictures/' . get_user_meta($user->ID, 'profile_picture', true) : null,
+        'user_registered' => $user->user_registered
+    );
+
+    wp_send_json_success($userdata);
+}
+
+add_action('wp_ajax_gsg_get_student', 'gsg_get_student');
+add_action('wp_ajax_nopriv_gsg_get_student', 'gsg_get_student');
 /*}}}*/

@@ -92,6 +92,7 @@ function gsg_enqueue() {
         'isStudentsPage' => gsg_is_students_page() ? true : false,
         'logoutNonce' => wp_create_nonce('logout-nonce'),
         'getStudentsNonce' => wp_create_nonce('get-students-nonce'),
+        'getStudentNonce' => wp_create_nonce('get-student-nonce'),
         'currentUser' => is_user_logged_in() ? $current_user : null,
         'currentUserNameInitials' => is_user_logged_in() ? $current_user_name_initials : null,
         'currentUserHasProfilePicture' => $has_profile_picture

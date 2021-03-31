@@ -17,7 +17,7 @@ get_header();
                     <h1 class="p-0 mb-0 fs-2">Students</h1>
 
                     <div class="btn-group">
-                        <button class="btn btn-outline-secondary border-end-0"><i class="bi bi-person-plus"></i> Add new</button>
+                        <!--<button class="btn btn-outline-secondary border-end-0"><i class="bi bi-person-plus"></i> Add new</button>-->
                         <button class="btn btn-outline-secondary"><i class="bi bi-download"></i> Export to spreadsheet</button>
                         <button class="btn btn-outline-secondary border-start-0"><i class="bi bi-download"></i> Export to PDF</button>
                     </div>
@@ -29,24 +29,30 @@ get_header();
 
 <div class="container my-sm-5">
     <div class="bg-white shadow-sm p-4 rounded">
-        <table id="students-table" class="table table-striped w-100">
+        <table id="students-table" class="table table-striped table-responsive w-100">
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Name</th>
                     <th>Email address</th>
                     <th>Contact number</th>
+                    <th class="text-center">Action</th>
                 </tr>
             </thead>
 
             <tfoot>
                 <tr>
+                    <th>ID</th>
                     <th>Name</th>
                     <th>Email address</th>
                     <th>Contact number</th>
+                    <th class="text-center">Action</th>
                 </tr>
             </tfoot>
         </table>
     </div>
 </div>
+
+<?php include_once 'templates/student-details-modal.php'; ?>
 
 <?php get_footer(); ?>

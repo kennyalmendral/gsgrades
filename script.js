@@ -3,7 +3,7 @@
 
     $(window).on('load', function() {/*{{{*/
         loader.fadeOut('slow', function() {
-            $(this).remove();
+            $(this).hide();
         });
     });/*}}}*/
 
@@ -622,7 +622,7 @@
         if (gsg.isStudentsPage) {/*{{{*/
             const studentsTable = $('#students-table');
 
-            studentsTable.DataTable({
+            const studentsDataTable = studentsTable.DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
@@ -632,11 +632,88 @@
                         get_students_nonce: gsg.getStudentsNonce
                     },
                     columns: [
+                        { data: 'ID' },
                         { data: 'display_name' },
                         { data: 'user_email' },
                         { data: 'contact_number' },
-                    ]
+                    ],
+                },
+                columnDefs: [
+                    {
+                        targets: -1,
+                        data: null,
+                        defaultContent: '<button class="view-details-button btn btn-secondary btn-sm" title="View details"><i class="bi bi-eye d-none"></i><i class="bi bi-eye-fill"></i></button>',
+                        className: 'dt-center',
+                        orderable: false
+                    }
+                ],
+                language: {
+                    search: '',
+                    searchPlaceholder: 'Search...'
                 }
+            });
+
+            studentsTable.on('click', 'button', function() {
+                const me = $(this);
+                const data = studentsDataTable.row($(this).parents('tr')).data();
+                const studentId = data[0];
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'GET',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_get_student',
+                        get_student_nonce: gsg.getStudentNonce,
+                        student_id: studentId
+                    },
+                    beforeSend: function() {
+                        me.attr('disabled', true);
+                        me.find('.bi-eye-fill').addClass('d-none');
+                        me.find('.bi-eye').removeClass('d-none');
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        alert(response.data);
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            const user = response.data;
+                            const name = $('#student-details-modal').find('#name');
+                            const emailAddress = $('#student-details-modal').find('#email-address a');
+                            const contactNumber = $('#student-details-modal').find('#contact-number a');
+
+                            const studentDetailsModal = new bootstrap.Modal(document.getElementById('student-details-modal'), {
+                                backdrop: 'static',
+                                keyboard: false
+                            });
+
+                            if (user.profile_picture == null) {
+                                $('#student-details-modal').find('#image-wrap').html(`<h4 class="m-0 text-muted">${user.user_initials}</h4>`);
+                            } else {
+                                $('#student-details-modal').find('#image-wrap').html(`<img src="${user.profile_picture}" alt="${user.display_name}">`);
+                            }
+
+                            name.text(user.display_name);
+
+                            emailAddress.attr('href', `mailto:${user.user_email}`);
+                            emailAddress.attr('title', `Send mail to ${user.user_email}`);
+                            emailAddress.text(user.user_email);
+
+                            contactNumber.attr('href', `tel:${user.contact_number}`);
+                            contactNumber.attr('title', `Call ${user.contact_number}`);
+                            contactNumber.text(user.contact_number);
+
+                            studentDetailsModal.show();
+                        }
+                    },
+                    complete: function() {
+                        me.removeAttr('disabled');
+                        me.find('.bi-eye-fill').removeClass('d-none');
+                        me.find('.bi-eye').addClass('d-none');
+                    }
+                });
             });
         }/*}}}*/
 
