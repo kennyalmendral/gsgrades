@@ -636,6 +636,7 @@
                         { data: 'display_name' },
                         { data: 'user_email' },
                         { data: 'contact_number' },
+                        { data: 'user_registered' },
                     ],
                 },
                 columnDefs: [

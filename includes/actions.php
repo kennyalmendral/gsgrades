@@ -500,6 +500,9 @@ function gsg_get_students() {
             $order_column = 'meta_value';
             $order_column_meta_key = 'contact_number';
             break;
+        case 4:
+            $order_column = 'user_registered';
+            break;
         default:
             break;
     }
@@ -581,7 +584,8 @@ function gsg_get_students() {
             $user->ID,
             $user->display_name,
             $user->user_email,
-            get_user_meta($user->ID, 'contact_number', true)
+            get_user_meta($user->ID, 'contact_number', true),
+            date('F d, Y', strtotime($user->user_registered))
         );
     }
 

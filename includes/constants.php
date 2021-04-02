@@ -3,11 +3,17 @@
 define('GSG_DEV_MODE', true);
 define('GSG_THEME_URL', get_template_directory_uri());
 define('GSG_THEME_PATH', get_template_directory());
+
 define('GSG_VENDORS_URL', GSG_THEME_URL . '/vendors');
+define('GSG_VENDORS_PATH', GSG_THEME_PATH . '/vendors');
+
 define('GSG_IMAGES_URL', GSG_THEME_URL . '/images');
 
 define('GSG_TEMPLATES_URL', GSG_THEME_URL . '/templates');
 define('GSG_TEMPLATES_PATH', GSG_THEME_PATH . '/templates');
+
+define('GSG_UPLOADS_URL', wp_upload_dir()['baseurl']);
+define('GSG_UPLOADS_PATH', wp_upload_dir()['basedir']);
 
 define('LOGIN_PAGE_ID', 13);
 define('LOGIN_PAGE_URL', get_permalink(LOGIN_PAGE_ID));

@@ -39,10 +39,6 @@ table.dataTable {
     margin-bottom: 22px !important;
 }
 
-div.dataTables_wrapper div.dataTables_info {
-    padding-top: 0 !important;
-}
-
 .page-id-17 #main-content #account-info-container {
     border-top-right-radius: .25rem;
 }
