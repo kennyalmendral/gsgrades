@@ -82,48 +82,64 @@ if (isset($_POST['export_pdf'])) {/*{{{*/
                 'email_address' => $user->user_email,
                 'contact_number' => get_user_meta($user->ID, 'contact_number', true),
                 'date_registered' => date('F d, Y', strtotime($user->user_registered)),
-                'profile_picture_url' => !empty(get_user_meta($user->ID, 'profile_picture', true)) ? GSG_UPLOADS_URL . '/profile-pictures/'. get_user_meta($user->ID, 'profile_picture', true) : 'N/A'
+                'profile_picture_url' => !empty(get_user_meta($user->ID, 'profile_picture', true)) ? GSG_UPLOADS_URL . '/profile-pictures/'. get_user_meta($user->ID, 'profile_picture', true) : null
             );
         }
 
-        $filepath = GSG_UPLOADS_PATH . '/exports/Gottes Segen Students.pdf';
+        require_once GSG_VENDORS_PATH . '/dompdf/autoload.inc.php';
 
-        require_once GSG_VENDORS_PATH . '/fpdf182/fpdf.php';
+        $options = new \Dompdf\Options();
+        $options->setIsRemoteEnabled(true);
+        $options->isHtml5ParserEnabled(true);
 
-        $pdf = new FPDF('L');
+        $dompdf = new \Dompdf\Dompdf($options);
+        $dompdf->setPaper('A4', 'landscape');
 
-        $pdf->AddPage();
+        $html_template_raw = file_get_contents(GSG_TEMPLATES_PATH . '/students.html');
+        $html_template = '';
 
-        $pdf->SetFont('Arial', 'B', 24);
-        $pdf->Cell(0, 0, 'Gottes Segen Students', 0, 1, 'C');
+        $users_table = '<table cellpadding=0 cellspacing=0>';
+            $users_table .= '<thead>';
+                $users_table .= '<tr>';
+                    $users_table .= '<th>ID</th>';
+                    $users_table .= '<th>Name</th>';
+                    $users_table .= '<th>Email Address</th>';
+                    $users_table .= '<th>Contact Number</th>';
+                    $users_table .= '<th>Date Registered</th>';
+                    $users_table .= '<th>Profile Picture URL</th>';
+                $users_table .= '</tr>';
+            $users_table .= '</thead>';
 
-        $pdf->Ln(10);
+            $users_table .= '<tbody>';
+                foreach ($users as $user) {
+                    $users_table .= '<tr>';
+                        $users_table .= "<td>{$user['id']}</td>";
+                        $users_table .= "<td>{$user['name']}</td>";
+                        $users_table .= "<td>{$user['email_address']}</td>";
+                        $users_table .= "<td>{$user['contact_number']}</td>";
+                        $users_table .= "<td>{$user['date_registered']}</td>";
 
-        $pdf->SetFont('Arial', 'B', 9);
+                        if (empty($user['profile_picture_url'])) {
+                            $users_table .= '<td>N/A</td>';
+                        } else {
+                            $users_table .= '<td><a href="' . $user['profile_picture_url'] . '">Click to view</a></td>';
+                        }
+                    $users_table .= '</tr>';
+                }
+            $users_table .= '</tbody>';
+        $users_table .= '</table>';
 
-        $data = array();
+        $variables = array(
+            '[STUDENTS]' => $users_table,
+        );
 
-        $heading_columns = array('ID', 'Name', 'Email Address', 'Contact Number', 'Date Registered', 'Profile Picture URL');
-
-        foreach ($heading_columns as $column) {
-            $pdf->Cell(46.2, 7, $column, 1, 0, 'L');
+        foreach ($variables as $key => $value) {
+            $html_template = strtr($html_template_raw, $variables);
         }
 
-        $pdf->Ln();
-
-        $pdf->SetFont('Arial', '', 9);
-
-        foreach ($users as $row) {
-            foreach ($row as $column) {
-                $pdf->Cell(46.2, 6, $column, 1, 0, 'L');
-            }
-
-            $pdf->Ln();
-        }
-
-        $pdf->Ln();
-
-        $pdf->Output('D', 'Gottes Segen Grades.pdf', true);
+        $dompdf->loadHtml($html_template, 'UTF-8');
+        $dompdf->render();
+        $dompdf->stream('Gottes Segen Students.pdf');
 
         exit;
     }

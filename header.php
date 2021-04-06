@@ -28,7 +28,7 @@
     </div>
 
     <div id="wrapper">
-        <?php if (gsg_is_account_page() || gsg_is_records_page() || gsg_is_grades_page() || gsg_is_students_page()): ?>
+        <?php if (gsg_is_account_page() || gsg_is_records_page() || gsg_is_classes_page() || gsg_is_grades_page() || gsg_is_students_page()): ?>
             <header>
                 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
                     <div class="container">
@@ -43,6 +43,7 @@
 
                             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                                 <?php if (gsg_is_teacher()): ?>
+                                    <li class="nav-item"><a class="nav-link <?php echo $current_page == 'classes' ? 'active' : '' ; ?>" href="<?php echo CLASSES_PAGE_URL; ?>">Classes</a></li>
                                     <li class="nav-item"><a class="nav-link <?php echo $current_page == 'records' ? 'active' : '' ; ?>" href="<?php echo RECORDS_PAGE_URL; ?>">Records</a></li>
                                     <li class="nav-item"><a class="nav-link <?php echo $current_page == 'students' ? 'active' : '' ; ?>" href="<?php echo STUDENTS_PAGE_URL; ?>">Students</a></li>
                                 <?php elseif (gsg_is_student()): ?>

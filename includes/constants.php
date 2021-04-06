@@ -33,6 +33,9 @@ define('ACCOUNT_PAGE_URL', get_permalink(ACCOUNT_PAGE_ID));
 define('RECORDS_PAGE_ID', 26);
 define('RECORDS_PAGE_URL', get_permalink(RECORDS_PAGE_ID));
 
+define('CLASSES_PAGE_ID', 41);
+define('CLASSES_PAGE_URL', get_permalink(CLASSES_PAGE_ID));
+
 define('GRADES_PAGE_ID', 20);
 define('GRADES_PAGE_URL', get_permalink(GRADES_PAGE_ID));
 

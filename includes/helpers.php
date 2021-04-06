@@ -42,6 +42,10 @@ function gsg_is_records_page() {
     return is_page(RECORDS_PAGE_ID);
 }
 
+function gsg_is_classes_page() {
+    return is_page(CLASSES_PAGE_ID);
+}
+
 function gsg_is_grades_page() {
     return is_page(GRADES_PAGE_ID);
 }

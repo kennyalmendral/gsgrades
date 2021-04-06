@@ -24,9 +24,6 @@ function gsg_enqueue() {
 	$uri = get_theme_file_uri();
 	$version = GSG_DEV_MODE ? time() : false;
 
-	/*wp_register_style('google-font', 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap', array(), null);
-    wp_enqueue_style('google-font');*/
-
 	wp_register_style('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css', array(), null);
     wp_enqueue_style('bootstrap');
 
@@ -62,8 +59,6 @@ function gsg_enqueue() {
 
 	wp_register_script('gsg-script', "$uri/script.js", array('jquery'), $version, true);
 
-	//$entry_locations = $wpdb->get_results("SELECT * FROM `{$wpdb->prefix}entry_locations`");
-
     $has_profile_picture = false;
 
     if (is_user_logged_in()) {
@@ -83,12 +78,14 @@ function gsg_enqueue() {
         'accountUrl' => ACCOUNT_PAGE_URL,
         'gradesUrl' => GRADES_PAGE_URL,
         'recordsUrl' => RECORDS_PAGE_URL,
+        'classesUrl' => CLASSES_PAGE_URL,
         'studentsUrl' => STUDENTS_PAGE_URL,
         'isLoginPage' => gsg_is_login_page() ? true : false,
         'isRegisterPage' => gsg_is_register_page() ? true : false,
         'isForgotPasswordPage' => gsg_is_forgot_password_page() ? true : false,
         'isResetPasswordPage' => gsg_is_reset_password_page() ? true : false,
         'isAccountPage' => gsg_is_account_page() ? true : false,
+        'isClassesPage' => gsg_is_classes_page() ? true : false,
         'isStudentsPage' => gsg_is_students_page() ? true : false,
         'logoutNonce' => wp_create_nonce('logout-nonce'),
         'getStudentsNonce' => wp_create_nonce('get-students-nonce'),
