@@ -174,7 +174,7 @@ get_header();
 </div>
 
 <div class="container my-sm-5">
-    <div class="bg-white shadow-sm p-4 rounded">
+    <div id="main-content" class="bg-white shadow-sm p-4 rounded">
         <table id="students-table" class="table table-striped table-responsive w-100">
             <thead>
                 <tr>

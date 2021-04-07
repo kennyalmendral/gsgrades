@@ -651,6 +651,11 @@
                 language: {
                     search: '',
                     searchPlaceholder: 'Search...'
+                },
+                initComplete: function(settings, json) {
+                    $('#students-table_length select').removeClass('form-control form-control-sm').addClass('form-select form-select-sm');
+
+                    $('#main-content').fadeIn();
                 }
             });
 
@@ -719,6 +724,101 @@
         }/*}}}*/
 
         if (gsg.isClassesPage) {/*{{{*/
+            const statusFilter = $('body').find('#status-filter');
+            const statusFilterSelect = statusFilter.find('select');
+
+            const classesTable = $('#classes-table');
+        
+            const classesDataTable = classesTable.DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: gsg.ajaxUrl,
+                    data: function(d) {
+                        d.action = 'gsg_get_classes';
+                        d.get_classes_nonce = gsg.getClassesNonce;
+                        d.status = statusFilterSelect.val();
+                    },
+                    columns: [
+                        { data: 'id' },
+                        { data: 'post_title' },
+                        { data: 'completion_hours' },
+                        { data: 'completed_hours' },
+                        { data: 'remaining_hours' },
+                        { data: 'status' },
+                        { data: 'date_created' }
+                    ],
+                },
+                columnDefs: [
+                    {
+                        targets: -1,
+                        data: null,
+                        defaultContent: '<button class="edit-class-button btn btn-primary btn-sm me-2" title="Edit class"><i class="bi bi-pencil d-none"></i><i class="bi bi-pencil-fill"></i></button><button class="delete-class-button btn btn-danger btn-sm" title="Delete class"><i class="bi bi-trash d-none"></i><i class="bi bi-trash-fill"></i></button>',
+                        className: 'dt-center',
+                        orderable: false
+                    }
+                ],
+                order: [
+                    [6, 'DESC']
+                ],
+                language: {
+                    search: '',
+                    searchPlaceholder: 'Search...'
+                },
+                initComplete: function(settings, json) {
+                    $('#classes-table_length select').removeClass('form-control form-control-sm').addClass('form-select form-select-sm');
+
+                    $('#classes-table_wrapper .row:first-of-type').addClass('justify-content-between');
+                    $('#classes-table_wrapper .row:first-of-type .col-sm-12').removeClass('col-md-6').addClass('col-md-4');
+                    $('#classes-table_wrapper .row:first-of-type .col-sm-12').removeClass('col-md-6').addClass('col-md-4');
+
+                    $('#classes-table_wrapper .row:first-of-type .col-sm-12:last-of-type').addClass('d-flex align-items-center justify-content-between').prepend(statusFilter);
+
+                    $('#main-content').fadeIn();
+                }
+            });
+
+            statusFilterSelect.change(function() {
+                classesDataTable.ajax.reload();
+            });
+
+            $('body').on('click', '.delete-class-button', function() {
+                const me = $(this);
+                const data = classesDataTable.row($(this).parents('tr')).data();
+                const classId = data[0];
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_delete_class',
+                        delete_class_nonce: gsg.deleteClassNonce,
+                        class_id: classId
+                    },
+                    beforeSend: function() {
+                        me.attr('disabled', true);
+                        me.find('.bi-trash-fill').addClass('d-none');
+                        me.find('.bi-trash').removeClass('d-none');
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        alert(response.data.error_message);
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            location.href = gsg.classesUrl;
+                        }
+                    },
+                    complete: function() {
+                        me.removeAttr('disabled');
+                        me.find('.bi-trash-fill').removeClass('d-none');
+                        me.find('.bi-trash').addClass('d-none');
+                    }
+                });
+            });
+        
             const createClassBtn = $('#create-class');
             const createClassModalForm = $('#create-class-modal').find('form');
             const createClassModalFormSubmitBtn = createClassModalForm.find('.modal-footer button');
@@ -782,13 +882,16 @@
                         }
                     },
                     success: function(response) {
-                        console.log(response);
-
                         if (response.success) {
                             createClassModalForm.find('.modal-body').prepend(`<div id="create-class-success" class="alert alert-success fs-8 px-3 py-2">${response.data.message}</div>`);
 
                             setTimeout(function() {
-                                location.href = gsg.classesUrl;
+                                createClassModal.hide();
+
+                                createClassModalForm.find('#create-class-success').remove();
+                                createClassModalForm.find('#completion-hours').val('');
+
+                                classesDataTable.ajax.reload();
                             }, 1000);
                         }
                     },

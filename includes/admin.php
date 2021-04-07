@@ -1,8 +1,7 @@
 <?php
 
 function gsg_custom_class_columns($columns) {
-    unset($columns['date']);
-
+    //unset($columns['date']);
     $columns['completion_hours'] = 'Number of hours to complete';
     $columns['completed_hours'] = 'Completed hours';
     $columns['remaining_hours'] = 'Remaining hours';

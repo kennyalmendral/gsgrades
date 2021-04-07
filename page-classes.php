@@ -23,7 +23,44 @@ get_header();
     </div>
 </div>
 
-<div class="container my-3">
+<div class="container my-sm-5">
+    <div id="main-content" class="bg-white shadow-sm p-4 rounded">
+        <div id="status-filter" class="d-flex align-items-center me-2">
+            <select id="status-filter-select" class="form-select form-select-sm fs-6">
+                <option value="">Select status</option>
+                <option value="ongoing">Ongoing</option>
+                <option value="completed">Completed</option>
+            </select>
+        </div>
+
+        <table id="classes-table" class="table table-striped table-responsive w-100">
+            <thead>
+                <tr>
+                    <th width="7%">ID</th>
+                    <th width="12%">Code</th>
+                    <th width="22%">Number of hours to complete</th>
+                    <th width="14%">Completed hours</th>
+                    <th width="14%">Remaining hours</th>
+                    <th width="10%">Status</th>
+                    <th>Date created</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+
+            <tfoot>
+                <tr>
+                    <th>ID</th>
+                    <th>Code</th>
+                    <th>Number of hours to complete</th>
+                    <th>Completed hours</th>
+                    <th>Remaining hours</th>
+                    <th>Status</th>
+                    <th>Date created</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 </div>
 
 <?php include_once 'templates/create-class-modal.php'; ?>

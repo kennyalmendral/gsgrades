@@ -628,6 +628,218 @@ add_action('wp_ajax_gsg_get_student', 'gsg_get_student');
 add_action('wp_ajax_nopriv_gsg_get_student', 'gsg_get_student');
 /*}}}*/
 
+/*{{{gsg_get_classes*/
+function gsg_get_classes() {
+    check_ajax_referer('get-classes-nonce', 'get_classes_nonce');
+
+    global $wpdb;
+    global $current_user;
+
+    $draw = intval($_GET['draw']);
+    $offset = intval($_GET['start']);
+    $limit = intval($_GET['length']);
+    $search = trim($_GET['search']['value']);
+    $status = trim($_GET['status']);
+
+    $order_column_index = intval($_GET['order'][0]['column']);
+    $order_column = '';
+    $order_column_meta_key = '';
+
+    switch ($order_column_index) {
+        case 0:
+            $order_column = 'ID';
+            break;
+        case 1:
+            $order_column = 'post_title';
+            break;
+        case 2:
+            $order_column = 'meta_value';
+            $order_column_meta_key = 'completion_hours';
+            break;
+        case 3:
+            $order_column = 'meta_value';
+            $order_column_meta_key = 'completed_hours';
+            break;
+        case 4:
+            $order_column = 'meta_value';
+            $order_column_meta_key = 'remaining_hours';
+            break;
+        case 5:
+            $order_column = 'post_status';
+            break;
+        case 6:
+            $order_column = 'post_date';
+            break;
+        default:
+            break;
+    }
+
+    $order_direction = $_GET['order'][0]['dir'];
+
+    $classes = array();
+
+    $total_class_query = new WP_Query(array(
+        'post_type' => 'class',
+        'post_status' => empty($status) ? array('ongoing', 'completed') : array($status),
+        'posts_per_page' => -1,
+        'author' => $current_user->ID
+    ));
+
+    $total_classes = $total_class_query->found_posts;
+    $total_filtered_classes = $total_classes;
+
+    $class_query = new WP_Query(array(
+        'post_type' => 'class',
+        'post_status' => empty($status) ? array('ongoing', 'completed') : array($status),
+        'posts_per_page' => $limit,
+        'author' => $current_user->ID,
+        'offset' => $offset,
+        'orderby' => empty($order_column_index) ? 'post_date' : $order_column,
+        'order' => empty($order_direction) ? 'DESC' : $order_direction,
+        'meta_key' => $order_column_meta_key
+    ));
+
+    if (!empty($search)) {
+        $total_class_query_search = new WP_Query(array(
+            'post_type' => 'class',
+            'post_status' => empty($status) ? array('ongoing', 'completed') : array($status),
+            'posts_per_page' => -1,
+            'author' => $current_user->ID,
+            's' => esc_attr($search)
+        ));
+
+        $total_class_query_meta_key = new WP_Query(array(
+            'post_type' => 'class',
+            'post_status' => empty($status) ? array('ongoing', 'completed') : array($status),
+            'posts_per_page' => -1,
+            'author' => $current_user->ID,
+            'meta_query' => array(
+                'relation' => 'OR',
+                array(
+                    'key' => 'completion_hours',
+                    'value' => $search,
+                    'compare' => 'LIKE'
+                ),
+                array(
+                    'key' => 'completed_hours',
+                    'value' => $search,
+                    'compare' => 'LIKE'
+                ),
+                array(
+                    'key' => 'remaining_hours',
+                    'value' => $search,
+                    'compare' => 'LIKE'
+                ),
+            )
+        ));
+
+        $total_class_query = new WP_Query();
+        $total_class_query->posts = array_unique(array_merge($total_class_query_search->posts, $total_class_query_meta_key->posts), SORT_REGULAR);
+        $total_filtered_classes = count($total_class_query->posts);
+
+        $class_query_search = new WP_Query(array(
+            'post_type' => 'class',
+            'post_status' => empty($status) ? array('ongoing', 'completed') : array($status),
+            'posts_per_page' => $limit,
+            'author' => $current_user->ID,
+            'offset' => $offset,
+            'orderby' => empty($order_column_index) ? 'post_date' : $order_column,
+            'order' => empty($order_direction) ? 'DESC' : $order_direction,
+            'meta_key' => $order_column_meta_key,
+            's' => esc_attr($search)
+        ));
+
+        $class_query_meta_key = new WP_Query(array(
+            'post_type' => 'class',
+            'post_status' => empty($status) ? array('ongoing', 'completed') : array($status),
+            'posts_per_page' => $limit,
+            'author' => $current_user->ID,
+            'offset' => $offset,
+            'orderby' => empty($order_column_index) ? 'post_date' : $order_column,
+            'order' => empty($order_direction) ? 'DESC' : $order_direction,
+            'meta_key' => $order_column_meta_key,
+            'meta_query' => array(
+                'relation' => 'OR',
+                array(
+                    'key' => 'completion_hours',
+                    'value' => $search,
+                    'compare' => 'LIKE'
+                ),
+                array(
+                    'key' => 'completed_hours',
+                    'value' => $search,
+                    'compare' => 'LIKE'
+                ),
+                array(
+                    'key' => 'remaining_hours',
+                    'value' => $search,
+                    'compare' => 'LIKE'
+                ),
+            )
+        ));
+
+        $class_query = new WP_Query();
+        $class_query->posts = array_unique(array_merge($class_query_search->posts, $class_query_meta_key->posts), SORT_REGULAR);
+
+        if (!empty($class_query->posts)) {
+            foreach ($class_query->posts as $post) {
+                $post_status = get_post_status($post->ID);
+
+                if ($post_status == 'ongoing') {
+                    $post_status_badge_bg = 'secondary';
+                } else if ($post_status == 'completed') {
+                    $post_status_badge_bg = 'success';
+                }
+
+                $classes[] = array(
+                    $post->ID,
+                    $post->post_title,
+                    get_field('completion_hours', $post->ID),
+                    get_field('completed_hours', $post->ID),
+                    get_field('remaining_hours', $post->ID),
+                    '<span class="badge bg-' . $post_status_badge_bg . '">' . ucfirst($post_status) . '</span>',
+                    get_the_date('M d, Y', $post->ID)
+                );
+            }
+        }
+    } else {
+        while ($class_query->have_posts()) {
+            $class_query->the_post();
+
+            $post_status = get_post_status();
+
+            if ($post_status == 'ongoing') {
+                $post_status_badge_bg = 'secondary';
+            } else if ($post_status == 'completed') {
+                $post_status_badge_bg = 'success';
+            }
+
+            $classes[] = array(
+                get_the_ID(),
+                get_the_title(),
+                get_field('completion_hours'),
+                get_field('completed_hours'),
+                get_field('remaining_hours'),
+                '<span class="badge bg-' . $post_status_badge_bg . '">' . ucfirst($post_status) . '</span>',
+                get_the_date('M d, Y')
+            );
+        }
+
+        wp_reset_postdata();
+    }
+
+    wp_send_json(array(
+        'draw' => $draw,
+        'recordsTotal' => $total_classes,
+        'recordsFiltered' => $total_filtered_classes,
+        'data' => $classes
+    ));
+}
+
+add_action('wp_ajax_gsg_get_classes', 'gsg_get_classes');
+add_action('wp_ajax_nopriv_gsg_get_classes', 'gsg_get_classes');
+/*}}}*/
+
 /*{{{gsg_create_class*/
 function gsg_create_class() {
     if (!isset($_POST['create_class_nonce']) || !wp_verify_nonce($_POST['create_class_nonce'], 'gsg_create_class')) {
@@ -660,7 +872,7 @@ function gsg_create_class() {
 
     $post_id = wp_insert_post(array(
         'post_type' => 'class',
-        'post_status' => 'publish',
+        'post_status' => 'ongoing',
         'post_title' => $random_string,
         'post_author' => $current_user->ID
     ));
@@ -674,4 +886,27 @@ function gsg_create_class() {
 
 add_action('wp_ajax_gsg_create_class', 'gsg_create_class');
 add_action('wp_ajax_nopriv_gsg_create_class', 'gsg_create_class');
+/*}}}*/
+
+/*{{{gsg_delete_class*/
+function gsg_delete_class() {
+    check_ajax_referer('delete-class-nonce', 'delete_class_nonce');
+
+    //global $current_user;
+
+    $post_id = intval($_POST['class_id']);
+
+    if (empty($post_id)) {
+        wp_send_json_error(array('error_message' => 'Please select a class to delete.'), 500);
+    }
+
+    if (!wp_trash_post($post_id)) {
+        wp_send_json_error(array('error_message' => 'Unable to delete class.'), 500);
+    }
+
+    wp_send_json_success();
+}
+
+add_action('wp_ajax_gsg_delete_class', 'gsg_delete_class');
+add_action('wp_ajax_nopriv_gsg_delete_class', 'gsg_delete_class');
 /*}}}*/

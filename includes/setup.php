@@ -2,9 +2,7 @@
 
 function gsg_setup_theme() {
 	add_theme_support('post-thumbnails');
-
     add_theme_support('title-tag');
-
 	add_theme_support('html5', array(
         'comment-list',
         'comment-form',
@@ -33,7 +31,7 @@ function gsg_enqueue() {
 	wp_register_style('font-awesome', 'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css', array(), null);
     wp_enqueue_style('font-awesome');
 
-    if (gsg_is_students_page()) {
+    if (gsg_is_students_page() || gsg_is_classes_page()) {
         wp_register_style('bootstrap-datatables', 'https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css', array('bootstrap'), $version);
         wp_enqueue_style('bootstrap-datatables');
     }
@@ -49,7 +47,7 @@ function gsg_enqueue() {
 	wp_register_script('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js', array('jquery'), null, true);
 	wp_enqueue_script('bootstrap');
 
-    if (gsg_is_students_page()) {
+    if (gsg_is_students_page() || gsg_is_classes_page()) {
         wp_register_script('datatables', 'https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js', array('jquery'), null, true);
         wp_enqueue_script('datatables');
 
@@ -89,7 +87,9 @@ function gsg_enqueue() {
         'isStudentsPage' => gsg_is_students_page() ? true : false,
         'logoutNonce' => wp_create_nonce('logout-nonce'),
         'getStudentsNonce' => wp_create_nonce('get-students-nonce'),
+        'getClassesNonce' => wp_create_nonce('get-classes-nonce'),
         'getStudentNonce' => wp_create_nonce('get-student-nonce'),
+        'deleteClassNonce' => wp_create_nonce('delete-class-nonce'),
         'currentUser' => is_user_logged_in() ? $current_user : null,
         'currentUserNameInitials' => is_user_logged_in() ? $current_user_name_initials : null,
         'currentUserHasProfilePicture' => $has_profile_picture

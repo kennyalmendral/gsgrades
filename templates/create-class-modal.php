@@ -9,7 +9,7 @@
             <div class="modal-body">
                 <div class="col">
                     <label for="completion-hours" class="mb-1 text-muted">Number of hours to complete</label>
-                    <input type="number" id="completion-hours" class="form-control">
+                    <input type="number" id="completion-hours" class="form-control" required>
                 </div>
             </div>
 

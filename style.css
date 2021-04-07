@@ -39,6 +39,10 @@ table.dataTable {
     margin-bottom: 22px !important;
 }
 
+div.dataTables_wrapper .custom-select {
+    font-size: 1rem;
+}
+
 .page-id-17 #main-content #account-info-container {
     border-top-right-radius: .25rem;
 }
@@ -94,6 +98,18 @@ table.dataTable {
 
 .page-id-17 .notice {
     font-size: 14px;
+}
+
+.page-id-22 #main-content {
+    display: none;
+}
+
+.page-id-41 #status-filter {
+    width: 100%;
+}
+
+.page-id-41 #main-content {
+    display: none;
 }
 
 @media (max-width: 767px) {
