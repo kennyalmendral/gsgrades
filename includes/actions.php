@@ -627,3 +627,51 @@ function gsg_get_student() {
 add_action('wp_ajax_gsg_get_student', 'gsg_get_student');
 add_action('wp_ajax_nopriv_gsg_get_student', 'gsg_get_student');
 /*}}}*/
+
+/*{{{gsg_create_class*/
+function gsg_create_class() {
+    if (!isset($_POST['create_class_nonce']) || !wp_verify_nonce($_POST['create_class_nonce'], 'gsg_create_class')) {
+        wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
+    }
+
+    global $current_user;
+
+    $errors = array();
+
+    $completion_hours = intval($_POST['completion_hours']);
+
+    if (empty($completion_hours)) {
+        $errors['completion_hours'] = 'The completion hours field is required.';
+    } else if (!is_numeric($completion_hours)) {
+        $errors['completion_hours'] = 'The completion hours must be numeric.';
+    } else if ($completion_hours < 1) {
+        $errors['completion_hours'] = 'The completion hours must be greater than 0.';
+    }
+
+    if (!empty($errors)) {
+        wp_send_json_error($errors, 400);
+    }
+
+    $random_string = gsg_generate_random_string();
+
+    if (!is_null(get_page_by_title($random_string, OBJECT, 'class'))) {
+        $random_string = gsg_generate_random_string();
+    }
+
+    $post_id = wp_insert_post(array(
+        'post_type' => 'class',
+        'post_status' => 'publish',
+        'post_title' => $random_string,
+        'post_author' => $current_user->ID
+    ));
+
+    update_field('completion_hours', $completion_hours, $post_id);
+    update_field('completed_hours', 0, $post_id);
+    update_field('remaining_hours', $completion_hours, $post_id);
+
+    wp_send_json_success(array('message' => 'Class has been created.'), 201);
+}
+
+add_action('wp_ajax_gsg_create_class', 'gsg_create_class');
+add_action('wp_ajax_nopriv_gsg_create_class', 'gsg_create_class');
+/*}}}*/

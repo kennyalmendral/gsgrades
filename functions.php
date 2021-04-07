@@ -1,5 +1,9 @@
 <?php
 
+if (is_admin()) {
+    include_once 'includes/admin.php';
+}
+
 include_once 'includes/constants.php';
 include_once 'includes/setup.php';
 include_once 'includes/misc.php';

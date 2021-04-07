@@ -718,6 +718,89 @@
             });
         }/*}}}*/
 
+        if (gsg.isClassesPage) {/*{{{*/
+            const createClassBtn = $('#create-class');
+            const createClassModalForm = $('#create-class-modal').find('form');
+            const createClassModalFormSubmitBtn = createClassModalForm.find('.modal-footer button');
+
+            const createClassModal = new bootstrap.Modal(document.getElementById('create-class-modal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            createClassBtn.click(function() {
+                const me = $(this);
+
+                createClassModal.show();
+            });
+
+            createClassModalForm.submit(function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_create_class',
+                        create_class_nonce: createClassModalForm.find('#gsg_create_class_nonce_field').val(),
+                        completion_hours: createClassModalForm.find('#completion-hours').val()
+                    },
+                    beforeSend: function() {
+                        createClassModalFormSubmitBtn.attr('disabled', true);
+                        createClassModalFormSubmitBtn.find('span').text('Creating class');
+                        createClassModalFormSubmitBtn.find('i').removeClass('d-none');
+
+                        createClassModalForm.find('#completion-hours').length > 0 && createClassModalForm.find('#completion-hours').removeClass('is-invalid');
+                        createClassModalForm.find('#create-class-error').length > 0 && createClassModalForm.find('#create-class-error').remove();
+                        createClassModalForm.find('.alert-success').length > 0 && createClassModalForm.find('.alert-success').remove();
+                        createClassModalForm.find('.invalid-feedback').length > 0 && createClassModalForm.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (const key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    keyId = key.replace('_', '-');
+
+                                    if ($(`#${keyId}-error-alert`).length === 0) {
+                                        $(`#${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(createClassModalForm.find(`#${keyId}`));
+                                    }
+
+                                    if (key === 'create_class_error') {
+                                        if ($('#create_class_error').length === 0) {
+                                            createClassModalForm.find('.modal-body').prepend(`<div id="create-class-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    success: function(response) {
+                        console.log(response);
+
+                        if (response.success) {
+                            createClassModalForm.find('.modal-body').prepend(`<div id="create-class-success" class="alert alert-success fs-8 px-3 py-2">${response.data.message}</div>`);
+
+                            setTimeout(function() {
+                                location.href = gsg.classesUrl;
+                            }, 1000);
+                        }
+                    },
+                    complete: function() {
+                        createClassModalFormSubmitBtn.removeAttr('disabled');
+                        createClassModalFormSubmitBtn.find('span').text('Login');
+                        createClassModalFormSubmitBtn.find('i').addClass('d-none');
+                    }
+                });
+            });
+        }/*}}}*/
+
         $('#logout').click(function(e) {/*{{{*/
             e.preventDefault();
 

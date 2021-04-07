@@ -100,7 +100,7 @@ get_header();
                     <div class="alert alert-success fs-8 px-3 py-2">Your profile picture has been removed successfully.</div>
                 <?php endif; ?>
 
-                <label for="profile-picture" class="text-muted mb-1">Profile Picture</label>
+                <label for="profile-picture" class="text-muted mb-1">Profile picture</label>
 
                 <input type="file" id="profile-picture" class="form-control fs-6">
 

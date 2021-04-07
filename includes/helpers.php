@@ -97,3 +97,16 @@ function gsg_current_user_profile_picture() {
 
     return $wp_upload_dir['baseurl'] . '/profile-pictures/' . get_user_meta($current_user->ID, 'profile_picture', true);
 }
+
+function gsg_generate_random_string() {
+    $string = '0123456789ABCDEFGHILJKLMNOPQRSTUVWXYZ0123456789';
+
+    $random_string = str_repeat($string, 10);
+    $random_string = str_shuffle($random_string);
+
+    $n = 10;
+
+    $random_string = substr($random_string, 0, $n);
+
+    return $random_string;
+}

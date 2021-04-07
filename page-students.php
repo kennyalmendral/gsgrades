@@ -34,7 +34,7 @@ if (isset($_POST['export_csv'])) {/*{{{*/
         $filepath = GSG_UPLOADS_PATH . '/exports/Gottes Segen Students.csv';
         $csv_file = fopen($filepath, 'w+');
 
-        $heading_columns = array('Name', 'ID', 'Email Address', 'Contact Number', 'Date Registered', 'Profile Picture URL');
+        $heading_columns = array('Name', 'ID', 'Email address', 'Contact number', 'Date registered', 'Profile picture');
 
         fputcsv($csv_file, $heading_columns);
 
@@ -103,10 +103,10 @@ if (isset($_POST['export_pdf'])) {/*{{{*/
                 $users_table .= '<tr>';
                     $users_table .= '<th>ID</th>';
                     $users_table .= '<th>Name</th>';
-                    $users_table .= '<th>Email Address</th>';
-                    $users_table .= '<th>Contact Number</th>';
-                    $users_table .= '<th>Date Registered</th>';
-                    $users_table .= '<th>Profile Picture URL</th>';
+                    $users_table .= '<th>Email address</th>';
+                    $users_table .= '<th>Contact number</th>';
+                    $users_table .= '<th>Date registered</th>';
+                    $users_table .= '<th>Profile picture</th>';
                 $users_table .= '</tr>';
             $users_table .= '</thead>';
 
@@ -180,9 +180,9 @@ get_header();
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
-                    <th>Email Address</th>
-                    <th>Contact Number</th>
-                    <th>Date Registered</th>
+                    <th>Email address</th>
+                    <th>Contact number</th>
+                    <th>Date registered</th>
                     <th class="text-center">Action</th>
                 </tr>
             </thead>
@@ -191,9 +191,9 @@ get_header();
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
-                    <th>Email Address</th>
-                    <th>Contact Number</th>
-                    <th>Date Registered</th>
+                    <th>Email address</th>
+                    <th>Contact number</th>
+                    <th>Date registered</th>
                     <th class="text-center">Action</th>
                 </tr>
             </tfoot>
