@@ -783,40 +783,44 @@
             });
 
             $('body').on('click', '.delete-class-button', function() {
-                const me = $(this);
-                const data = classesDataTable.row($(this).parents('tr')).data();
-                const classId = data[0];
+                let confirmation = confirm('This action cannot be undone. Are you sure you want to delete this class?');
 
-                $.ajax({
-                    url: gsg.ajaxUrl,
-                    method: 'POST',
-                    dataType: 'json',
-                    data: {
-                        action: 'gsg_delete_class',
-                        delete_class_nonce: gsg.deleteClassNonce,
-                        class_id: classId
-                    },
-                    beforeSend: function() {
-                        me.attr('disabled', true);
-                        me.find('.bi-trash-fill').addClass('d-none');
-                        me.find('.bi-trash').removeClass('d-none');
-                    },
-                    error: function(xhr) {
-                        let response = xhr.responseJSON;
+                if (confirmation) {
+                    const me = $(this);
+                    const data = classesDataTable.row($(this).parents('tr')).data();
+                    const classId = data[0];
 
-                        alert(response.data.error_message);
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            location.href = gsg.classesUrl;
+                    $.ajax({
+                        url: gsg.ajaxUrl,
+                        method: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'gsg_delete_class',
+                            delete_class_nonce: gsg.deleteClassNonce,
+                            class_id: classId
+                        },
+                        beforeSend: function() {
+                            me.attr('disabled', true);
+                            me.find('.bi-trash-fill').addClass('d-none');
+                            me.find('.bi-trash').removeClass('d-none');
+                        },
+                        error: function(xhr) {
+                            let response = xhr.responseJSON;
+
+                            alert(response.data.error_message);
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                location.href = gsg.classesUrl;
+                            }
+                        },
+                        complete: function() {
+                            me.removeAttr('disabled');
+                            me.find('.bi-trash-fill').removeClass('d-none');
+                            me.find('.bi-trash').addClass('d-none');
                         }
-                    },
-                    complete: function() {
-                        me.removeAttr('disabled');
-                        me.find('.bi-trash-fill').removeClass('d-none');
-                        me.find('.bi-trash').addClass('d-none');
-                    }
-                });
+                    });
+                }
             });
         
             const createClassBtn = $('#create-class');
