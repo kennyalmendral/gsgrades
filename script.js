@@ -753,7 +753,11 @@
                     {
                         targets: -1,
                         data: null,
-                        defaultContent: '<button class="edit-class-button btn btn-primary btn-sm me-2" title="Edit class"><i class="bi bi-pencil d-none"></i><i class="bi bi-pencil-fill"></i></button><button class="delete-class-button btn btn-danger btn-sm" title="Delete class"><i class="bi bi-trash d-none"></i><i class="bi bi-trash-fill"></i></button>',
+                        defaultContent: `
+                            <button class="view-summary-button btn btn-success btn-sm me-1" title="View summary"><i class="bi bi-file-earmark-text d-none"></i><i class="bi bi-file-earmark-text-fill"></i></button>
+                            <button class="manage-class-button btn btn-primary btn-sm me-1" title="Manage class"><i class="bi bi-pencil d-none"></i><i class="bi bi-pencil-fill"></i></button>
+                            <button class="archive-class-button btn btn-secondary btn-sm" title="Archive class"><i class="bi bi-archive d-none"></i><i class="bi bi-archive-fill"></i></button>
+                        `,
                         className: 'dt-center',
                         orderable: false
                     }
@@ -782,8 +786,8 @@
                 classesDataTable.ajax.reload();
             });
 
-            $('body').on('click', '.delete-class-button', function() {
-                let confirmation = confirm('This action cannot be undone. Are you sure you want to delete this class?');
+            $('body').on('click', '.archive-class-button', function() {
+                let confirmation = confirm('This action cannot be undone. Are you sure you want to archive this class?');
 
                 if (confirmation) {
                     const me = $(this);
@@ -795,14 +799,14 @@
                         method: 'POST',
                         dataType: 'json',
                         data: {
-                            action: 'gsg_delete_class',
-                            delete_class_nonce: gsg.deleteClassNonce,
+                            action: 'gsg_archive_class',
+                            archive_class_nonce: gsg.archiveClassNonce,
                             class_id: classId
                         },
                         beforeSend: function() {
                             me.attr('disabled', true);
-                            me.find('.bi-trash-fill').addClass('d-none');
-                            me.find('.bi-trash').removeClass('d-none');
+                            me.find('.bi-archive-fill').addClass('d-none');
+                            me.find('.bi-archive').removeClass('d-none');
                         },
                         error: function(xhr) {
                             let response = xhr.responseJSON;
@@ -816,8 +820,8 @@
                         },
                         complete: function() {
                             me.removeAttr('disabled');
-                            me.find('.bi-trash-fill').removeClass('d-none');
-                            me.find('.bi-trash').addClass('d-none');
+                            me.find('.bi-archive-fill').removeClass('d-none');
+                            me.find('.bi-archive').addClass('d-none');
                         }
                     });
                 }
@@ -848,6 +852,7 @@
                     data: {
                         action: 'gsg_create_class',
                         create_class_nonce: createClassModalForm.find('#gsg_create_class_nonce_field').val(),
+                        level: createClassModalForm.find('#level').val(),
                         completion_hours: createClassModalForm.find('#completion-hours').val()
                     },
                     beforeSend: function() {
@@ -855,6 +860,7 @@
                         createClassModalFormSubmitBtn.find('span').text('Creating class');
                         createClassModalFormSubmitBtn.find('i').removeClass('d-none');
 
+                        createClassModalForm.find('#level').length > 0 && createClassModalForm.find('#level').removeClass('is-invalid');
                         createClassModalForm.find('#completion-hours').length > 0 && createClassModalForm.find('#completion-hours').removeClass('is-invalid');
                         createClassModalForm.find('#create-class-error').length > 0 && createClassModalForm.find('#create-class-error').remove();
                         createClassModalForm.find('.alert-success').length > 0 && createClassModalForm.find('.alert-success').remove();

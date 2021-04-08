@@ -36,14 +36,14 @@ get_header();
         <table id="classes-table" class="table table-striped table-responsive w-100">
             <thead>
                 <tr>
-                    <th width="7%">ID</th>
+                    <th width="9%">ID</th>
                     <th width="12%">Code</th>
-                    <th width="22%">Number of hours to complete</th>
-                    <th width="14%">Completed hours</th>
-                    <th width="14%">Remaining hours</th>
+                    <th width="9%">Level</th>
+                    <th width="14%"># of hours to complete</th>
+                    <th width="12%">Completed hours</th>
+                    <th width="12%">Remaining hours</th>
                     <th width="10%">Status</th>
-                    <th>Date created</th>
-                    <th class="text-center">Actions</th>
+                    <th width="20%"class="text-center">Actions</th>
                 </tr>
             </thead>
 
@@ -51,11 +51,11 @@ get_header();
                 <tr>
                     <th>ID</th>
                     <th>Code</th>
-                    <th>Number of hours to complete</th>
+                    <th>Level</th>
+                    <th># of hours to complete</th>
                     <th>Completed hours</th>
                     <th>Remaining hours</th>
                     <th>Status</th>
-                    <th>Date created</th>
                     <th class="text-center">Actions</th>
                 </tr>
             </tfoot>

@@ -654,21 +654,22 @@ function gsg_get_classes() {
             break;
         case 2:
             $order_column = 'meta_value';
-            $order_column_meta_key = 'completion_hours';
+            $order_column_meta_key = 'level';
             break;
         case 3:
             $order_column = 'meta_value';
-            $order_column_meta_key = 'completed_hours';
+            $order_column_meta_key = 'completion_hours';
             break;
         case 4:
             $order_column = 'meta_value';
-            $order_column_meta_key = 'remaining_hours';
+            $order_column_meta_key = 'completed_hours';
             break;
         case 5:
-            $order_column = 'post_status';
+            $order_column = 'meta_value';
+            $order_column_meta_key = 'remaining_hours';
             break;
         case 6:
-            $order_column = 'post_date';
+            $order_column = 'post_status';
             break;
         default:
             break;
@@ -794,6 +795,7 @@ function gsg_get_classes() {
                 $classes[] = array(
                     $post->ID,
                     $post->post_title,
+                    get_field('level', $post->ID),
                     get_field('completion_hours', $post->ID),
                     get_field('completed_hours', $post->ID),
                     get_field('remaining_hours', $post->ID),
@@ -817,6 +819,7 @@ function gsg_get_classes() {
             $classes[] = array(
                 get_the_ID(),
                 get_the_title(),
+                get_field('level'),
                 get_field('completion_hours'),
                 get_field('completed_hours'),
                 get_field('remaining_hours'),
@@ -850,7 +853,14 @@ function gsg_create_class() {
 
     $errors = array();
 
+    $level = trim($_POST['level']);
     $completion_hours = intval($_POST['completion_hours']);
+
+    if (empty($level)) {
+        $errors['level'] = 'The level field is required.';
+    } else if (preg_match('/[\'^£$%&*()}{@#~?><>,|=_+¬-]/', $level)) {
+        $errors['level'] = 'The level field must contain alphanumeric characters only.';
+    }
 
     if (empty($completion_hours)) {
         $errors['completion_hours'] = 'The completion hours field is required.';
@@ -877,6 +887,7 @@ function gsg_create_class() {
         'post_author' => $current_user->ID
     ));
 
+    update_field('level', strtoupper($level), $post_id);
     update_field('completion_hours', $completion_hours, $post_id);
     update_field('completed_hours', 0, $post_id);
     update_field('remaining_hours', $completion_hours, $post_id);
@@ -888,25 +899,28 @@ add_action('wp_ajax_gsg_create_class', 'gsg_create_class');
 add_action('wp_ajax_nopriv_gsg_create_class', 'gsg_create_class');
 /*}}}*/
 
-/*{{{gsg_delete_class*/
-function gsg_delete_class() {
-    check_ajax_referer('delete-class-nonce', 'delete_class_nonce');
+/*{{{gsg_archive_class*/
+function gsg_archive_class() {
+    check_ajax_referer('archive-class-nonce', 'archive_class_nonce');
 
     //global $current_user;
 
     $post_id = intval($_POST['class_id']);
 
     if (empty($post_id)) {
-        wp_send_json_error(array('error_message' => 'Please select a class to delete.'), 500);
+        wp_send_json_error(array('error_message' => 'Please select a class to archive.'), 500);
     }
 
-    if (!wp_trash_post($post_id)) {
-        wp_send_json_error(array('error_message' => 'Unable to delete class.'), 500);
+    if (!wp_update_post(array(
+        'ID' => $post_id,
+        'post_status' => 'archived'
+    ))) {
+        wp_send_json_error(array('error_message' => 'Unable to archive class.'), 500);
     }
 
     wp_send_json_success();
 }
 
-add_action('wp_ajax_gsg_delete_class', 'gsg_delete_class');
-add_action('wp_ajax_nopriv_gsg_delete_class', 'gsg_delete_class');
+add_action('wp_ajax_gsg_archive_class', 'gsg_archive_class');
+add_action('wp_ajax_nopriv_gsg_archive_class', 'gsg_archive_class');
 /*}}}*/

@@ -2,7 +2,8 @@
 
 function gsg_custom_class_columns($columns) {
     //unset($columns['date']);
-    $columns['completion_hours'] = 'Number of hours to complete';
+    $columns['level'] = 'Level';
+    $columns['completion_hours'] = '# of hours to complete';
     $columns['completed_hours'] = 'Completed hours';
     $columns['remaining_hours'] = 'Remaining hours';
 
@@ -13,6 +14,9 @@ add_filter('manage_class_posts_columns', 'gsg_custom_class_columns');
 
 function gsg_class_columns_data($column, $post_id) {
     switch ($column) {
+        case 'level':
+            echo get_field('level');
+            break;
         case 'completion_hours':
             echo get_field('completion_hours');
             break;
@@ -44,7 +48,7 @@ function gsg_posts_search_entry_type($search, $query) {
         $sql = "
             or EXISTS (
                 SELECT * FROM {$wpdb->postmeta} WHERE post_id={$wpdb->posts}.ID
-                AND meta_key IN ('completion_hours', 'completed_hours', 'remaining_hours')
+                AND meta_key IN ('level', 'completion_hours', 'completed_hours', 'remaining_hours')
                 AND meta_value LIKE %s
             )
         ";

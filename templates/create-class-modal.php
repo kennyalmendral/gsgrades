@@ -7,9 +7,18 @@
             </div>
 
             <div class="modal-body">
-                <div class="col">
-                    <label for="completion-hours" class="mb-1 text-muted">Number of hours to complete</label>
-                    <input type="number" id="completion-hours" class="form-control" required>
+                <div class="row mb-2">
+                    <div class="col">
+                        <label for="level" class="mb-1 text-muted">Level</label>
+                        <input type="text" id="level" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <label for="completion-hours" class="mb-1 text-muted">Number of hours to complete</label>
+                        <input type="number" id="completion-hours" class="form-control" required>
+                    </div>
                 </div>
             </div>
 
