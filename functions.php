@@ -21,7 +21,7 @@ function gsg_ajax_login_redirect() {
         wp_redirect(GRADES_PAGE_URL);
         exit;
     } else if (in_array('teacher', $current_user->roles)) {
-        wp_redirect(RECORDS_PAGE_URL);
+        wp_redirect(CLASSES_PAGE_URL);
         exit;
     }
 }

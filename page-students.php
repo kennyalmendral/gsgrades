@@ -5,7 +5,7 @@ if (!is_user_logged_in()) {
     exit;
 }
 
-if (isset($_POST['export_csv'])) {/*{{{*/
+if (isset($_POST['export_csv'])) {
     if (!isset($_POST['gsg_export_students_csv_nonce_field']) || !wp_verify_nonce($_POST['gsg_export_students_csv_nonce_field'], 'gsg_export_students_csv')) {
         wp_redirect(STUDENTS_PAGE_URL);
         exit;
@@ -58,9 +58,9 @@ if (isset($_POST['export_csv'])) {/*{{{*/
     }
 
     gsg_export_students_csv();
-}/*}}}*/
+}
 
-if (isset($_POST['export_pdf'])) {/*{{{*/
+if (isset($_POST['export_pdf'])) {
     if (!isset($_POST['gsg_export_students_pdf_nonce_field']) || !wp_verify_nonce($_POST['gsg_export_students_pdf_nonce_field'], 'gsg_export_students_pdf')) {
         wp_redirect(STUDENTS_PAGE_URL);
         exit;
@@ -145,7 +145,7 @@ if (isset($_POST['export_pdf'])) {/*{{{*/
     }
 
     gsg_export_students_pdf();
-}/*}}}*/
+}
 
 get_header();
 

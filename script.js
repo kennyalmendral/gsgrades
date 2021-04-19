@@ -1,16 +1,16 @@
 (function($) {
     const loader = $('#loader');
 
-    $(window).on('load', function() {/*{{{*/
+    $(window).on('load', function() {
         loader.fadeOut('slow', function() {
             $(this).hide();
         });
-    });/*}}}*/
+    });
 
     $(document).ready(function() {
         console.log(gsg);
 
-        if (gsg.isLoginPage) {/*{{{*/
+        if (gsg.isLoginPage) {
             const loginForm = $('.gsg-auth-form');
             const loginBtn = loginForm.find('button');
 
@@ -84,9 +84,9 @@
                     }
                 });
             });
-        }/*}}}*/
+        }
 
-        if (gsg.isRegisterPage) {/*{{{*/
+        if (gsg.isRegisterPage) {
             const registerForm = $('.gsg-auth-form');
             const registerBtn = registerForm.find('button');
 
@@ -169,9 +169,9 @@
                     }
                 });
             });
-        }/*}}}*/
+        }
 
-        if (gsg.isForgotPasswordPage) {/*{{{*/
+        if (gsg.isForgotPasswordPage) {
             const forgotPasswordForm = $('.gsg-auth-form');
             const sendBtn = forgotPasswordForm.find('button');
 
@@ -234,9 +234,9 @@
                     }
                 });
             });
-        }/*}}}*/
+        }
 
-        if (gsg.isResetPasswordPage) {/*{{{*/
+        if (gsg.isResetPasswordPage) {
             const resetPasswordForm = $('.gsg-auth-form');
             const saveBtn = resetPasswordForm.find('button');
 
@@ -304,9 +304,9 @@
                     }
                 });
             });
-        }/*}}}*/
+        }
 
-        if (gsg.isAccountPage) {/*{{{*/
+        if (gsg.isAccountPage) {
             const accountInfoForm = $('#account-info-container form');
             const profilePictureContainer = $('#profile-picture-container');
             const saveChangesBtn = accountInfoForm.find('#save-changes-button');
@@ -383,7 +383,7 @@
                         }
                     } else {
                         profilePictureContainer.find('#image-wrap').html(`<h4 class="m-0 text-muted">${gsg.currentUserNameInitials}</h4>`);
-                    
+
                         $(`<div id="profile-picture-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">The file type must be an image and must be in JPG or PNG format only.</div>`).insertAfter(me);
 
                         !me.hasClass('is-invalid') && me.addClass('is-invalid');
@@ -617,9 +617,9 @@
                     }
                 });
             });
-        }/*}}}*/
+        }
 
-        if (gsg.isStudentsPage) {/*{{{*/
+        if (gsg.isStudentsPage) {
             const studentsTable = $('#students-table');
 
             const studentsDataTable = studentsTable.DataTable({
@@ -721,14 +721,14 @@
                     }
                 });
             });
-        }/*}}}*/
+        }
 
-        if (gsg.isClassesPage) {/*{{{*/
+        if (gsg.isClassesPage) {
             const statusFilter = $('body').find('#status-filter');
             const statusFilterSelect = statusFilter.find('select');
 
             const classesTable = $('#classes-table');
-        
+
             const classesDataTable = classesTable.DataTable({
                 processing: true,
                 serverSide: true,
@@ -786,6 +786,43 @@
                 classesDataTable.ajax.reload();
             });
 
+            $('body').on('click', '.manage-class-button', function() {
+				const me = $(this);
+                const data = classesDataTable.row($(this).parents('tr')).data();
+                const classId = data[0];
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_get_class_permalink',
+                        get_class_permalink_nonce: gsg.getClassPermalinkNonce,
+                        class_id: classId
+                    },
+                    beforeSend: function() {
+                        me.attr('disabled', true);
+                        me.find('.bi-pencil-fill').addClass('d-none');
+                        me.find('.bi-pencil').removeClass('d-none');
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        alert(response.data.error_message);
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                        	location.href = response.data;
+                        }
+                    },
+                    complete: function() {
+                        me.removeAttr('disabled');
+                        me.find('.bi-pencil-fill').removeClass('d-none');
+                        me.find('.bi-pencil').addClass('d-none');
+                    }
+                });
+			});
+
             $('body').on('click', '.archive-class-button', function() {
                 let confirmation = confirm('This action cannot be undone. Are you sure you want to archive this class?');
 
@@ -826,7 +863,7 @@
                     });
                 }
             });
-        
+
             const createClassBtn = $('#create-class');
             const createClassModalForm = $('#create-class-modal').find('form');
             const createClassModalFormSubmitBtn = createClassModalForm.find('.modal-footer button');
@@ -837,8 +874,6 @@
             });
 
             createClassBtn.click(function() {
-                const me = $(this);
-
                 createClassModal.show();
             });
 
@@ -907,14 +942,183 @@
                     },
                     complete: function() {
                         createClassModalFormSubmitBtn.removeAttr('disabled');
-                        createClassModalFormSubmitBtn.find('span').text('Login');
+                        createClassModalFormSubmitBtn.find('span').text('Submit');
                         createClassModalFormSubmitBtn.find('i').addClass('d-none');
                     }
                 });
             });
-        }/*}}}*/
+        }
 
-        $('#logout').click(function(e) {/*{{{*/
+		if (gsg.isClassPage) {
+			const classId = $('#main-content #class-id');
+			const details = $('#details');
+			const saveChangesBtn = details.find('#save-changes');
+			const level = details.find('#level');
+			const completionHours = details.find('#completion-hours');
+			let completedHours = details.find('#completed-hours');
+			let remainingHours = details.find('#remaining-hours');
+
+            $('#details #save-changes').click(function() {
+				const me = $(this);
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_update_class',
+                        update_class_nonce: gsg.updateClassNonce,
+						class_id: classId.val(),
+                        level: level.val(),
+                        completion_hours: completionHours.val()
+                    },
+                    beforeSend: function() {
+                        me.attr('disabled', true);
+                        me.find('span').text('Saving changes');
+                        me.find('i').removeClass('d-none');
+
+                        level.hasClass('is-invalid') && level.removeClass('is-invalid');
+                        completionHours.hasClass('is-invalid') && completionHours.removeClass('is-invalid');
+                        details.find('#update-class-error').length > 0 && details.find('#update-class-error').remove();
+                        details.find('.alert-success').length > 0 && details.find('.alert-success').remove();
+                        details.find('.invalid-feedback').length > 0 && details.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (const key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    keyId = key.replace('_', '-');
+
+                                    if ($(`#${keyId}-error-alert`).length === 0) {
+                                        $(`#${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(`#details #${keyId}`);
+                                    }
+
+                                    if (key === 'update_class_error') {
+                                        if ($('#update-class-error').length === 0) {
+                                            details.find('.card-body').prepend(`<div id="update-class-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            details.find('.card-body').prepend(`<div id="update-class-success" class="alert alert-success fs-8 px-3 py-2">${response.data}</div>`);
+
+                            setTimeout(function() {
+                				location.reload();
+                            }, 1000);
+                        }
+                    },
+                    complete: function() {
+                        me.removeAttr('disabled');
+                        me.find('span').text('Save changes');
+                        me.find('i').addClass('d-none');
+                    }
+                });
+			});
+
+            const sessions = $('#sessions');
+            const createSessionBtn = sessions.find('#create-session');
+            const createSessionModalForm = $('#create-session-modal').find('form');
+            const createSessionModalFormSubmitBtn = createSessionModalForm.find('.modal-footer button');
+
+            const createSessionModal = new bootstrap.Modal(document.getElementById('create-session-modal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            createSessionBtn.click(function() {
+                createSessionModal.show();
+            });
+
+            createSessionModalForm.submit(function(e) {
+                e.preventDefault();
+
+				let startTime = createSessionModalForm.find('#start-time');
+				let endTime = createSessionModalForm.find('#end-time');
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_create_session',
+                        create_session_nonce: gsg.createSessionNonce,
+						class_id: classId.val(),
+                        start_time: startTime.val(),
+                        end_time: endTime.val()
+                    },
+                    beforeSend: function() {
+                        createSessionModalFormSubmitBtn.attr('disabled', true);
+                        createSessionModalFormSubmitBtn.find('span').text('Creating session');
+                        createSessionModalFormSubmitBtn.find('i').removeClass('d-none');
+
+                        startTime.hasClass('is-invalid') && startTime.removeClass('is-invalid');
+                        endTime.hasClass('is-invalid') && endTime.removeClass('is-invalid');
+
+                        createSessionModalForm.find('#create-session-error').length > 0 && createSessionModalForm.find('#create-session-error').remove();
+                        createSessionModalForm.find('.alert-success').length > 0 && createSessionModalForm.find('.alert-success').remove();
+                        createSessionModalForm.find('.invalid-feedback').length > 0 && createSessionModalForm.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (const key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    keyId = key.replace('_', '-');
+
+                                    if ($(`#${keyId}-error-alert`).length === 0) {
+                                        $(`#${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(createSessionModalForm.find(`#${keyId}`));
+                                    }
+
+                                    if (key === 'create_session_error') {
+                                        if ($('#create_session_error').length === 0) {
+                                            createSessionModalForm.find('.modal-body').prepend(`<div id="create-session-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            createSessionModalForm.find('.modal-body').prepend(`<div id="create-session-success" class="alert alert-success fs-8 px-3 py-2">${response.data.message}</div>`);
+
+                            setTimeout(function() {
+                                createSessionModal.hide();
+
+                                createSessionModalForm.find('#create-session-success').remove();
+
+                                startTime.val('');
+                                endTime.val('');
+
+								location.reload();
+                            }, 1000);
+                        }
+                    },
+                    complete: function() {
+                        createSessionModalFormSubmitBtn.removeAttr('disabled');
+                        createSessionModalFormSubmitBtn.find('span').text('Submit');
+                        createSessionModalFormSubmitBtn.find('i').addClass('d-none');
+                    }
+                });
+            });
+		}
+
+        $('#logout').click(function(e) {
             e.preventDefault();
 
             const me = $(this);
@@ -938,6 +1142,6 @@
                     }
                 }
             });
-        });/*}}}*/
+        });
     });
 })(jQuery);

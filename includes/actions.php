@@ -1,6 +1,5 @@
 <?php
 
-/*{{{wpse66094_no_admin_access*/ 
 function wpse66094_no_admin_access() {
     if (wp_doing_ajax()) {
         return;
@@ -17,9 +16,7 @@ function wpse66094_no_admin_access() {
 }
 
 add_action('admin_init', 'wpse66094_no_admin_access', 100);
-/*}}}*/
 
-/*{{{gsg_login*/ 
 function gsg_login() {
     if (!isset($_POST['login_nonce']) || !wp_verify_nonce($_POST['login_nonce'], 'gsg_login')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
@@ -62,9 +59,7 @@ function gsg_login() {
 
 add_action('wp_ajax_gsg_login', 'gsg_login');
 add_action('wp_ajax_nopriv_gsg_login', 'gsg_login');
-/*}}}*/
 
-/*{{{gsg_logout*/
 function gsg_logout() {
     check_ajax_referer('logout-nonce', 'logout_nonce');
 
@@ -78,9 +73,7 @@ function gsg_logout() {
 
 add_action('wp_ajax_gsg_logout', 'gsg_logout');
 add_action('wp_ajax_nopriv_gsg_logout', 'gsg_logout');
-/*}}}*/
 
-/*{{{gsg_register*/
 function gsg_register() {
     if (!isset($_POST['register_nonce']) || !wp_verify_nonce($_POST['register_nonce'], 'gsg_register')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
@@ -187,9 +180,7 @@ function gsg_register() {
 
 add_action('wp_ajax_gsg_register', 'gsg_register');
 add_action('wp_ajax_nopriv_gsg_register', 'gsg_register');
-/*}}}*/
 
-/*{{{gsg_forgot_password*/
 function gsg_forgot_password() {
     if (!isset($_POST['forgot_password_nonce']) || !wp_verify_nonce($_POST['forgot_password_nonce'], 'gsg_forgot_password')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
@@ -236,9 +227,7 @@ function gsg_forgot_password() {
 
 add_action('wp_ajax_gsg_forgot_password', 'gsg_forgot_password');
 add_action('wp_ajax_nopriv_gsg_forgot_password', 'gsg_forgot_password');
-/*}}}*/
 
-/*{{{gsg_reset_password*/
 function gsg_reset_password() {
     if (!isset($_POST['reset_password_nonce']) || !wp_verify_nonce($_POST['reset_password_nonce'], 'gsg_reset_password')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
@@ -285,9 +274,7 @@ function gsg_reset_password() {
 
 add_action('wp_ajax_gsg_reset_password', 'gsg_reset_password');
 add_action('wp_ajax_nopriv_gsg_reset_password', 'gsg_reset_password');
-/*}}}*/
 
-/*{{{gsg_save_account_info*/
 function gsg_save_account_info() {
     if (!isset($_POST['save_account_info_nonce']) || !wp_verify_nonce($_POST['save_account_info_nonce'], 'gsg_save_account_info')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
@@ -398,9 +385,7 @@ function gsg_save_account_info() {
 
 add_action('wp_ajax_gsg_save_account_info', 'gsg_save_account_info');
 add_action('wp_ajax_nopriv_gsg_save_account_info', 'gsg_save_account_info');
-/*}}}*/
 
-/*{{{gsg_upload_update_profile_picture*/
 function gsg_upload_update_profile_picture() {
     if (!isset($_POST['upload_update_profile_picture_nonce']) || !wp_verify_nonce($_POST['upload_update_profile_picture_nonce'], 'gsg_upload_update_profile_picture')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
@@ -444,9 +429,7 @@ function gsg_upload_update_profile_picture() {
 
 add_action('wp_ajax_gsg_upload_update_profile_picture', 'gsg_upload_update_profile_picture');
 add_action('wp_ajax_nopriv_gsg_upload_update_profile_picture', 'gsg_upload_update_profile_picture');
-/*}}}*/
 
-/*{{{gsg_remove_profile_picture*/
 function gsg_remove_profile_picture() {
     if (!isset($_POST['remove_profile_picture_nonce']) || !wp_verify_nonce($_POST['remove_profile_picture_nonce'], 'gsg_remove_profile_picture')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
@@ -469,9 +452,7 @@ function gsg_remove_profile_picture() {
 
 add_action('wp_ajax_gsg_remove_profile_picture', 'gsg_remove_profile_picture');
 add_action('wp_ajax_nopriv_gsg_remove_profile_picture', 'gsg_remove_profile_picture');
-/*}}}*/
 
-/*{{{gsg_get_students*/
 function gsg_get_students() {
     check_ajax_referer('get-students-nonce', 'get_students_nonce');
 
@@ -599,9 +580,7 @@ function gsg_get_students() {
 
 add_action('wp_ajax_gsg_get_students', 'gsg_get_students');
 add_action('wp_ajax_nopriv_gsg_get_students', 'gsg_get_students');
-/*}}}*/
 
-/*{{{gsg_get_student*/
 function gsg_get_student() {
     check_ajax_referer('get-student-nonce', 'get_student_nonce');
 
@@ -626,9 +605,7 @@ function gsg_get_student() {
 
 add_action('wp_ajax_gsg_get_student', 'gsg_get_student');
 add_action('wp_ajax_nopriv_gsg_get_student', 'gsg_get_student');
-/*}}}*/
 
-/*{{{gsg_get_classes*/
 function gsg_get_classes() {
     check_ajax_referer('get-classes-nonce', 'get_classes_nonce');
 
@@ -841,9 +818,7 @@ function gsg_get_classes() {
 
 add_action('wp_ajax_gsg_get_classes', 'gsg_get_classes');
 add_action('wp_ajax_nopriv_gsg_get_classes', 'gsg_get_classes');
-/*}}}*/
 
-/*{{{gsg_create_class*/
 function gsg_create_class() {
     if (!isset($_POST['create_class_nonce']) || !wp_verify_nonce($_POST['create_class_nonce'], 'gsg_create_class')) {
         wp_send_json_error(array('error_message' => 'Something went wrong...'), 500);
@@ -897,13 +872,51 @@ function gsg_create_class() {
 
 add_action('wp_ajax_gsg_create_class', 'gsg_create_class');
 add_action('wp_ajax_nopriv_gsg_create_class', 'gsg_create_class');
-/*}}}*/
 
-/*{{{gsg_archive_class*/
+function gsg_update_class() {
+    check_ajax_referer('update-class-nonce', 'update_class_nonce');
+
+    $errors = array();
+
+	$class_id = intval($_POST['class_id']);
+    $level = $_POST['level'];
+    $completion_hours = intval($_POST['completion_hours']);
+
+	if (empty($class_id)) {
+        wp_send_json_error(array('update_class_error' => 'The class ID field is required.'), 204);
+	}
+
+	if (empty($level)) {
+        $errors['level'] = 'The level field is required.';
+	}
+
+	if (empty($completion_hours)) {
+        $errors['completion_hours'] = 'The completion hours field is required.';
+	} else if ($completion_hours < 1) {
+        $errors['completion_hours'] = 'The completion hours field must be greater than 0.';
+	}
+
+    if (!empty($errors)) {
+        wp_send_json_error($errors, 400);
+    }
+
+	global $wpdb;
+
+	update_field('level', $level, $class_id);
+	update_field('completion_hours', $completion_hours, $class_id);
+
+	$sum_total_hours = $wpdb->get_var("SELECT SUM(total_hours) FROM {$wpdb->prefix}class_sessions");
+
+	gsg_update_class_hours($class_id, $sum_total_hours);
+
+    wp_send_json_success("Details has been updated successfully.");
+}
+
+add_action('wp_ajax_gsg_update_class', 'gsg_update_class');
+add_action('wp_ajax_nopriv_gsg_update_class', 'gsg_update_class');
+
 function gsg_archive_class() {
     check_ajax_referer('archive-class-nonce', 'archive_class_nonce');
-
-    //global $current_user;
 
     $post_id = intval($_POST['class_id']);
 
@@ -923,4 +936,68 @@ function gsg_archive_class() {
 
 add_action('wp_ajax_gsg_archive_class', 'gsg_archive_class');
 add_action('wp_ajax_nopriv_gsg_archive_class', 'gsg_archive_class');
-/*}}}*/
+
+function gsg_get_class_permalink() {
+    check_ajax_referer('get-class-permalink-nonce', 'get_class_permalink_nonce');
+
+    $class_id = intval($_POST['class_id']);
+
+    if (empty($class_id)) {
+        wp_send_json_error(array('error_message' => 'Class ID is required.'), 500);
+    }
+
+	$permalink = get_permalink($class_id);
+
+    wp_send_json_success($permalink);
+}
+
+add_action('wp_ajax_gsg_get_class_permalink', 'gsg_get_class_permalink');
+add_action('wp_ajax_nopriv_gsg_get_class_permalink', 'gsg_get_class_permalink');
+
+function gsg_create_session() {
+    check_ajax_referer('create-session-nonce', 'create_session_nonce');
+
+    $errors = array();
+
+	$class_id = intval($_POST['class_id']);
+    $start_time = $_POST['start_time'];
+    $end_time = $_POST['end_time'];
+
+	if (empty($class_id)) {
+        wp_send_json_error(array('create_session_error' => 'The class ID field is required.'), 204);
+	}
+
+	if (empty($start_time)) {
+        $errors['start_time'] = 'The start time field is required.';
+	}
+
+	if (empty($end_time)) {
+        $errors['end_time'] = 'The end time field is required.';
+	}
+
+    if (!empty($errors)) {
+        wp_send_json_error($errors, 400);
+    }
+
+	global $wpdb;
+
+	$total_hours = round(abs(strtotime($start_time) - strtotime($end_time)) / 3600, 2);
+
+	$wpdb->insert($wpdb->prefix . 'class_sessions', array(
+		'class_id' => $class_id,
+		'start_time' => $start_time,
+		'end_time' => $end_time,
+		'total_hours' => $total_hours,
+		'created_at' => date('Y-m-d H:i:s'),
+		'updated_at' => date('Y-m-d H:i:s')
+	), array('%d', '%s', '%s', '%d', '%s', '%s'));
+
+	$sum_total_hours = $wpdb->get_var("SELECT SUM(total_hours) FROM {$wpdb->prefix}class_sessions");
+
+	gsg_update_class_hours($class_id, $sum_total_hours);
+
+    wp_send_json_success(array('message' => 'Session has been created.'), 201);
+}
+
+add_action('wp_ajax_gsg_create_session', 'gsg_create_session');
+add_action('wp_ajax_nopriv_gsg_create_session', 'gsg_create_session');

@@ -58,11 +58,11 @@ function gsg_get_current_page() {
     if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
         $url = 'https://';
     } else {
-        $url = 'http://'; 
+        $url = 'http://';
     }
 
-    $url .= $_SERVER['HTTP_HOST']; 
-    $url .= $_SERVER['REQUEST_URI']; 
+    $url .= $_SERVER['HTTP_HOST'];
+    $url .= $_SERVER['REQUEST_URI'];
 
     return basename($url);
 }
@@ -109,4 +109,15 @@ function gsg_generate_random_string() {
     $random_string = substr($random_string, 0, $n);
 
     return $random_string;
+}
+
+function gsg_update_class_hours($class_id, $sum_total_hours) {
+	global $wpdb;
+
+	update_field('completed_hours', $sum_total_hours, $class_id);
+
+	$completion_hours = intval(get_field('completion_hours', $class_id));
+	$completed_hours = intval(get_field('completed_hours', $class_id));
+
+	update_field('remaining_hours', $completion_hours - $completed_hours , $class_id);
 }
