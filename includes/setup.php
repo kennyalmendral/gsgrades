@@ -94,6 +94,8 @@ function gsg_enqueue() {
         'updateClassNonce' => wp_create_nonce('update-class-nonce'),
         'archiveClassNonce' => wp_create_nonce('archive-class-nonce'),
         'createSessionNonce' => wp_create_nonce('create-session-nonce'),
+        'updateSessionNonce' => wp_create_nonce('update-session-nonce'),
+        'deleteSessionNonce' => wp_create_nonce('delete-session-nonce'),
         'currentUser' => is_user_logged_in() ? $current_user : null,
         'currentUserNameInitials' => is_user_logged_in() ? $current_user_name_initials : null,
         'currentUserHasProfilePicture' => $has_profile_picture

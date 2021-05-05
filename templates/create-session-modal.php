@@ -8,7 +8,7 @@
 
             <div class="modal-body">
                 <div class="row mb-2">
-                    <div class="col">
+                    <div class="col mb-2">
                         <label for="start-time" class="mb-1 text-muted">Start time</label>
                         <input type="time" id="start-time" class="form-control" required>
                     </div>

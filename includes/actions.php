@@ -878,36 +878,36 @@ function gsg_update_class() {
 
     $errors = array();
 
-	$class_id = intval($_POST['class_id']);
+    $class_id = intval($_POST['class_id']);
     $level = $_POST['level'];
     $completion_hours = intval($_POST['completion_hours']);
 
-	if (empty($class_id)) {
+    if (empty($class_id)) {
         wp_send_json_error(array('update_class_error' => 'The class ID field is required.'), 204);
-	}
+    }
 
-	if (empty($level)) {
+    if (empty($level)) {
         $errors['level'] = 'The level field is required.';
-	}
+    }
 
-	if (empty($completion_hours)) {
+    if (empty($completion_hours)) {
         $errors['completion_hours'] = 'The completion hours field is required.';
-	} else if ($completion_hours < 1) {
+    } else if ($completion_hours < 1) {
         $errors['completion_hours'] = 'The completion hours field must be greater than 0.';
-	}
+    }
 
     if (!empty($errors)) {
         wp_send_json_error($errors, 400);
     }
 
-	global $wpdb;
+    global $wpdb;
 
-	update_field('level', $level, $class_id);
-	update_field('completion_hours', $completion_hours, $class_id);
+    update_field('level', $level, $class_id);
+    update_field('completion_hours', $completion_hours, $class_id);
 
-	$sum_total_hours = $wpdb->get_var("SELECT SUM(total_hours) FROM {$wpdb->prefix}class_sessions");
+    $sum_total_hours = $wpdb->get_var("SELECT SUM(total_hours) FROM {$wpdb->prefix}class_sessions");
 
-	gsg_update_class_hours($class_id, $sum_total_hours);
+    gsg_update_class_hours($class_id, $sum_total_hours);
 
     wp_send_json_success("Details has been updated successfully.");
 }
@@ -946,7 +946,7 @@ function gsg_get_class_permalink() {
         wp_send_json_error(array('error_message' => 'Class ID is required.'), 500);
     }
 
-	$permalink = get_permalink($class_id);
+    $permalink = get_permalink($class_id);
 
     wp_send_json_success($permalink);
 }
@@ -959,45 +959,135 @@ function gsg_create_session() {
 
     $errors = array();
 
-	$class_id = intval($_POST['class_id']);
+    $class_id = intval($_POST['class_id']);
     $start_time = $_POST['start_time'];
     $end_time = $_POST['end_time'];
 
-	if (empty($class_id)) {
+    if (empty($class_id)) {
         wp_send_json_error(array('create_session_error' => 'The class ID field is required.'), 204);
-	}
+    }
 
-	if (empty($start_time)) {
+    if (empty($start_time)) {
         $errors['start_time'] = 'The start time field is required.';
-	}
+    }
 
-	if (empty($end_time)) {
+    if (empty($end_time)) {
         $errors['end_time'] = 'The end time field is required.';
-	}
+    }
 
     if (!empty($errors)) {
         wp_send_json_error($errors, 400);
     }
 
-	global $wpdb;
+    global $wpdb;
 
-	$total_hours = round(abs(strtotime($start_time) - strtotime($end_time)) / 3600, 2);
+    $total_hours = round(abs(strtotime($start_time) - strtotime($end_time)) / 3600, 2);
 
-	$wpdb->insert($wpdb->prefix . 'class_sessions', array(
-		'class_id' => $class_id,
-		'start_time' => $start_time,
-		'end_time' => $end_time,
-		'total_hours' => $total_hours,
-		'created_at' => date('Y-m-d H:i:s'),
-		'updated_at' => date('Y-m-d H:i:s')
-	), array('%d', '%s', '%s', '%d', '%s', '%s'));
+    $wpdb->insert($wpdb->prefix . 'class_sessions', array(
+        'class_id' => $class_id,
+        'start_time' => $start_time,
+        'end_time' => $end_time,
+        'total_hours' => $total_hours,
+        'created_at' => date('Y-m-d H:i:s'),
+        'updated_at' => date('Y-m-d H:i:s')
+    ), array('%d', '%s', '%s', '%d', '%s', '%s'));
 
-	$sum_total_hours = $wpdb->get_var("SELECT SUM(total_hours) FROM {$wpdb->prefix}class_sessions");
+    $sum_total_hours = $wpdb->get_var("SELECT SUM(total_hours) FROM {$wpdb->prefix}class_sessions");
 
-	gsg_update_class_hours($class_id, $sum_total_hours);
+    gsg_update_class_hours($class_id, $sum_total_hours);
 
     wp_send_json_success(array('message' => 'Session has been created.'), 201);
 }
 
 add_action('wp_ajax_gsg_create_session', 'gsg_create_session');
 add_action('wp_ajax_nopriv_gsg_create_session', 'gsg_create_session');
+
+function gsg_update_session() {
+    check_ajax_referer('update-session-nonce', 'update_session_nonce');
+
+    $errors = array();
+
+    $session_id = intval($_POST['session_id']);
+    $class_id = intval($_POST['class_id']);
+    $start_time = $_POST['start_time'];
+    $end_time = $_POST['end_time'];
+
+    if (empty($session_id)) {
+        wp_send_json_error(array('update_session_error' => 'The session ID field is required.'), 204);
+    }
+
+    if (empty($class_id)) {
+        wp_send_json_error(array('update_session_error' => 'The class ID field is required.'), 204);
+    }
+
+    if (empty($start_time)) {
+        $errors['start_time'] = 'The start time field is required.';
+    }
+
+    if (empty($end_time)) {
+        $errors['end_time'] = 'The end time field is required.';
+    }
+
+    if (!empty($errors)) {
+        wp_send_json_error($errors, 400);
+    }
+
+    global $wpdb;
+
+    $total_hours = round(abs(strtotime($start_time) - strtotime($end_time)) / 3600, 2);
+
+    $wpdb->update(
+        $wpdb->prefix . 'class_sessions',
+        array(
+            'class_id' => $class_id,
+            'start_time' => $start_time,
+            'end_time' => $end_time,
+            'total_hours' => $total_hours,
+            'updated_at' => date('Y-m-d H:i:s')
+        ),
+        array(
+            'id' => $session_id
+        ),
+        array('%d', '%s', '%s', '%d', '%s'),
+        array('%d')
+    );
+
+    $sum_total_hours = $wpdb->get_var("SELECT SUM(total_hours) FROM {$wpdb->prefix}class_sessions");
+
+    gsg_update_class_hours($class_id, $sum_total_hours);
+
+    wp_send_json_success(array('message' => 'Session has been updated.'));
+}
+
+add_action('wp_ajax_gsg_update_session', 'gsg_update_session');
+add_action('wp_ajax_nopriv_gsg_update_session', 'gsg_update_session');
+
+function gsg_delete_session() {
+    check_ajax_referer('delete-session-nonce', 'delete_session_nonce');
+
+    $session_id = intval($_POST['session_id']);
+    $class_id = intval($_POST['class_id']);
+
+    if (empty($session_id)) {
+        wp_send_json_error(array('delete_session_error' => 'The session ID field is required.'), 204);
+    }
+
+    if (empty($class_id)) {
+        wp_send_json_error(array('delete_session_error' => 'The session ID field is required.'), 204);
+    }
+
+    global $wpdb;
+
+    $wpdb->delete($wpdb->prefix . 'class_sessions', array(
+        'ID' => $session_id
+    ), array('%d'));
+
+    $sum_total_hours = $wpdb->get_var("SELECT SUM(total_hours) FROM {$wpdb->prefix}class_sessions");
+
+    gsg_update_class_hours($class_id, $sum_total_hours);
+
+    wp_send_json_success();
+}
+
+add_action('wp_ajax_gsg_delete_session', 'gsg_delete_session');
+add_action('wp_ajax_nopriv_gsg_delete_session', 'gsg_delete_session');

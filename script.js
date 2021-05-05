@@ -787,7 +787,7 @@
             });
 
             $('body').on('click', '.manage-class-button', function() {
-				const me = $(this);
+                const me = $(this);
                 const data = classesDataTable.row($(this).parents('tr')).data();
                 const classId = data[0];
 
@@ -812,7 +812,7 @@
                     },
                     success: function(response) {
                         if (response.success) {
-                        	location.href = response.data;
+                            location.href = response.data;
                         }
                     },
                     complete: function() {
@@ -821,7 +821,7 @@
                         me.find('.bi-pencil').addClass('d-none');
                     }
                 });
-			});
+            });
 
             $('body').on('click', '.archive-class-button', function() {
                 let confirmation = confirm('This action cannot be undone. Are you sure you want to archive this class?');
@@ -949,17 +949,15 @@
             });
         }
 
-		if (gsg.isClassPage) {
-			const classId = $('#main-content #class-id');
-			const details = $('#details');
-			const saveChangesBtn = details.find('#save-changes');
-			const level = details.find('#level');
-			const completionHours = details.find('#completion-hours');
-			let completedHours = details.find('#completed-hours');
-			let remainingHours = details.find('#remaining-hours');
+        if (gsg.isClassPage) {
+            const classId = $('#main-content #class-id');
+            const details = $('#details');
+            const saveChangesBtn = details.find('#save-changes');
+            const level = details.find('#level');
+            const completionHours = details.find('#completion-hours');
 
-            $('#details #save-changes').click(function() {
-				const me = $(this);
+            saveChangesBtn.click(function() {
+                const me = $(this);
 
                 $.ajax({
                     url: gsg.ajaxUrl,
@@ -968,7 +966,7 @@
                     data: {
                         action: 'gsg_update_class',
                         update_class_nonce: gsg.updateClassNonce,
-						class_id: classId.val(),
+                        class_id: classId.val(),
                         level: level.val(),
                         completion_hours: completionHours.val()
                     },
@@ -1013,7 +1011,7 @@
                             details.find('.card-body').prepend(`<div id="update-class-success" class="alert alert-success fs-8 px-3 py-2">${response.data}</div>`);
 
                             setTimeout(function() {
-                				location.reload();
+                                location.reload();
                             }, 1000);
                         }
                     },
@@ -1023,12 +1021,16 @@
                         me.find('i').addClass('d-none');
                     }
                 });
-			});
+            });
 
             const sessions = $('#sessions');
+            
             const createSessionBtn = sessions.find('#create-session');
             const createSessionModalForm = $('#create-session-modal').find('form');
             const createSessionModalFormSubmitBtn = createSessionModalForm.find('.modal-footer button');
+
+            const updateSessionModalForm = $('#update-session-modal').find('form');
+            const updateSessionModalFormSubmitBtn = updateSessionModalForm.find('.modal-footer button');
 
             const createSessionModal = new bootstrap.Modal(document.getElementById('create-session-modal'), {
                 backdrop: 'static',
@@ -1042,8 +1044,8 @@
             createSessionModalForm.submit(function(e) {
                 e.preventDefault();
 
-				let startTime = createSessionModalForm.find('#start-time');
-				let endTime = createSessionModalForm.find('#end-time');
+                let startTime = createSessionModalForm.find('#start-time');
+                let endTime = createSessionModalForm.find('#end-time');
 
                 $.ajax({
                     url: gsg.ajaxUrl,
@@ -1052,7 +1054,7 @@
                     data: {
                         action: 'gsg_create_session',
                         create_session_nonce: gsg.createSessionNonce,
-						class_id: classId.val(),
+                        class_id: classId.val(),
                         start_time: startTime.val(),
                         end_time: endTime.val()
                     },
@@ -1105,7 +1107,7 @@
                                 startTime.val('');
                                 endTime.val('');
 
-								location.reload();
+                                location.reload();
                             }, 1000);
                         }
                     },
@@ -1116,7 +1118,138 @@
                     }
                 });
             });
-		}
+
+            const updateSessionModal = new bootstrap.Modal(document.getElementById('update-session-modal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+ 
+            $('body').on('click', '.edit-session-button', function() {
+                const me = $(this);
+                const data = me.data();
+                
+                updateSessionModalForm.find('#edit-session-id').val(data.sessionId);
+                updateSessionModalForm.find('#edit-class-id').val(data.sessionClassId);
+                updateSessionModalForm.find('#edit-start-time').val(data.sessionStartTime);
+                updateSessionModalForm.find('#edit-end-time').val(data.sessionEndTime);
+
+                updateSessionModal.show();
+            });
+
+            $('body').on('click', '.delete-session-button', function() {
+                let confirmation = confirm('This action cannot be undone. Are you sure you want to delete this session?');
+
+                if (confirmation) {
+                    const me = $(this);
+
+                    let sessionId = me.data('session-id');
+                    let classId = me.data('class-id');
+                    
+                    $.ajax({
+                        url: gsg.ajaxUrl,
+                        method: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'gsg_delete_session',
+                            delete_session_nonce: gsg.deleteSessionNonce,
+                            session_id: sessionId,
+                            class_id: classId
+                        },
+                        error: function(xhr) {
+                            let response = xhr.responseJSON;
+
+                            alert(response.data.delete_session_error);
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                location.reload();
+                            }
+                        }
+                    });
+                }
+            });
+
+            updateSessionModalForm.submit(function(e) {
+                e.preventDefault();
+
+                let startTime = updateSessionModalForm.find('#edit-start-time');
+                let endTime = updateSessionModalForm.find('#edit-end-time');
+                let sessionId = updateSessionModalForm.find('#edit-session-id');
+                let classId = updateSessionModalForm.find('#edit-class-id');
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_update_session',
+                        update_session_nonce: gsg.updateSessionNonce,
+                        session_id: sessionId.val(),
+                        class_id: classId.val(),
+                        start_time: startTime.val(),
+                        end_time: endTime.val()
+                    },
+                    beforeSend: function() {
+                        updateSessionModalFormSubmitBtn.attr('disabled', true);
+                        updateSessionModalFormSubmitBtn.find('span').text('Updating session');
+                        updateSessionModalFormSubmitBtn.find('i').removeClass('d-none');
+
+                        startTime.hasClass('is-invalid') && startTime.removeClass('is-invalid');
+                        endTime.hasClass('is-invalid') && endTime.removeClass('is-invalid');
+
+                        updateSessionModalForm.find('#update-session-error').length > 0 && updateSessionModalForm.find('#update-session-error').remove();
+                        updateSessionModalForm.find('.alert-success').length > 0 && updateSessionModalForm.find('.alert-success').remove();
+                        updateSessionModalForm.find('.invalid-feedback').length > 0 && updateSessionModalForm.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (const key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    keyId = key.replace('_', '-');
+
+                                    if ($(`#edit-${keyId}-error-alert`).length === 0) {
+                                        $(`#edit-${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="edit-${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(updateSessionModalForm.find(`#edit-${keyId}`));
+                                    }
+
+                                    if (key === 'update_session_error') {
+                                        if ($('#update_session_error').length === 0) {
+                                            updateSessionModalForm.find('.modal-body').prepend(`<div id="update-session-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            updateSessionModalForm.find('.modal-body').prepend(`<div id="update-session-success" class="alert alert-success fs-8 px-3 py-2">${response.data.message}</div>`);
+
+                            setTimeout(function() {
+                                updateSessionModal.hide();
+
+                                updateSessionModalForm.find('#update-session-success').remove();
+
+                                startTime.val('');
+                                endTime.val('');
+
+                                location.reload();
+                            }, 1000);
+                        }
+                    },
+                    complete: function() {
+                        updateSessionModalFormSubmitBtn.removeAttr('disabled');
+                        updateSessionModalFormSubmitBtn.find('span').text('Save changes');
+                        updateSessionModalFormSubmitBtn.find('i').addClass('d-none');
+                    }
+                });
+            });
+        }
 
         $('#logout').click(function(e) {
             e.preventDefault();
