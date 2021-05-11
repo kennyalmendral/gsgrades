@@ -9,9 +9,9 @@ global $post;
 global $wpdb;
 
 $level = get_field('level', $post->ID);
-$completion_hours = get_field('completion_hours', $post->ID);
-$completed_hours = get_field('completed_hours', $post->ID);
-$remaining_hours = get_field('remaining_hours', $post->ID);
+$completion_hours = intval(get_field('completion_hours', $post->ID));
+$completed_hours = intval(get_field('completed_hours', $post->ID));
+$remaining_hours = intval(get_field('remaining_hours', $post->ID));
 
 $sessions = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}class_sessions WHERE class_id = %d ORDER BY created_at ASC", $post->ID));
 
@@ -24,7 +24,11 @@ get_header();
         <div class="row">
             <div class="col">
                 <div class="d-flex flex-row align-items-center justify-content-between mb-0">
-                    <h1 class="p-0 mb-0 fs-2">Manage <?php the_title(); ?></h1>
+                    <?php if ($remaining_hours <= 0): ?>
+                        <h1 class="p-0 mb-0 fs-2">Manage <?php the_title(); ?> <span class="badge bg-success fs-6" style="position: relative; top: -6px; margin-left: 5px;">Completed</span></h1>
+                    <?php else: ?>
+                        <h1 class="p-0 mb-0 fs-2">Manage <?php the_title(); ?> <span class="badge bg-secondary fs-6" style="position: relative; top: -6px; margin-left: 5px;">Ongoing</span></h1>
+                    <?php endif; ?>
 
                     <button name="generate_class_summary" id="generate-class-summary" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-ruled"></i> Generate class summary</button>
                 </div>
@@ -102,7 +106,7 @@ get_header();
                                         <td valign="middle" class="text-center"><?php echo date('g:i A', strtotime($session->end_time)); ?></td>
                                         <td valign="middle" class="text-center"><?php echo $session->total_hours; ?></td>
                                         <td valign="middle" class="text-center">
-                                            <button class="edit-session-button btn btn-outline-primary btn-sm me-1" title="Edit session" data-session-id="<?php echo esc_attr($session->id); ?>" data-session-class-id="<?php echo esc_attr($session->class_id); ?>" data-session-start-time="<?php echo esc_attr($session->start_time); ?>" data-session-end-time="<?php echo esc_attr($session->end_time); ?>" data-session-total-hours="<?php echo esc_attr($session->total_hours); ?>"><i class="bi bi-pencil d-none"></i><i class="bi bi-pencil-fill"></i></button>
+                                            <button class="edit-session-button btn btn-outline-primary btn-sm me-1" title="Edit session" data-session-id="<?php echo esc_attr($session->id); ?>" data-session-class-id="<?php echo esc_attr($session->class_id); ?>" data-session-start-time="<?php echo esc_attr($session->start_time); ?>" data-session-end-time="<?php echo esc_attr($session->end_time); ?>" data-session-total-hours="<?php echo esc_attr($session->total_hours); ?>" <?php echo $remaining_hours <= 0 ? 'disabled' : '' ; ?>><i class="bi bi-pencil d-none"></i><i class="bi bi-pencil-fill"></i></button>
 
                                             <button class="delete-session-button btn btn-outline-danger btn-sm" title="Delete session" data-session-id="<?php echo esc_attr($session->id); ?>" data-class-id="<?php echo esc_attr($session->class_id); ?>"><i class="bi bi-trash d-none"></i><i class="bi bi-trash-fill"></i></button>
                                         </td>
@@ -116,7 +120,7 @@ get_header();
                 </div>
 
                 <div class="card-footer py-3">
-                    <button id="create-session" class="btn btn-secondary">Create new session</button>
+                    <button id="create-session" class="btn btn-secondary" <?php echo $remaining_hours <= 0 ? 'disabled' : '' ; ?>>Create new session</button>
                 </div>
             </div>
 

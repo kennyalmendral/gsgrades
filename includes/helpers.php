@@ -111,6 +111,20 @@ function gsg_generate_random_string() {
     return $random_string;
 }
 
+function gsg_get_class_sum_total_hours($class_id) {
+    global $wpdb;
+
+    $sum_total_hours = $wpdb->get_var("SELECT SUM(total_hours) FROM {$wpdb->prefix}class_sessions WHERE class_id={$class_id}");
+
+    return intval($sum_total_hours);
+}
+
+function gsg_get_class_completion_hours($class_id) {
+	$completion_hours = intval(get_field('completion_hours', $class_id));
+
+    return $completion_hours;
+}
+
 function gsg_update_class_hours($class_id, $sum_total_hours) {
 	global $wpdb;
 
@@ -120,4 +134,22 @@ function gsg_update_class_hours($class_id, $sum_total_hours) {
 	$completed_hours = intval(get_field('completed_hours', $class_id));
 
 	update_field('remaining_hours', $completion_hours - $completed_hours , $class_id);
+
+    $remaining_hours = intval(get_field('remaining_hours'));
+
+    if ($remaining_hours <= 0) {
+        gsg_update_class_status($class_id, 'completed');
+    }
+}
+
+function gsg_update_class_status($class_id, $status) {
+    global $wpdb;
+
+    $wpdb->update(
+        $wpdb->posts,
+        array('post_status' => $status),
+        array('ID' => $class_id),
+        array('%s'),
+        array('%d')
+    );
 }

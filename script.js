@@ -931,12 +931,13 @@
                             createClassModalForm.find('.modal-body').prepend(`<div id="create-class-success" class="alert alert-success fs-8 px-3 py-2">${response.data.message}</div>`);
 
                             setTimeout(function() {
-                                createClassModal.hide();
+                                location.href = response.data.class_permalink;
+                                // createClassModal.hide();
 
-                                createClassModalForm.find('#create-class-success').remove();
-                                createClassModalForm.find('#completion-hours').val('');
+                                // createClassModalForm.find('#create-class-success').remove();
+                                // createClassModalForm.find('#completion-hours').val('');
 
-                                classesDataTable.ajax.reload();
+                                // classesDataTable.ajax.reload();
                             }, 1000);
                         }
                     },
@@ -955,6 +956,18 @@
             const saveChangesBtn = details.find('#save-changes');
             const level = details.find('#level');
             const completionHours = details.find('#completion-hours');
+
+            level.keyup(function(e) {
+                if (e.keyCode === 13) {
+                    saveChangesBtn.click();
+                }
+             });
+
+            completionHours.keyup(function(e) {
+               if (e.keyCode === 13) {
+                   saveChangesBtn.click();
+               }
+            });
 
             saveChangesBtn.click(function() {
                 const me = $(this);

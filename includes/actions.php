@@ -867,7 +867,10 @@ function gsg_create_class() {
     update_field('completed_hours', 0, $post_id);
     update_field('remaining_hours', $completion_hours, $post_id);
 
-    wp_send_json_success(array('message' => 'Class has been created.'), 201);
+    wp_send_json_success(array(
+        'message' => 'Class has been created.',
+        'class_permalink' => get_permalink($post_id)
+    ), 201);
 }
 
 add_action('wp_ajax_gsg_create_class', 'gsg_create_class');
@@ -896,18 +899,24 @@ function gsg_update_class() {
         $errors['completion_hours'] = 'The completion hours field must be greater than 0.';
     }
 
+    $sum_total_hours = gsg_get_class_sum_total_hours($class_id);
+
+    if ($completion_hours < $sum_total_hours) {
+        $errors['completion_hours'] = 'The completion hours must be greater than or equal to the completed hours.';
+    }
+
     if (!empty($errors)) {
         wp_send_json_error($errors, 400);
     }
 
-    global $wpdb;
-
     update_field('level', $level, $class_id);
     update_field('completion_hours', $completion_hours, $class_id);
-
-    $sum_total_hours = $wpdb->get_var("SELECT SUM(total_hours) FROM {$wpdb->prefix}class_sessions");
-
-    gsg_update_class_hours($class_id, $sum_total_hours);
+    
+    if ($sum_total_hours > 0) {
+        gsg_update_class_hours($class_id, $sum_total_hours);
+    } else {
+        update_field('remaining_hours', $completion_hours, $class_id);
+    }
 
     wp_send_json_success("Details has been updated successfully.");
 }
@@ -974,14 +983,33 @@ function gsg_create_session() {
     if (empty($end_time)) {
         $errors['end_time'] = 'The end time field is required.';
     }
+    
+    $total_hours = round(abs(strtotime($start_time) - strtotime($end_time)) / 3600, 2);
 
+    if ($total_hours == 0) {
+        wp_send_json_error(array('create_session_error' => 'The end time must be greater than the start time. Please try again.'), 409);
+    }   
+
+    $sum_total_hours = gsg_get_class_sum_total_hours($class_id);
+    $completion_hours = gsg_get_class_completion_hours($class_id);
+
+    if ($sum_total_hours > 0) {
+        $new_sum_total_hours = intval($sum_total_hours + $total_hours);
+
+        if (($completion_hours < $new_sum_total_hours) && ($completion_hours != $new_sum_total_hours)) {
+            wp_send_json_error(array('create_session_error' => 'Unable to create session because the current class completion hours must be greater than or equal to the total session hour(s). Please try again.'), 409);
+        }
+    } else {
+        if ($completion_hours < $total_hours) {
+            wp_send_json_error(array('create_session_error' => 'Unable to create session because the current class completion hours must be greater than or equal to the total session hour(s). Please try again.'), 409);
+        }
+    }
+    
     if (!empty($errors)) {
         wp_send_json_error($errors, 400);
     }
 
     global $wpdb;
-
-    $total_hours = round(abs(strtotime($start_time) - strtotime($end_time)) / 3600, 2);
 
     $wpdb->insert($wpdb->prefix . 'class_sessions', array(
         'class_id' => $class_id,
@@ -992,7 +1020,7 @@ function gsg_create_session() {
         'updated_at' => date('Y-m-d H:i:s')
     ), array('%d', '%s', '%s', '%d', '%s', '%s'));
 
-    $sum_total_hours = $wpdb->get_var("SELECT SUM(total_hours) FROM {$wpdb->prefix}class_sessions");
+    $sum_total_hours = gsg_get_class_sum_total_hours($class_id);
 
     gsg_update_class_hours($class_id, $sum_total_hours);
 
@@ -1028,13 +1056,32 @@ function gsg_update_session() {
         $errors['end_time'] = 'The end time field is required.';
     }
 
+    $total_hours = round(abs(strtotime($start_time) - strtotime($end_time)) / 3600, 2);
+
+    if ($total_hours == 0) {
+        wp_send_json_error(array('update_session_error' => 'The end time must be greater than the start time. Please try again.'), 409);
+    }
+
+    $sum_total_hours = gsg_get_class_sum_total_hours($class_id);
+    $completion_hours = gsg_get_class_completion_hours($class_id);
+
+    if ($sum_total_hours > 0) {
+        $new_sum_total_hours = intval($sum_total_hours + $total_hours);
+
+        if (($completion_hours < $new_sum_total_hours) && ($completion_hours != $new_sum_total_hours)) {
+            wp_send_json_error(array('update_session_error' => 'Unable to update session because the current class completion hours must be greater than or equal to the total session hour(s). Please try again.'), 409);
+        }
+    } else {
+        if ($completion_hours < $total_hours) {
+            wp_send_json_error(array('update_session_error' => 'Unable to update session because the current class completion hours must be greater than or equal to the total session hour(s). Please try again.'), 409);
+        }
+    }
+    
     if (!empty($errors)) {
         wp_send_json_error($errors, 400);
     }
 
     global $wpdb;
-
-    $total_hours = round(abs(strtotime($start_time) - strtotime($end_time)) / 3600, 2);
 
     $wpdb->update(
         $wpdb->prefix . 'class_sessions',
@@ -1045,14 +1092,12 @@ function gsg_update_session() {
             'total_hours' => $total_hours,
             'updated_at' => date('Y-m-d H:i:s')
         ),
-        array(
-            'id' => $session_id
-        ),
+        array('id' => $session_id),
         array('%d', '%s', '%s', '%d', '%s'),
         array('%d')
     );
 
-    $sum_total_hours = $wpdb->get_var("SELECT SUM(total_hours) FROM {$wpdb->prefix}class_sessions");
+    $sum_total_hours = gsg_get_class_sum_total_hours($class_id);
 
     gsg_update_class_hours($class_id, $sum_total_hours);
 
@@ -1073,16 +1118,14 @@ function gsg_delete_session() {
     }
 
     if (empty($class_id)) {
-        wp_send_json_error(array('delete_session_error' => 'The session ID field is required.'), 204);
+        wp_send_json_error(array('delete_session_error' => 'The class ID field is required.'), 204);
     }
 
     global $wpdb;
 
-    $wpdb->delete($wpdb->prefix . 'class_sessions', array(
-        'ID' => $session_id
-    ), array('%d'));
+    $wpdb->delete($wpdb->prefix . 'class_sessions', array('ID' => $session_id), array('%d'));
 
-    $sum_total_hours = $wpdb->get_var("SELECT SUM(total_hours) FROM {$wpdb->prefix}class_sessions");
+    $sum_total_hours = gsg_get_class_sum_total_hours($class_id);
 
     gsg_update_class_hours($class_id, $sum_total_hours);
 
