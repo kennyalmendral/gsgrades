@@ -196,19 +196,6 @@ function gsg_custom_admin_filters() {
             }
         echo '</select>';
 
-        echo '<select name="filter_type">';
-            echo '<option value="">All types</option>';
-
-            foreach ($types as $label => $value) {
-                printf(
-                    '<option value="%s"%s>%s</option>',
-                    $value,
-                    $value == $current_type ? ' selected="selected"' : '',
-                    $label
-                );
-            }
-        echo '</select>';
-
         echo '<select name="filter_category">';
             echo '<option value="">All categories</option>';
 
@@ -217,6 +204,19 @@ function gsg_custom_admin_filters() {
                     '<option value="%s"%s>%s</option>',
                     $value,
                     $value == $current_category ? ' selected="selected"' : '',
+                    $label
+                );
+            }
+        echo '</select>';
+
+        echo '<select name="filter_type">';
+            echo '<option value="">All types</option>';
+
+            foreach ($types as $label => $value) {
+                printf(
+                    '<option value="%s"%s>%s</option>',
+                    $value,
+                    $value == $current_type ? ' selected="selected"' : '',
                     $label
                 );
             }
@@ -294,12 +294,29 @@ function gsg_custom_admin_filters_parse_query($query) {
 add_filter('parse_query', 'gsg_custom_admin_filters_parse_query');
 
 function gsg_custom_admin_head() {
-    echo "<style type='text/css'>
+    global $current_user;
+
+    if ($current_user->ID != 2) {
+        echo '<style type="text/css">
+            #adminmenu #menu-appearance,
+            #adminmenu #menu-plugins,
+            #adminmenu #menu-tools,
+            #adminmenu #menu-settings,
+            #adminmenu #toplevel_page_duplicator,
+            #adminmenu #toplevel_page_cptui_main_menu,
+            #adminmenu #toplevel_page_edit-post_type-acf-field-group,
+            #adminmenu #menu-dashboard .wp-submenu li:last-of-type {
+                display: none;
+            }
+        </style>';        
+    }
+
+    echo '<style type="text/css">
         .post-type-record #posts-filter #cat,
         .post-type-record #posts-filter #author {
             display: none;
         }
-    </style>";
+    </style>';
 }
 
 add_action('admin_head', 'gsg_custom_admin_head');

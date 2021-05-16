@@ -778,6 +778,8 @@
 
                     $('#classes-table_wrapper .row:first-of-type .col-sm-12:last-of-type').addClass('d-flex align-items-center justify-content-between').prepend(statusFilter);
 
+                    $('#classes-table_filter input').attr('placeholder', 'Search class code');
+
                     $('#main-content').fadeIn();
                 }
             });
@@ -1261,6 +1263,95 @@
                         updateSessionModalFormSubmitBtn.find('i').addClass('d-none');
                     }
                 });
+            });
+
+            const studentFilter = $('body').find('#student-filter');
+            const studentFilterSelect = studentFilter.find('select');
+
+            const categoryFilter = $('body').find('#category-filter');
+            const categoryFilterSelect = categoryFilter.find('select');
+
+            const typeFilter = $('body').find('#type-filter');
+            const typeFilterSelect = typeFilter.find('select');
+
+            const recordsTable = $('#records-table');
+
+            const recordsDataTable = recordsTable.DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: gsg.ajaxUrl,
+                    data: function(d) {
+                        d.action = 'gsg_get_records';
+                        d.get_records_nonce = gsg.getRecordsNonce;
+                        d.student = studentFilterSelect.val();
+                        d.category = categoryFilterSelect.val();
+                        d.type = typeFilterSelect.val();
+                    },
+                    columns: [
+                        { data: 'id' },
+                        { data: 'student' },
+                        { data: 'category' },
+                        { data: 'type' },
+                        { data: 'score' },
+                        { data: 'total_score' },
+                        { data: 'date_created' },
+                        { data: 'last_updated' }
+                    ],
+                },
+                columnDefs: [
+                    {
+                        targets: -1,
+                        data: null,
+                        defaultContent: `
+                            <button class="edit-record-button btn btn-outline-primary btn-sm me-1" title="Edit record"><i class="bi bi-pencil d-none"></i><i class="bi bi-pencil-fill"></i></button>
+                            <button class="delete-record-button btn btn-outline-danger btn-sm" title="Delete record"><i class="bi bi-trash d-none"></i><i class="bi bi-trash-fill"></i></button>
+                        `,
+                        className: 'dt-center',
+                        orderable: false
+                    }
+                ],
+                order: [
+                    [6, 'DESC']
+                ],
+                language: {
+                    search: '',
+                    searchPlaceholder: 'Search...'
+                },
+                initComplete: function(settings, json) {
+                    $('#records-table_length select').removeClass('form-control form-control-sm').addClass('form-select form-select-sm');
+
+                    $('#records-table_wrapper .row:first-of-type').addClass('justify-content-between');
+                    $('#records-table_wrapper .row:first-of-type .col-sm-12:first-of-type').removeClass('col-md-6').addClass('col-md-4');
+                    $('#records-table_wrapper .row:first-of-type .col-sm-12:last-of-type').removeClass('col-md-6').addClass('col-md-8');
+
+                    $('#records-table_wrapper .row:first-of-type .col-sm-12:last-of-type').addClass('d-flex align-items-center justify-content-between')
+                        .prepend(typeFilter)
+                        .prepend(studentFilter)
+                        .prepend(categoryFilter);
+
+                    $('#records-table_filter input').css('margin-left', 0).attr('placeholder', 'Search record ID');
+
+                    $('#records').fadeIn();
+                }
+            });
+
+            $('body').on('keyup', '#records-table_filter input', function() {
+                studentFilterSelect.val('');
+                categoryFilterSelect.val('');
+                typeFilterSelect.val('');
+            });
+
+            studentFilterSelect.change(function() {
+                recordsDataTable.ajax.reload();
+            });
+
+            categoryFilterSelect.change(function() {
+                recordsDataTable.ajax.reload();
+            });
+
+            typeFilterSelect.change(function() {
+                recordsDataTable.ajax.reload();
             });
         }
 

@@ -5,8 +5,7 @@ if (!is_user_logged_in()) {
     exit;
 }
 
-global $post;
-global $wpdb;
+global $post, $wpdb, $current_user;
 
 $level = get_field('level', $post->ID);
 $completion_hours = intval(get_field('completion_hours', $post->ID));
@@ -14,6 +13,28 @@ $completed_hours = intval(get_field('completed_hours', $post->ID));
 $remaining_hours = intval(get_field('remaining_hours', $post->ID));
 
 $sessions = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}class_sessions WHERE class_id = %d ORDER BY created_at ASC", $post->ID));
+
+$record_query = new WP_Query(array(
+    'post_type' => 'record',
+    'post_status' => 'publish',
+    'posts_per_page' => -1,
+    'author' => $current_user->ID
+));
+
+$students = array();
+
+if (!empty($record_query->posts)) {
+    foreach ($record_query->posts as $record) {
+        $students[intval(get_field('student', $record->ID))] = get_user_by('ID', get_field('student', $record->ID))->display_name;
+    }
+}
+
+$get_categories = $wpdb->get_results("SELECT term_id, name, slug FROM $wpdb->terms WHERE term_id NOT IN(1, 2, 8, 9, 10) ORDER BY name ASC");
+$categories = array();
+
+foreach ($get_categories as $category) {
+    $categories[$category->term_id] = $category->name;
+}
 
 get_header();
 
@@ -94,7 +115,7 @@ get_header();
                                     <th class="text-center">Start time</th>
                                     <th class="text-center">End time</th>
                                     <th class="text-center">Total hours</th>
-                                    <th class="text-center">Action</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
 
@@ -123,16 +144,87 @@ get_header();
                     <button id="create-session" class="btn btn-secondary" <?php echo $remaining_hours <= 0 ? 'disabled' : '' ; ?>>Create new session</button>
                 </div>
             </div>
+        </div>
+    </div>
 
+    <div id="records" class="row align-items-start">
+        <div class="col-12">
             <div class="card bg-white shadow-sm">
-                <div class="card-header">
+                <div class="card-header py-3 d-flex align-items-center justify-content-between">
                     <h4 class="mb-0">Records</h4>
+                    <button id="create-record" class="btn btn-secondary">Create new record</button>
                 </div>
 
                 <div class="card-body">
+                    <div id="student-filter" class="d-flex align-items-center me-2">
+                        <select id="student-filter-select" class="form-select form-select-sm fs-6">
+                            <option value="">Select student</option>
+
+                            <?php if (!empty($students)): ?>
+                                <?php foreach ($students as $id => $display_name): ?>
+                                    <option value="<?php echo esc_attr($id); ?>"><?php echo $display_name; ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <div id="category-filter" class="d-flex align-items-center me-2">
+                        <select id="category-filter-select" class="form-select form-select-sm fs-6">
+                            <option value="">Select category</option>
+
+                            <?php if (!empty($categories)): ?>
+                                <?php foreach ($categories as $id => $name): ?>
+                                    <option value="<?php echo esc_attr($id); ?>"><?php echo $name; ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <div id="type-filter" class="d-flex align-items-center me-2">
+                        <select id="type-filter-select" class="form-select form-select-sm fs-6">
+                            <option value="">Select type</option>
+                            <option value="quiz">Quiz</option>
+                            <option value="exam">Exam</option>
+                        </select>
+                    </div>
+
+                    <table id="records-table" class="table table-striped table-responsive w-100">
+                        <thead>
+                            <tr>
+                                <th width="6%">ID</th>
+                                <th width="15%">Student</th>
+                                <th width="15%">Category</th>
+                                <th width="8%">Type</th>
+                                <th width="8%">Score</th>
+                                <th width="10%">Total score</th>
+                                <th width="15%">Date created</th>
+                                <th width="15%">Last updated</th>
+                                <th width="20%" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tfoot>
+                            <tr>
+                                <th width="6%">ID</th>
+                                <th width="15%">Student</th>
+                                <th width="15%">Category</th>
+                                <th width="8%">Type</th>
+                                <th width="8%">Score</th>
+                                <th width="10%">Total score</th>
+                                <th width="15%">Date created</th>
+                                <th width="15%">Last updated</th>
+                                <th width="20%" class="text-center">Actions</th>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
+
+                <!-- <div class="card-footer py-3">
+                    <button id="create-record" class="btn btn-secondary">Create new record</button>
+                </div> -->
             </div>
         </div>
+
     </div>
 </div>
 

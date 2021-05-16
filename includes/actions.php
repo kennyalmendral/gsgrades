@@ -1134,3 +1134,273 @@ function gsg_delete_session() {
 
 add_action('wp_ajax_gsg_delete_session', 'gsg_delete_session');
 add_action('wp_ajax_nopriv_gsg_delete_session', 'gsg_delete_session');
+
+function gsg_get_records() {
+    check_ajax_referer('get-records-nonce', 'get_records_nonce');
+
+    global $wpdb, $current_user;
+
+    $draw = intval($_GET['draw']);
+    $offset = intval($_GET['start']);
+    $limit = intval($_GET['length']);
+    $search = trim($_GET['search']['value']);
+    $student = intval($_GET['student']);
+    $category = intval($_GET['category']);
+    $type = trim($_GET['type']);
+
+    $order_column_index = intval($_GET['order'][0]['column']);
+    $order_column = '';
+    $order_column_meta_key = '';
+
+    switch ($order_column_index) {
+        case 0:
+            $order_column = 'ID';
+            break;
+        case 1:
+            $order_column = 'meta_value';
+            $order_column_meta_key = 'student';
+            break;
+        case 2:
+            $order_column = 'meta_value';
+            $order_column_meta_key = 'category';
+            break;
+        case 3:
+            $order_column = 'meta_value';
+            $order_column_meta_key = 'type';
+            break;
+        case 4:
+            $order_column = 'meta_value';
+            $order_column_meta_key = 'score';
+            break;
+        case 5:
+            $order_column = 'meta_value';
+            $order_column_meta_key = 'total_score';
+            break;
+        case 6:
+            $order_column = 'post_date';
+            break;
+        case 7:
+            $order_column = 'post_modified';
+            break;
+        default:
+            break;
+    }
+
+    $order_direction = $_GET['order'][0]['dir'];
+
+    $records = array();
+
+    $total_record_query = new WP_Query(array(
+        'post_type' => 'record',
+        'post_status' => 'publish',
+        'posts_per_page' => -1,
+        'author' => $current_user->ID
+    ));
+
+    $total_records = $total_record_query->found_posts;
+    $total_filtered_records = $total_records;
+
+    $record_query = new WP_Query(array(
+        'post_type' => 'record',
+        'post_status' => 'publish',
+        'posts_per_page' => $limit,
+        'author' => $current_user->ID,
+        'offset' => $offset,
+        'orderby' => empty($order_column_index) ? 'post_date' : $order_column,
+        'order' => empty($order_direction) ? 'DESC' : $order_direction,
+        'meta_key' => $order_column_meta_key
+    ));
+
+    if (!empty($search) || !empty($student) || !empty($category) || !empty($type)) {
+        $total_record_query_search = new WP_Query(array(
+            'post_type' => 'record',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'author' => $current_user->ID,
+            's' => esc_attr($search)
+        ));
+
+        if (!empty($student) && empty($category) && empty($type)) {
+            $meta_query = array(
+                array(
+                    'key' => 'student',
+                    'value' => $student
+                ),
+            );
+        } else if (!empty($student) && !empty($category) && empty($type)) {
+            $meta_query = array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'student',
+                    'value' => $student
+                ),
+                array(
+                    'key' => 'category',
+                    'value' => $category
+                )
+            );
+        } else if (!empty($student) && empty($category) && !empty($type)) {
+            $meta_query = array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'student',
+                    'value' => $student
+                ),
+                array(
+                    'key' => 'type',
+                    'value' => $type
+                )
+            );
+        } else if (empty($student) && !empty($category) && empty($type)) {
+            $meta_query = array(
+                array(
+                    'key' => 'category',
+                    'value' => $category
+                )
+            );
+        } else if (empty($student) && !empty($category) && !empty($type)) {
+            $meta_query = array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'category',
+                    'value' => $category
+                ),
+                array(
+                    'key' => 'type',
+                    'value' => $type
+                )
+            );
+        } else if (empty($student) && empty($category) && !empty($type)) {
+            $meta_query = array(
+                array(
+                    'key' => 'type',
+                    'value' => $type
+                ),
+            );
+        } else if (!empty($student) && !empty($category) && !empty($type)) {
+            $meta_query = array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'student',
+                    'value' => $student
+                ),
+                array(
+                    'key' => 'category',
+                    'value' => $category
+                ),
+                array(
+                    'key' => 'type',
+                    'value' => $type
+                )
+            );
+        }
+
+        $total_record_query_meta_key = new WP_Query(array(
+            'post_type' => 'record',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'author' => $current_user->ID,
+            'meta_query' => $meta_query
+        ));
+
+        $total_record_query = new WP_Query();
+
+        if (!empty($search)) {
+            $total_record_query->posts = array_unique($total_record_query_search->posts, SORT_REGULAR);
+        } else {
+            $total_record_query->posts = [array_unique($total_record_query_meta_key->posts, SORT_REGULAR)];
+        }
+
+        $total_filtered_records = count($total_record_query->posts);
+
+        $record_query_search = new WP_Query(array(
+            'post_type' => 'record',
+            'post_status' => 'publish',
+            'posts_per_page' => $limit,
+            'author' => $current_user->ID,
+            'offset' => $offset,
+            'orderby' => empty($order_column_index) ? 'post_date' : $order_column,
+            'order' => empty($order_direction) ? 'DESC' : $order_direction,
+            'meta_key' => $order_column_meta_key,
+            's' => esc_attr($search)
+        ));
+
+        $record_query_meta_key = new WP_Query(array(
+            'post_type' => 'record',
+            'post_status' => 'publish',
+            'posts_per_page' => $limit,
+            'author' => $current_user->ID,
+            'offset' => $offset,
+            'orderby' => empty($order_column_index) ? 'post_date' : $order_column,
+            'order' => empty($order_direction) ? 'DESC' : $order_direction,
+            'meta_key' => $order_column_meta_key,
+            'meta_query' => $meta_query
+        ));
+
+        $record_query = new WP_Query();
+
+        if (!empty($search)) {
+            $record_query->posts = array_unique($record_query_search->posts, SORT_REGULAR);
+        } else {
+            $record_query->posts = array_unique($record_query_meta_key->posts, SORT_REGULAR);
+        }
+
+        if (!empty($record_query->posts)) {
+            foreach ($record_query->posts as $post) {
+                $user = get_user_by('ID', get_field('student', $post->ID));
+                $category = get_category(get_field('category', $post->ID));
+                $type = ucwords(str_replace('-', ' ', get_field('type', $post->ID)));
+                $score = intval(get_field('score', $post->ID));
+                $total_score = intval(get_field('total_score', $post->ID));
+                $date_created = get_the_date('M d, Y', $post->ID);
+                $last_updated = get_the_modified_date('M d, Y', $post->ID);
+
+                $records[] = array(
+                    $post->ID,
+                    $user->display_name,
+                    $category->name,
+                    $type,
+                    $score,
+                    $total_score,
+                    $date_created,
+                    $last_updated
+                );
+            }
+        }
+    } else {
+        while ($record_query->have_posts()) {
+            $record_query->the_post();
+
+            $user = get_user_by('ID', get_field('student'));
+            $category = get_category(get_field('category'));
+            $type = ucwords(str_replace('-', ' ', get_field('type')));
+            $score = intval(get_field('score'));
+            $total_score = intval(get_field('total_score'));
+            $date_created = get_the_date('M d, Y');
+            $last_updated = get_the_modified_date('M d, Y');
+
+            $records[] = array(
+                get_the_ID(),
+                $user->display_name,
+                $category->name,
+                $type,
+                $score,
+                $total_score,
+                $date_created,
+                $last_updated
+            );
+        }
+
+        wp_reset_postdata();
+    }
+
+    wp_send_json(array(
+        'draw' => $draw,
+        'recordsTotal' => $total_records,
+        'recordsFiltered' => $total_filtered_records,
+        'data' => $records
+    ));
+}
+
+add_action('wp_ajax_gsg_get_records', 'gsg_get_records');
+add_action('wp_ajax_nopriv_gsg_get_records', 'gsg_get_records');

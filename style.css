@@ -121,6 +121,10 @@ div.dataTables_wrapper .custom-select {
 	padding: 5px 10px;
 }
 
+.single-class #main-content #records {
+    display: none;
+}
+
 @media (max-width: 767px) {
     .page-id-17 #main-content #save-changes-button,
     .page-id-17 #main-content #upload-update-button,

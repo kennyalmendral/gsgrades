@@ -31,7 +31,7 @@ function gsg_enqueue() {
 	wp_register_style('font-awesome', 'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css', array(), null);
     wp_enqueue_style('font-awesome');
 
-    if (gsg_is_students_page() || gsg_is_classes_page()) {
+    if (gsg_is_students_page() || gsg_is_classes_page() || gsg_is_class_page()) {
         wp_register_style('bootstrap-datatables', 'https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css', array('bootstrap'), $version);
         wp_enqueue_style('bootstrap-datatables');
     }
@@ -47,7 +47,7 @@ function gsg_enqueue() {
 	wp_register_script('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js', array('jquery'), null, true);
 	wp_enqueue_script('bootstrap');
 
-    if (gsg_is_students_page() || gsg_is_classes_page()) {
+    if (gsg_is_students_page() || gsg_is_classes_page() || gsg_is_class_page()) {
         wp_register_script('datatables', 'https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js', array('jquery'), null, true);
         wp_enqueue_script('datatables');
 
@@ -84,12 +84,13 @@ function gsg_enqueue() {
         'isResetPasswordPage' => gsg_is_reset_password_page() ? true : false,
         'isAccountPage' => gsg_is_account_page() ? true : false,
         'isClassesPage' => gsg_is_classes_page() ? true : false,
-        'isClassPage' => is_singular('class') ? true : false,
+        'isClassPage' => gsg_is_class_page() ? true : false,
         'isStudentsPage' => gsg_is_students_page() ? true : false,
         'logoutNonce' => wp_create_nonce('logout-nonce'),
         'getClassPermalinkNonce' => wp_create_nonce('get-class-permalink-nonce'),
         'getStudentsNonce' => wp_create_nonce('get-students-nonce'),
         'getClassesNonce' => wp_create_nonce('get-classes-nonce'),
+        'getRecordsNonce' => wp_create_nonce('get-records-nonce'),
         'getStudentNonce' => wp_create_nonce('get-student-nonce'),
         'updateClassNonce' => wp_create_nonce('update-class-nonce'),
         'archiveClassNonce' => wp_create_nonce('archive-class-nonce'),
