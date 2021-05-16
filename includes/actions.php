@@ -1404,3 +1404,88 @@ function gsg_get_records() {
 
 add_action('wp_ajax_gsg_get_records', 'gsg_get_records');
 add_action('wp_ajax_nopriv_gsg_get_records', 'gsg_get_records');
+
+function gsg_create_record() {
+    check_ajax_referer('create-record-nonce', 'create_record_nonce');
+
+    global $current_user;
+
+    $errors = array();
+
+    $class_id = intval($_POST['class_id']);
+    $teacher = intval($current_user->ID);
+    $student = intval($_POST['student']);
+    $category = intval($_POST['category']);
+    $type = trim($_POST['type']);
+    $score = intval($_POST['score']);
+    $total_score = intval($_POST['total_score']);
+
+    if (empty($class_id)) {
+        wp_send_json_error(array('create_record_error' => 'The class ID field is required.'), 204);
+    }
+
+    if (empty($student)) {
+        $errors['student'] = 'Please select a student.';
+    }
+
+    if (empty($category)) {
+        $errors['category'] = 'Please select a category.';
+    }
+
+    if (empty($type)) {
+        $errors['type'] = 'Please select a type.';
+    }
+
+    if ($score < 0) {
+        $errors['score'] = 'The score field must not be less than 0.';
+    }
+
+    if ($total_score < 0) {
+        $errors['total_score'] = 'The total score field must not be less than 0.';
+    }
+
+    if (!empty($errors)) {
+        wp_send_json_error($errors, 400);
+    }
+
+    $post_id = wp_insert_post(array(
+        'post_type' => 'record',
+        'post_status' => 'publish',
+        'post_author' => $current_user->ID
+    ));
+
+    wp_update_post(array(
+        'ID' => $post_id,
+        'post_title' => $post_id
+    ));
+
+    update_field('class', $class_id, $post_id);
+    update_field('teacher', $teacher, $post_id);
+    update_field('student', $student, $post_id);
+    update_field('category', $category, $post_id);
+    update_field('type', $type, $post_id);
+    update_field('score', $score, $post_id);
+    update_field('total_score', $total_score, $post_id);
+
+    wp_send_json_success(array('message' => 'Record has been created.'), 201);
+}
+
+add_action('wp_ajax_gsg_create_record', 'gsg_create_record');
+add_action('wp_ajax_nopriv_gsg_create_record', 'gsg_create_record');
+
+function gsg_delete_record() {
+    check_ajax_referer('delete-record-nonce', 'delete_record_nonce');
+
+    $record_id = intval($_POST['record_id']);
+
+    if (empty($record_id)) {
+        wp_send_json_error(array('delete_record_error' => 'The record ID field is required.'), 204);
+    }
+
+    wp_delete_post($record_id);
+
+    wp_send_json_success();
+}
+
+add_action('wp_ajax_gsg_delete_record', 'gsg_delete_record');
+add_action('wp_ajax_nopriv_gsg_delete_record', 'gsg_delete_record');

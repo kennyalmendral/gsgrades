@@ -97,6 +97,9 @@ function gsg_enqueue() {
         'createSessionNonce' => wp_create_nonce('create-session-nonce'),
         'updateSessionNonce' => wp_create_nonce('update-session-nonce'),
         'deleteSessionNonce' => wp_create_nonce('delete-session-nonce'),
+        'createRecordNonce' => wp_create_nonce('create-record-nonce'),
+        'updateRecordNonce' => wp_create_nonce('update-record-nonce'),
+        'deleteRecordNonce' => wp_create_nonce('delete-record-nonce'),
         'currentUser' => is_user_logged_in() ? $current_user : null,
         'currentUserNameInitials' => is_user_logged_in() ? $current_user_name_initials : null,
         'currentUserHasProfilePicture' => $has_profile_picture

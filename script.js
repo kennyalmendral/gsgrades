@@ -1353,6 +1353,234 @@
             typeFilterSelect.change(function() {
                 recordsDataTable.ajax.reload();
             });
+
+            const records = $('#records');
+            
+            const createRecordBtn = records.find('#create-record');
+            const createRecordModalForm = $('#create-record-modal').find('form');
+            const createRecordModalFormSubmitBtn = createRecordModalForm.find('.modal-footer button');
+
+            const updateRecordModalForm = $('#update-record-modal').find('form');
+            const updateRecordModalFormSubmitBtn = updateRecordModalForm.find('.modal-footer button');
+
+            const createRecordModal = new bootstrap.Modal(document.getElementById('create-record-modal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            createRecordBtn.click(function() {
+                createRecordModal.show();
+            });
+
+            createRecordModalForm.submit(function(e) {
+                e.preventDefault();
+
+                let student = createRecordModalForm.find('#student');
+                let category = createRecordModalForm.find('#category');
+                let type = createRecordModalForm.find('#type');
+                let score = createRecordModalForm.find('#score');
+                let totalScore = createRecordModalForm.find('#total-score');
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_create_record',
+                        create_record_nonce: gsg.createRecordNonce,
+                        class_id: classId.val(),
+                        student: student.val(),
+                        category: category.val(),
+                        type: type.val(),
+                        score: score.val(),
+                        total_score: totalScore.val()
+                    },
+                    beforeSend: function() {
+                        createRecordModalFormSubmitBtn.attr('disabled', true);
+                        createRecordModalFormSubmitBtn.find('span').text('Creating record');
+                        createRecordModalFormSubmitBtn.find('i').removeClass('d-none');
+
+                        student.hasClass('is-invalid') && student.removeClass('is-invalid');
+                        category.hasClass('is-invalid') && category.removeClass('is-invalid');
+                        type.hasClass('is-invalid') && type.removeClass('is-invalid');
+                        score.hasClass('is-invalid') && score.removeClass('is-invalid');
+                        totalScore.hasClass('is-invalid') && totalScore.removeClass('is-invalid');
+
+                        createRecordModalForm.find('#create-record-error').length > 0 && createRecordModalForm.find('#create-record-error').remove();
+                        createRecordModalForm.find('.alert-success').length > 0 && createRecordModalForm.find('.alert-success').remove();
+                        createRecordModalForm.find('.invalid-feedback').length > 0 && createRecordModalForm.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (const key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    keyId = key.replace('_', '-');
+
+                                    if ($(`#${keyId}-error-alert`).length === 0) {
+                                        $(`#${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(createRecordModalForm.find(`#${keyId}`));
+                                    }
+
+                                    if (key === 'create_record_error') {
+                                        if ($('#create_record_error').length === 0) {
+                                            createRecordModalForm.find('.modal-body').prepend(`<div id="create-record-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            createRecordModalForm.find('.modal-body').prepend(`<div id="create-record-success" class="alert alert-success fs-8 px-3 py-2">${response.data.message}</div>`);
+
+                            setTimeout(function() {
+                                createRecordModal.hide();
+
+                                createRecordModalForm.find('#create-record-success').remove();
+
+                                student.val('');
+                                category.val('');
+                                type.val('');
+                                score.val(0);
+                                totalScore.val(0);
+
+                                location.reload();
+                            }, 1000);
+                        }
+                    },
+                    complete: function() {
+                        createRecordModalFormSubmitBtn.removeAttr('disabled');
+                        createRecordModalFormSubmitBtn.find('span').text('Submit');
+                        createRecordModalFormSubmitBtn.find('i').addClass('d-none');
+                    }
+                });
+            });
+
+            const updateRecordModal = new bootstrap.Modal(document.getElementById('update-record-modal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            $('body').on('click', '.edit-record-button', function() {
+                const me = $(this);
+                const data = me.data();
+                
+                updateRecordModalForm.find('#edit-session-id').val(data.sessionId);
+
+                updateSessionModal.show();
+            });
+
+            $('body').on('click', '.delete-record-button', function() {
+                let confirmation = confirm('This action cannot be undone. Are you sure you want to delete this record?');
+
+                if (confirmation) {
+                    const me = $(this);
+                    const data = recordsDataTable.row(me.parents('tr')).data();
+                    const recordId = data[0];
+                    
+                    $.ajax({
+                        url: gsg.ajaxUrl,
+                        method: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'gsg_delete_record',
+                            delete_record_nonce: gsg.deleteRecordNonce,
+                            record_id: recordId
+                        },
+                        error: function(xhr) {
+                            let response = xhr.responseJSON;
+
+                            alert(response.data.delete_record_error);
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                location.reload();
+                            }
+                        }
+                    });
+                }
+            });
+
+            updateRecordModalForm.submit(function(e) {
+                e.preventDefault();
+
+                let classId = updateRecordModalForm.find('#edit-class-id');
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_update_record',
+                        update_record_nonce: gsg.updateRecordNonce,
+                        session_id: sessionId.val(),
+                    },
+                    beforeSend: function() {
+                        updateRecordModalFormSubmitBtn.attr('disabled', true);
+                        updateRecordModalFormSubmitBtn.find('span').text('Updating record');
+                        updateRecordModalFormSubmitBtn.find('i').removeClass('d-none');
+
+                        startTime.hasClass('is-invalid') && startTime.removeClass('is-invalid');
+                        endTime.hasClass('is-invalid') && endTime.removeClass('is-invalid');
+
+                        updateRecordModalForm.find('#update-record-error').length > 0 && updateRecordModalForm.find('#update-record-error').remove();
+                        updateRecordModalForm.find('.alert-success').length > 0 && updateRecordModalForm.find('.alert-success').remove();
+                        updateRecordModalForm.find('.invalid-feedback').length > 0 && updateRecordModalForm.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (const key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    keyId = key.replace('_', '-');
+
+                                    if ($(`#edit-${keyId}-error-alert`).length === 0) {
+                                        $(`#edit-${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="edit-${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(updateRecordModalForm.find(`#edit-${keyId}`));
+                                    }
+
+                                    if (key === 'update_record_error') {
+                                        if ($('#update_record_error').length === 0) {
+                                            updateRecordModalForm.find('.modal-body').prepend(`<div id="update-record-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            updateRecordModalForm.find('.modal-body').prepend(`<div id="update-record-success" class="alert alert-success fs-8 px-3 py-2">${response.data.message}</div>`);
+
+                            setTimeout(function() {
+                                updateRecordModal.hide();
+
+                                updateRecordModalForm.find('#update-record-success').remove();
+
+                                startTime.val('');
+                                endTime.val('');
+
+                                location.reload();
+                            }, 1000);
+                        }
+                    },
+                    complete: function() {
+                        updateRecordModalFormSubmitBtn.removeAttr('disabled');
+                        updateRecordModalFormSubmitBtn.find('span').text('Save changes');
+                        updateRecordModalFormSubmitBtn.find('i').addClass('d-none');
+                    }
+                });
+            });
         }
 
         $('#logout').click(function(e) {

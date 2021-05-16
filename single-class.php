@@ -14,6 +14,12 @@ $remaining_hours = intval(get_field('remaining_hours', $post->ID));
 
 $sessions = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}class_sessions WHERE class_id = %d ORDER BY created_at ASC", $post->ID));
 
+$all_students = get_users(array(
+    'role' => 'student',
+    'orderby' => 'display_name',
+    'order' => 'ASC'
+));
+
 $record_query = new WP_Query(array(
     'post_type' => 'record',
     'post_status' => 'publish',
@@ -218,10 +224,6 @@ get_header();
                         </tfoot>
                     </table>
                 </div>
-
-                <!-- <div class="card-footer py-3">
-                    <button id="create-record" class="btn btn-secondary">Create new record</button>
-                </div> -->
             </div>
         </div>
 
@@ -230,5 +232,7 @@ get_header();
 
 <?php include_once 'templates/create-session-modal.php'; ?>
 <?php include_once 'templates/update-session-modal.php'; ?>
+<?php include_once 'templates/create-record-modal.php'; ?>
+<?php include_once 'templates/update-record-modal.php'; ?>
 
 <?php get_footer(); ?>
