@@ -63,6 +63,8 @@
             </div>
 
             <div class="modal-footer">
+                <input type="hidden" id="edit-record-id" value="" required />
+
                 <button class="btn btn-primary position-relative"><i class="fa-li fa fa-circle-o-notch fa-spin d-none position-relative start-0 top-0"></i> <span>Save changes</span></button>
             </div>
         </form>

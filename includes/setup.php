@@ -91,6 +91,7 @@ function gsg_enqueue() {
         'getStudentsNonce' => wp_create_nonce('get-students-nonce'),
         'getClassesNonce' => wp_create_nonce('get-classes-nonce'),
         'getRecordsNonce' => wp_create_nonce('get-records-nonce'),
+        'getRecordNonce' => wp_create_nonce('get-record-nonce'),
         'getStudentNonce' => wp_create_nonce('get-student-nonce'),
         'updateClassNonce' => wp_create_nonce('update-class-nonce'),
         'archiveClassNonce' => wp_create_nonce('archive-class-nonce'),

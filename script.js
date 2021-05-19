@@ -1469,11 +1469,44 @@
 
             $('body').on('click', '.edit-record-button', function() {
                 const me = $(this);
-                const data = me.data();
-                
-                updateRecordModalForm.find('#edit-session-id').val(data.sessionId);
+                const data = recordsDataTable.row(me.parents('tr')).data();
+                const recordId = data[0];
 
-                updateSessionModal.show();
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_get_record',
+                        get_record_nonce: gsg.getRecordNonce,
+                        record_id: recordId
+                    },
+                    beforeSend: function() {
+                        me.attr('disabled', true);
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        alert(response.data.get_record_error);
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            const recordData = response.data;
+
+                            updateRecordModalForm.find('#edit-record-id').val(recordData.id);
+                            updateRecordModalForm.find('#edit-student').val(recordData.student);
+                            updateRecordModalForm.find('#edit-category').val(recordData.category);
+                            updateRecordModalForm.find('#edit-type').val(recordData.type);
+                            updateRecordModalForm.find('#edit-score').val(recordData.score);
+                            updateRecordModalForm.find('#edit-total-score').val(recordData.total_score);
+
+                            updateRecordModal.show();
+                        }
+                    },
+                    complete: function() {
+                        me.removeAttr('disabled');
+                    }
+                });
             });
 
             $('body').on('click', '.delete-record-button', function() {
@@ -1510,7 +1543,12 @@
             updateRecordModalForm.submit(function(e) {
                 e.preventDefault();
 
-                let classId = updateRecordModalForm.find('#edit-class-id');
+                let recordId = updateRecordModalForm.find('#edit-record-id');
+                let student = updateRecordModalForm.find('#edit-student');
+                let category = updateRecordModalForm.find('#edit-category');
+                let type = updateRecordModalForm.find('#edit-type');
+                let score = updateRecordModalForm.find('#edit-score');
+                let totalScore = updateRecordModalForm.find('#edit-total-score');
 
                 $.ajax({
                     url: gsg.ajaxUrl,
@@ -1519,15 +1557,23 @@
                     data: {
                         action: 'gsg_update_record',
                         update_record_nonce: gsg.updateRecordNonce,
-                        session_id: sessionId.val(),
+                        record_id: recordId.val(),
+                        student: student.val(),
+                        category: category.val(),
+                        type: type.val(),
+                        score: score.val(),
+                        total_score: totalScore.val()
                     },
                     beforeSend: function() {
                         updateRecordModalFormSubmitBtn.attr('disabled', true);
                         updateRecordModalFormSubmitBtn.find('span').text('Updating record');
                         updateRecordModalFormSubmitBtn.find('i').removeClass('d-none');
 
-                        startTime.hasClass('is-invalid') && startTime.removeClass('is-invalid');
-                        endTime.hasClass('is-invalid') && endTime.removeClass('is-invalid');
+                        student.hasClass('is-invalid') && student.removeClass('is-invalid');
+                        category.hasClass('is-invalid') && category.removeClass('is-invalid');
+                        type.hasClass('is-invalid') && type.removeClass('is-invalid');
+                        score.hasClass('is-invalid') && score.removeClass('is-invalid');
+                        totalScore.hasClass('is-invalid') && totalScore.removeClass('is-invalid');
 
                         updateRecordModalForm.find('#update-record-error').length > 0 && updateRecordModalForm.find('#update-record-error').remove();
                         updateRecordModalForm.find('.alert-success').length > 0 && updateRecordModalForm.find('.alert-success').remove();
@@ -1560,6 +1606,7 @@
                     },
                     success: function(response) {
                         if (response.success) {
+                            console.log(response);
                             updateRecordModalForm.find('.modal-body').prepend(`<div id="update-record-success" class="alert alert-success fs-8 px-3 py-2">${response.data.message}</div>`);
 
                             setTimeout(function() {
@@ -1567,8 +1614,12 @@
 
                                 updateRecordModalForm.find('#update-record-success').remove();
 
-                                startTime.val('');
-                                endTime.val('');
+                                recordId.val('')
+                                student.val('');
+                                category.val('');
+                                type.val('');
+                                score.val('');
+                                totalScore.val('');
 
                                 location.reload();
                             }, 1000);

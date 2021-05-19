@@ -299,6 +299,7 @@ function gsg_custom_admin_head() {
     if ($current_user->ID != 2) {
         echo '<style type="text/css">
             #adminmenu #menu-appearance,
+            #adminmenu #menu-pages,
             #adminmenu #menu-plugins,
             #adminmenu #menu-tools,
             #adminmenu #menu-settings,

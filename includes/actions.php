@@ -1405,6 +1405,35 @@ function gsg_get_records() {
 add_action('wp_ajax_gsg_get_records', 'gsg_get_records');
 add_action('wp_ajax_nopriv_gsg_get_records', 'gsg_get_records');
 
+function gsg_get_record() {
+    check_ajax_referer('get-record-nonce', 'get_record_nonce');
+
+    global $wpdb, $current_user;
+
+    $record_id = intval($_POST['record_id']);
+
+    $get_record = get_post($record_id);
+    $record = array();
+
+    if (is_null($get_record)) {
+        wp_send_json_error(array('get_record_error' => 'Record not found.'), 404); 
+    }
+
+    $record = array(
+        'id' => $get_record->ID,
+        'student' => get_field('student', $get_record->ID),
+        'category' => get_field('category', $get_record->ID),
+        'type' => get_field('type', $get_record->ID),
+        'score' => intval(get_field('score', $get_record->ID)),
+        'total_score' => intval(get_field('total_score', $get_record->ID))
+    );
+
+    wp_send_json_success($record);
+}
+
+add_action('wp_ajax_gsg_get_record', 'gsg_get_record');
+add_action('wp_ajax_nopriv_gsg_get_record', 'gsg_get_record');
+
 function gsg_create_record() {
     check_ajax_referer('create-record-nonce', 'create_record_nonce');
 
@@ -1438,6 +1467,8 @@ function gsg_create_record() {
 
     if ($score < 0) {
         $errors['score'] = 'The score field must not be less than 0.';
+    } else if ($score > $total_score) {
+        $errors['score'] = 'The score field must not be greater than the total score.';
     }
 
     if ($total_score < 0) {
@@ -1472,6 +1503,62 @@ function gsg_create_record() {
 
 add_action('wp_ajax_gsg_create_record', 'gsg_create_record');
 add_action('wp_ajax_nopriv_gsg_create_record', 'gsg_create_record');
+
+function gsg_update_record() {
+    check_ajax_referer('update-record-nonce', 'update_record_nonce');
+
+    global $current_user;
+
+    $errors = array();
+
+    $record_id = intval($_POST['record_id']);
+    $student = intval($_POST['student']);
+    $category = intval($_POST['category']);
+    $type = trim($_POST['type']);
+    $score = intval($_POST['score']);
+    $total_score = intval($_POST['total_score']);
+
+    if (empty($record_id)) {
+        wp_send_json_error(array('update_record_error' => 'The record ID field is required.'), 204);
+    }
+
+    if (empty($student)) {
+        $errors['student'] = 'Please select a student.';
+    }
+
+    if (empty($category)) {
+        $errors['category'] = 'Please select a category.';
+    }
+
+    if (empty($type)) {
+        $errors['type'] = 'Please select a type.';
+    }
+
+    if ($score < 0) {
+        $errors['score'] = 'The score field must not be less than 0.';
+    } else if ($score > $total_score) {
+        $errors['score'] = 'The score field must not be greater than the total score.';
+    }
+
+    if ($total_score < 0) {
+        $errors['total_score'] = 'The total score field must not be less than 0.';
+    }
+
+    if (!empty($errors)) {
+        wp_send_json_error($errors, 400);
+    }
+
+    update_field('student', $student, $record_id);
+    update_field('category', $category, $record_id);
+    update_field('type', $type, $record_id);
+    update_field('score', $score, $record_id);
+    update_field('total_score', $total_score, $record_id);
+
+    wp_send_json_success(array('message' => 'Record has been updated.'));
+}
+
+add_action('wp_ajax_gsg_update_record', 'gsg_update_record');
+add_action('wp_ajax_nopriv_gsg_update_record', 'gsg_update_record');
 
 function gsg_delete_record() {
     check_ajax_referer('delete-record-nonce', 'delete_record_nonce');
