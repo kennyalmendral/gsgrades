@@ -754,7 +754,7 @@
                         targets: -1,
                         data: null,
                         defaultContent: `
-                            <button class="view-summary-button btn btn-success btn-sm me-1" title="View summary"><i class="bi bi-file-earmark-text d-none"></i><i class="bi bi-file-earmark-text-fill"></i></button>
+                            <button class="view-report-button btn btn-success btn-sm me-1" title="View report"><i class="bi bi-file-earmark-text d-none"></i><i class="bi bi-file-earmark-text-fill"></i></button>
                             <button class="manage-class-button btn btn-primary btn-sm me-1" title="Manage class"><i class="bi bi-pencil d-none"></i><i class="bi bi-pencil-fill"></i></button>
                             <button class="archive-class-button btn btn-secondary btn-sm" title="Archive class"><i class="bi bi-archive d-none"></i><i class="bi bi-archive-fill"></i></button>
                         `,
@@ -958,6 +958,7 @@
             const saveChangesBtn = details.find('#save-changes');
             const level = details.find('#level');
             const completionHours = details.find('#completion-hours');
+            const generateReport = $('#generate-report');
 
             level.keyup(function(e) {
                 if (e.keyCode === 13) {
@@ -1632,6 +1633,12 @@
                         updateRecordModalFormSubmitBtn.find('i').addClass('d-none');
                     }
                 });
+            });
+
+            generateReport.click(function() {
+                const me = $(this);
+
+                console.log(me);
             });
         }
 

@@ -139,7 +139,7 @@ function gsg_update_class_hours($class_id, $sum_total_hours) {
 
 	update_field('remaining_hours', $completion_hours - $completed_hours , $class_id);
 
-    $remaining_hours = intval(get_field('remaining_hours'));
+    $remaining_hours = intval(get_field('remaining_hours', $class_id));
 
     if ($remaining_hours <= 0) {
         gsg_update_class_status($class_id, 'completed');

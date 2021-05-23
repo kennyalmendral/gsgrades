@@ -101,6 +101,7 @@ function gsg_enqueue() {
         'createRecordNonce' => wp_create_nonce('create-record-nonce'),
         'updateRecordNonce' => wp_create_nonce('update-record-nonce'),
         'deleteRecordNonce' => wp_create_nonce('delete-record-nonce'),
+        'generateReportNonce' => wp_create_nonce('generate-report-nonce'),
         'currentUser' => is_user_logged_in() ? $current_user : null,
         'currentUserNameInitials' => is_user_logged_in() ? $current_user_name_initials : null,
         'currentUserHasProfilePicture' => $has_profile_picture

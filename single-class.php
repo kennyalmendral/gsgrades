@@ -57,7 +57,7 @@ get_header();
                         <h1 class="p-0 mb-0 fs-2">Manage <?php the_title(); ?> <span class="badge bg-secondary fs-6" style="position: relative; top: -6px; margin-left: 5px;">Ongoing</span></h1>
                     <?php endif; ?>
 
-                    <button name="generate_class_summary" id="generate-class-summary" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-ruled"></i> Generate class summary</button>
+                    <button name="generate_report" id="generate-report" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-ruled"></i> Generate report</button>
                 </div>
             </div>
         </div>

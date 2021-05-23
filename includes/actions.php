@@ -1605,3 +1605,53 @@ function gsg_delete_record() {
 
 add_action('wp_ajax_gsg_delete_record', 'gsg_delete_record');
 add_action('wp_ajax_nopriv_gsg_delete_record', 'gsg_delete_record');
+
+function gsg_generate_report() {
+    check_ajax_referer('generate-report-nonce', 'generate_report_nonce');
+
+    $class_id = intval($_POST['class_id']);
+
+    if (empty($class_id)) {
+        wp_send_json_error(array('generate_report_error' => 'The class ID field is required.'), 204);
+    }
+
+    include_once GSG_VENDORS_PATH . '/dompdf/autoload.inc.php';
+
+    $options = new \Dompdf\Options();
+    $options->setIsRemoteEnabled(true);
+    $options->isHtml5ParserEnabled(true);
+
+    $dompdf = new \Dompdf\Dompdf($options);
+    $dompdf->setPaper('A4', 'landscape');
+
+    $html_template_raw = file_get_contents(GSG_VENDORS_PATH . '/dompdf/pdf_template.html');
+    $html_template = '';
+
+    $variables = array(
+        '[CLASS_CODE]' => '123',
+    );
+
+    /*wp_send_json(array(
+        'variables' => $variables
+    ));
+
+    die(0);*/
+
+    foreach ($variables as $key => $value) {
+        $html_template = strtr($html_template_raw, $variables);
+    }
+
+    foreach ($variables as $key => $value) {
+        $html_template = strtr($html_template_raw, $variables);
+    }
+
+    $dompdf->loadHtml($html_template, 'UTF-8');
+    $dompdf->render();
+
+    file_put_contents(GSG_UPLOADS_PATH . "reports/123.pdf", $dompdf->output());
+
+    wp_send_json_success();
+}
+
+add_action('wp_ajax_gsg_generate_report', 'gsg_generate_report');
+add_action('wp_ajax_nopriv_gsg_generate_report', 'gsg_generate_report');
