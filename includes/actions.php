@@ -1147,6 +1147,7 @@ function gsg_get_records() {
     $student = intval($_GET['student']);
     $category = intval($_GET['category']);
     $type = trim($_GET['type']);
+    $class_id = intval($_GET['class_id']);
 
     $order_column_index = intval($_GET['order'][0]['column']);
     $order_column = '';
@@ -1194,7 +1195,12 @@ function gsg_get_records() {
         'post_type' => 'record',
         'post_status' => 'publish',
         'posts_per_page' => -1,
-        'author' => $current_user->ID
+        'meta_query' => array(
+            array(
+                'key' => 'class',
+                'value' => $class_id
+            )
+        )
     ));
 
     $total_records = $total_record_query->found_posts;
@@ -1204,11 +1210,17 @@ function gsg_get_records() {
         'post_type' => 'record',
         'post_status' => 'publish',
         'posts_per_page' => $limit,
-        'author' => $current_user->ID,
+        // 'author' => $current_user->ID,
         'offset' => $offset,
         'orderby' => empty($order_column_index) ? 'post_date' : $order_column,
         'order' => empty($order_direction) ? 'DESC' : $order_direction,
-        'meta_key' => $order_column_meta_key
+        'meta_key' => $order_column_meta_key,
+        'meta_query' => array(
+            array(
+                'key' => 'class',
+                'value' => $class_id
+            )
+        )
     ));
 
     if (!empty($search) || !empty($student) || !empty($category) || !empty($type)) {
@@ -1216,8 +1228,14 @@ function gsg_get_records() {
             'post_type' => 'record',
             'post_status' => 'publish',
             'posts_per_page' => -1,
-            'author' => $current_user->ID,
-            's' => esc_attr($search)
+            // 'author' => $current_user->ID,
+            's' => esc_attr($search),
+            'meta_query' => array(
+                array(
+                    'key' => 'class',
+                    'value' => $class_id
+                )
+            )
         ));
 
         if (!empty($student) && empty($category) && empty($type)) {
@@ -1237,7 +1255,7 @@ function gsg_get_records() {
                 array(
                     'key' => 'category',
                     'value' => $category
-                )
+                ),
             );
         } else if (!empty($student) && empty($category) && !empty($type)) {
             $meta_query = array(
@@ -1249,14 +1267,14 @@ function gsg_get_records() {
                 array(
                     'key' => 'type',
                     'value' => $type
-                )
+                ),
             );
         } else if (empty($student) && !empty($category) && empty($type)) {
             $meta_query = array(
                 array(
                     'key' => 'category',
                     'value' => $category
-                )
+                ),
             );
         } else if (empty($student) && !empty($category) && !empty($type)) {
             $meta_query = array(
@@ -1268,7 +1286,7 @@ function gsg_get_records() {
                 array(
                     'key' => 'type',
                     'value' => $type
-                )
+                ),
             );
         } else if (empty($student) && empty($category) && !empty($type)) {
             $meta_query = array(
@@ -1291,15 +1309,20 @@ function gsg_get_records() {
                 array(
                     'key' => 'type',
                     'value' => $type
-                )
+                ),
             );
         }
+
+        $meta_query[] = array(
+            'key' => 'class',
+            'value' => $class_id
+        );
 
         $total_record_query_meta_key = new WP_Query(array(
             'post_type' => 'record',
             'post_status' => 'publish',
             'posts_per_page' => -1,
-            'author' => $current_user->ID,
+            // 'author' => $current_user->ID,
             'meta_query' => $meta_query
         ));
 
@@ -1308,7 +1331,7 @@ function gsg_get_records() {
         if (!empty($search)) {
             $total_record_query->posts = array_unique($total_record_query_search->posts, SORT_REGULAR);
         } else {
-            $total_record_query->posts = [array_unique($total_record_query_meta_key->posts, SORT_REGULAR)];
+            $total_record_query->posts = array_unique($total_record_query_meta_key->posts, SORT_REGULAR);
         }
 
         $total_filtered_records = count($total_record_query->posts);
@@ -1317,19 +1340,25 @@ function gsg_get_records() {
             'post_type' => 'record',
             'post_status' => 'publish',
             'posts_per_page' => $limit,
-            'author' => $current_user->ID,
+            // 'author' => $current_user->ID,
             'offset' => $offset,
             'orderby' => empty($order_column_index) ? 'post_date' : $order_column,
             'order' => empty($order_direction) ? 'DESC' : $order_direction,
             'meta_key' => $order_column_meta_key,
-            's' => esc_attr($search)
+            's' => esc_attr($search),
+            'meta_query' => array(
+                array(
+                    'key' => 'class',
+                    'value' => $class_id
+                )
+            )
         ));
 
         $record_query_meta_key = new WP_Query(array(
             'post_type' => 'record',
             'post_status' => 'publish',
             'posts_per_page' => $limit,
-            'author' => $current_user->ID,
+            // 'author' => $current_user->ID,
             'offset' => $offset,
             'orderby' => empty($order_column_index) ? 'post_date' : $order_column,
             'order' => empty($order_direction) ? 'DESC' : $order_direction,

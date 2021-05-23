@@ -1287,6 +1287,7 @@
                         d.student = studentFilterSelect.val();
                         d.category = categoryFilterSelect.val();
                         d.type = typeFilterSelect.val();
+                        d.class_id = classId.val();
                     },
                     columns: [
                         { data: 'id' },

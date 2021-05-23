@@ -296,9 +296,7 @@ if (is_admin()) {
     
     function gsg_custom_admin_head() {
         global $current_user;
-    
-        print_r($current_user);
-    
+        
         if ($current_user->ID != 2) {
             echo '<style type="text/css">
                 #adminmenu #menu-appearance,
