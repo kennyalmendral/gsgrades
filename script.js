@@ -754,7 +754,6 @@
                         targets: -1,
                         data: null,
                         defaultContent: `
-                            <button class="view-report-button btn btn-success btn-sm me-1" title="View report"><i class="bi bi-file-earmark-text d-none"></i><i class="bi bi-file-earmark-text-fill"></i></button>
                             <button class="manage-class-button btn btn-primary btn-sm me-1" title="Manage class"><i class="bi bi-pencil d-none"></i><i class="bi bi-pencil-fill"></i></button>
                             <button class="archive-class-button btn btn-secondary btn-sm" title="Archive class"><i class="bi bi-archive d-none"></i><i class="bi bi-archive-fill"></i></button>
                         `,
@@ -1638,7 +1637,34 @@
             generateReport.click(function() {
                 const me = $(this);
 
-                console.log(me);
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_generate_report',
+                        generate_report_nonce: gsg.generateReportNonce,
+                        class_id: classId.val()
+                    },
+                    beforeSend: function() {
+                        me.attr('disabled', true);
+                        me.find('span').text('Generating report');
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        alert(response.data.generate_report_error);
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            window.open(response.data.file_url);
+                        }
+                    },
+                    complete: function() {
+                        me.removeAttr('disabled');
+                        me.find('span').text('Generate report');
+                    }
+                });
             });
         }
 

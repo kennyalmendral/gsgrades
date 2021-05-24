@@ -3,35 +3,71 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Class Summary</title>
+    <title>Class [CODE] Report</title>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-        }
-
-        html, body {
-            margin: 0;
-            padding: 0;
-        }
-
+        html,
         body {
-            background-size: cover;
-            background-position: left top;
-            background-repeat: no-repeat;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #222;
         }
 
-        body > div {
-            position: relative;
+        #header div {
+            font-weight: 400;
+            font-family: Arial, Helvetica, sans-serif;
+            margin-bottom: 4px;
+        }
+
+        table {
+            width: 100%;
+            font-size: 12px;
+            border: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        table thead th {
+            background: #222;
+            color: #fff;
+            padding: 5px 8px;
+        }
+
+        table tbody tr:nth-child(even) {
+            background: #eee;
+        }
+
+        table tbody td {
+            padding: 5px 8px;
         }
     </style>
 </head>
 
 <body>
-    <div>
-        <h1>Class Report</h1>
-        <h4><strong>Class Code:</strong> [CLASS_CODE]</h4>
+    <div id="header">
+        <h1>Class [CODE] Report</h1>
+        <div><strong>Level:</strong> [LEVEL]</div>
+        <div><strong>Teacher:</strong> [TEACHER]</div>
     </div>
+
+    <table cellspacing=0>
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Leseverstehen und Wortschatz (20%)</th>
+                <th>Horverstehen/Diktat (20%)</th>
+                <th>Grammatik (20%)</th>
+                <th>Mundlich (20%)</th>
+                <th>Aufsatz (20%)</th>
+                <th>Total (60%)</th>
+                <th>Final Exam (30%)</th>
+                <th>Attendance (10%)</th>
+                <th>Final Grade</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            [RECORDS]
+        </tbody>
+    </table>
 </body>
 </html>

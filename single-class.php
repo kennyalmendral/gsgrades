@@ -53,11 +53,10 @@ get_header();
                 <div class="d-flex flex-row align-items-center justify-content-between mb-0">
                     <?php if ($remaining_hours <= 0): ?>
                         <h1 class="p-0 mb-0 fs-2">Manage <?php the_title(); ?> <span class="badge bg-success fs-6" style="position: relative; top: -6px; margin-left: 5px;">Completed</span></h1>
+                        <button name="generate_report" id="generate-report" class="btn btn-outline-secondary "><i class="bi bi-file-earmark-ruled"></i> <span>Generate report</span></button>
                     <?php else: ?>
                         <h1 class="p-0 mb-0 fs-2">Manage <?php the_title(); ?> <span class="badge bg-secondary fs-6" style="position: relative; top: -6px; margin-left: 5px;">Ongoing</span></h1>
                     <?php endif; ?>
-
-                    <button name="generate_report" id="generate-report" class="btn btn-outline-secondary"><i class="bi bi-file-earmark-ruled"></i> Generate report</button>
                 </div>
             </div>
         </div>

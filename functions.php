@@ -85,6 +85,33 @@ if (is_admin()) {
     }
     
     add_action('manage_posts_custom_column' , 'gsg_record_columns_data', 10, 2);
+
+    function gsg_custom_report_columns($columns) {
+        //unset($columns['date']);
+        $columns['reporter'] = 'Teacher';
+        $columns['file_url'] = 'File URL';
+    
+        return $columns;
+    }
+    
+    add_filter('manage_report_posts_columns', 'gsg_custom_report_columns');
+    
+    function gsg_report_columns_data($column, $post_id) {
+        switch ($column) {
+            case 'reporter':
+                $class = get_page_by_title(get_the_title(), OBJECT, 'report');
+                echo get_user_by('ID', $class->post_author)->display_name;
+
+                break;
+            case 'file_url':
+                echo '<a href="' . get_field('file_url') . '" target="_blank"> ' . get_field('file_url') . '</a>';
+                break;
+            default:
+                break;
+        }
+    }
+    
+    add_action('manage_posts_custom_column' , 'gsg_report_columns_data', 10, 2);
     
     function gsg_admin_init_entry_type() {
         global $typenow;
@@ -252,6 +279,35 @@ if (is_admin()) {
                 }
             echo '</select>';
         }
+
+        if ($post_type == 'report') {
+            $teachers = array();
+    
+            $get_teachers = get_users(array(
+                'role' => 'teacher',
+                'orderby' => 'display_name',
+                'order' => 'ASC'
+            ));
+    
+            foreach ($get_teachers as $teacher) {
+                $teachers[$teacher->display_name] = $teacher->ID;
+            }
+    
+            $current_teacher = isset($_GET['filter_teacher'])? trim($_GET['filter_teacher']) : '';
+    
+            echo '<select name="filter_teacher">';
+                echo '<option value="">All teachers</option>';
+    
+                foreach ($teachers as $label => $value) {
+                    printf(
+                        '<option value="%d"%s>%s</option>',
+                        $value,
+                        $value == $current_teacher ? ' selected="selected"' : '',
+                        $label
+                    );
+                }
+            echo '</select>';
+        }
     }
     
     add_action('restrict_manage_posts', 'gsg_custom_admin_filters');
@@ -285,6 +341,12 @@ if (is_admin()) {
             }
     
             if ($post_type == 'class' && $pagenow == 'edit.php') {
+                if (isset($_GET['filter_teacher']) && !empty($_GET['filter_teacher'])) {
+                    $query->query_vars['author'] = $_GET['filter_teacher'];
+                }
+            }
+
+            if ($post_type == 'report' && $pagenow == 'edit.php') {
                 if (isset($_GET['filter_teacher']) && !empty($_GET['filter_teacher'])) {
                     $query->query_vars['author'] = $_GET['filter_teacher'];
                 }

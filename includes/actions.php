@@ -1615,6 +1615,104 @@ function gsg_generate_report() {
         wp_send_json_error(array('generate_report_error' => 'The class ID field is required.'), 204);
     }
 
+    $class = get_post($class_id);
+
+    $code = $class->post_title;
+    $teacher = get_user_by('ID', $class->post_author);
+    $level = get_field('level', $class_id);
+
+    global $wpdb;
+
+    $record_query = new WP_Query(array(
+        'post_type' => 'record',
+        'post_status' => 'publish',
+        'posts_per_page' => -1,
+        'author' => $teacher->ID,
+        'meta_query' => array(
+            array(
+                'key' => 'class',
+                'value' => $class_id
+            )
+        )
+    ));
+
+    $records = array();
+    
+    $raw_student_ids = array();
+    
+    foreach ($record_query->posts as $record) {
+        $student = get_user_by('ID', get_field('student', $record->ID));
+
+        $raw_student_ids[] = $student->ID;
+    }
+
+    $student_ids = array_unique($raw_student_ids, SORT_REGULAR);
+
+    foreach ($student_ids as $student) {
+        $aufsatz_query = new WP_Query(array(
+            'post_type' => 'record',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'author' => $teacher->ID,
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'class',
+                    'value' => $class_id
+                ),
+                array(
+                    'key' => 'student',
+                    'value' => $student
+                ),
+                array(
+                    'key' => 'category',
+                    'value' => 7
+                ),
+                array(
+                    'key' => 'type',
+                    'value' => 'quiz'
+                )
+            )
+        ));
+
+        $aufsatz_scores = array();
+        $aufsatz_total_scores = array();
+
+        foreach ($aufsatz_query->posts as $item) {
+            $aufsatz_scores[] = get_field('score', $item->ID);
+            $aufsatz_total_scores[] = get_field('total_score', $item->ID);
+        }
+
+        $records[] = array(
+            'student' => get_user_by('ID', $student)->display_name,
+            'leseverstehen_und_wortschatz' => 0,
+            'horverstehen_diktat' => 0,
+            'grammatik' => 0,
+            'mundlich' => 0,
+            'aufsatz' => array_sum($aufsatz_scores),
+            'aufsatz_total' => array_sum($aufsatz_total_scores),
+            'total' => 0,
+            'final_exam' => 0,
+            'attendance' => 0,
+            'final_grade' => 0
+        );
+    }
+
+    foreach ($records as $record) {
+        $record_row_html .= '<tr>';
+            $record_row_html .= '<td>' . $record['student'] . '</td>';
+            $record_row_html .= '<td>' . $record['leseverstehen_und_wortschatz'] . '</td>';
+            $record_row_html .= '<td>' . $record['horverstehen_diktat'] . '</td>';
+            $record_row_html .= '<td>' . $record['grammatik'] . '</td>';
+            $record_row_html .= '<td>' . $record['mundlich'] . '</td>';
+            $record_row_html .= '<td>' . $record['aufsatz'] . ' (' . $record['aufsatz_total'] . ')</td>';
+            $record_row_html .= '<td>' . $record['total'] . '</td>';
+            $record_row_html .= '<td>' . $record['final_exam'] . '</td>';
+            $record_row_html .= '<td>' . $record['attendance'] . '</td>';
+            $record_row_html .= '<td>' . $record['final_grade'] . '</td>';
+        $record_row_html .= '</tr>';
+    }
+
     include_once GSG_VENDORS_PATH . '/dompdf/autoload.inc.php';
 
     $options = new \Dompdf\Options();
@@ -1628,14 +1726,17 @@ function gsg_generate_report() {
     $html_template = '';
 
     $variables = array(
-        '[CLASS_CODE]' => '123',
+        '[CODE]' => $code,
+        '[LEVEL]' => $level,
+        '[TEACHER]' => $teacher->display_name,
+        '[RECORDS]' => $record_row_html
     );
 
-    /*wp_send_json(array(
-        'variables' => $variables
-    ));
+    // wp_send_json(array(
+    //     'variables' => $variables
+    // ));
 
-    die(0);*/
+    // die(0);
 
     foreach ($variables as $key => $value) {
         $html_template = strtr($html_template_raw, $variables);
@@ -1648,9 +1749,24 @@ function gsg_generate_report() {
     $dompdf->loadHtml($html_template, 'UTF-8');
     $dompdf->render();
 
-    file_put_contents(GSG_UPLOADS_PATH . "reports/123.pdf", $dompdf->output());
+    file_put_contents(GSG_UPLOADS_PATH . "/reports/$code.pdf", $dompdf->output());
 
-    wp_send_json_success();
+    $post_exists = get_page_by_title($code, OBJECT, 'report');
+
+    if (is_null($post_exists)) {
+        $report_id = wp_insert_post(array(
+            'post_title' => $code,
+            'post_type' => 'report',
+            'post_status' => 'publish',
+            'post_author' => $class->post_author,
+        ));
+
+        update_field('file_url', GSG_UPLOADS_URL . "/reports/$code.pdf", $report_id);
+    }
+
+    wp_send_json_success(array(
+        'file_url' => GSG_UPLOADS_URL . "/reports/$code.pdf"
+    ));
 }
 
 add_action('wp_ajax_gsg_generate_report', 'gsg_generate_report');
