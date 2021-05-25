@@ -112,6 +112,40 @@ if (is_admin()) {
     }
     
     add_action('manage_posts_custom_column' , 'gsg_report_columns_data', 10, 2);
+
+    function gsg_custom_student_columns($columns) {
+        //unset($columns['date']);
+        $columns['student_class'] = 'Class Code';
+        $columns['class_student'] = 'Student';
+        $columns['days_present'] = 'Days Present';
+        $columns['status'] = 'Status';
+    
+        return $columns;
+    }
+    
+    add_filter('manage_student_posts_columns', 'gsg_custom_student_columns');
+    
+    function gsg_student_columns_data($column, $post_id) {
+        switch ($column) {
+            case 'student_class':
+                $class = get_post(get_field('class'));  
+                echo '<a href="' . get_edit_post_link($class->ID) . '" target="_blank" rel="noreferrer">' . $class->post_title . '</a>';
+                break;
+            case 'class_student':
+                echo get_user_by('ID', get_field('student'))->display_name;
+                break;
+            case 'days_present':
+                echo get_field('days_present');
+                break;
+            case 'status':
+                echo ucwords(get_field('status'));
+                break;
+            default:
+                break;
+        }
+    }
+    
+    add_action('manage_posts_custom_column' , 'gsg_student_columns_data', 10, 2);
     
     function gsg_admin_init_entry_type() {
         global $typenow;
@@ -308,6 +342,55 @@ if (is_admin()) {
                 }
             echo '</select>';
         }
+
+        if ($post_type == 'student') {
+            $students = array();
+
+            $status = array(
+                'Active' => 'active',
+                'Dropped' => 'dropped'
+            );
+    
+            $get_students = get_users(array(
+                'role' => 'student',
+                'orderby' => 'display_name',
+                'order' => 'ASC'
+            ));
+            
+    
+            foreach ($get_students as $student) {
+                $students[$student->display_name] = $student->ID;
+            }
+    
+            $current_student = isset($_GET['filter_student'])? trim($_GET['filter_student']) : '';
+            $current_status = isset($_GET['filter_status'])? trim($_GET['filter_status']) : '';
+    
+            echo '<select name="filter_student">';
+                echo '<option value="">All students</option>';
+    
+                foreach ($students as $label => $value) {
+                    printf(
+                        '<option value="%d"%s>%s</option>',
+                        $value,
+                        $value == $current_student ? ' selected="selected"' : '',
+                        $label
+                    );
+                }
+            echo '</select>';
+
+            echo '<select name="filter_status">';
+                echo '<option value="">All status</option>';
+    
+                foreach ($status as $label => $value) {
+                    printf(
+                        '<option value="%s"%s>%s</option>',
+                        $value,
+                        $value == $current_status ? ' selected="selected"' : '',
+                        $label
+                    );
+                }
+            echo '</select>';
+        }
     }
     
     add_action('restrict_manage_posts', 'gsg_custom_admin_filters');
@@ -349,6 +432,18 @@ if (is_admin()) {
             if ($post_type == 'report' && $pagenow == 'edit.php') {
                 if (isset($_GET['filter_teacher']) && !empty($_GET['filter_teacher'])) {
                     $query->query_vars['author'] = $_GET['filter_teacher'];
+                }
+            }
+
+            if ($post_type == 'student' && $pagenow == 'edit.php') {
+                if (isset($_GET['filter_student']) && !empty($_GET['filter_student'])) {
+                    $query->query_vars['meta_key'] = 'student';
+                    $query->query_vars['meta_value'] = $_GET['filter_student'];
+                }
+
+                if (isset($_GET['filter_status']) && !empty($_GET['filter_status'])) {
+                    $query->query_vars['meta_key'] = 'status';
+                    $query->query_vars['meta_value'] = $_GET['filter_status'];
                 }
             }
         }

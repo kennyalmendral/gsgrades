@@ -102,51 +102,74 @@ get_header();
                 </div>
             </div>
         </div>
+        
+        <div class="col-12 col-lg-8">
+            <div class="row">
+                <div id="sessions" class="col-12">
+                    <div class="card bg-white shadow-sm mb-4">
+                        <div class="card-header">
+                            <div class="d-flex flex-row align-items-center justify-content-between mb-0">
+                                <h4 class="mb-0">Sessions</h4>
+                            </div>
+                        </div>
 
-        <div id="sessions" class="col-12 col-lg-8">
-            <div class="card bg-white shadow-sm mb-4">
-                <div class="card-header">
-                    <div class="d-flex flex-row align-items-center justify-content-between mb-0">
-                        <h4 class="mb-0">Sessions</h4>
+                        <div class="card-body pb-2">
+                            <?php if (count($sessions) > 0): ?>
+                                <table class="table table-borderless">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th class="text-center">Start time</th>
+                                            <th class="text-center">End time</th>
+                                            <th class="text-center">Total hours</th>
+                                            <th class="text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <?php foreach ($sessions as $session): ?>
+                                            <tr>
+                                                <td valign="middle"><?php echo date('F d, Y', strtotime($session->created_at)); ?></td>
+                                                <td valign="middle" class="text-center"><?php echo date('g:i A', strtotime($session->start_time)); ?></td>
+                                                <td valign="middle" class="text-center"><?php echo date('g:i A', strtotime($session->end_time)); ?></td>
+                                                <td valign="middle" class="text-center"><?php echo $session->total_hours; ?></td>
+                                                <td valign="middle" class="text-center">
+                                                    <button class="edit-session-button btn btn-outline-primary btn-sm me-1" title="Edit session" data-session-id="<?php echo esc_attr($session->id); ?>" data-session-class-id="<?php echo esc_attr($session->class_id); ?>" data-session-start-time="<?php echo esc_attr($session->start_time); ?>" data-session-end-time="<?php echo esc_attr($session->end_time); ?>" data-session-total-hours="<?php echo esc_attr($session->total_hours); ?>" <?php echo $remaining_hours <= 0 ? 'disabled' : '' ; ?>><i class="bi bi-pencil d-none"></i><i class="bi bi-pencil-fill"></i></button>
+
+                                                    <button class="delete-session-button btn btn-outline-danger btn-sm" title="Delete session" data-session-id="<?php echo esc_attr($session->id); ?>" data-class-id="<?php echo esc_attr($session->class_id); ?>"><i class="bi bi-trash d-none"></i><i class="bi bi-trash-fill"></i></button>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            <?php else: ?>
+                                <p class="mb-0 text-muted text-center py-4">There are no sessions created yet.</p>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="card-footer py-3">
+                            <button id="create-session" class="btn btn-secondary" <?php echo $remaining_hours <= 0 ? 'disabled' : '' ; ?>>Create new session</button>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="card-body pb-2">
-                    <?php if (count($sessions) > 0): ?>
-                        <table class="table table-borderless">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th class="text-center">Start time</th>
-                                    <th class="text-center">End time</th>
-                                    <th class="text-center">Total hours</th>
-                                    <th class="text-center">Actions</th>
-                                </tr>
-                            </thead>
+            <div class="row">
+                <div id="students" class="col-12">
+                    <div class="card bg-white shadow-sm mb-4">
+                        <div class="card-header">
+                            <div class="d-flex flex-row align-items-center justify-content-between mb-0">
+                                <h4 class="mb-0">Students</h4>
+                            </div>
+                        </div>
 
-                            <tbody>
-                                <?php foreach ($sessions as $session): ?>
-                                    <tr>
-                                        <td valign="middle"><?php echo date('F d, Y', strtotime($session->created_at)); ?></td>
-                                        <td valign="middle" class="text-center"><?php echo date('g:i A', strtotime($session->start_time)); ?></td>
-                                        <td valign="middle" class="text-center"><?php echo date('g:i A', strtotime($session->end_time)); ?></td>
-                                        <td valign="middle" class="text-center"><?php echo $session->total_hours; ?></td>
-                                        <td valign="middle" class="text-center">
-                                            <button class="edit-session-button btn btn-outline-primary btn-sm me-1" title="Edit session" data-session-id="<?php echo esc_attr($session->id); ?>" data-session-class-id="<?php echo esc_attr($session->class_id); ?>" data-session-start-time="<?php echo esc_attr($session->start_time); ?>" data-session-end-time="<?php echo esc_attr($session->end_time); ?>" data-session-total-hours="<?php echo esc_attr($session->total_hours); ?>" <?php echo $remaining_hours <= 0 ? 'disabled' : '' ; ?>><i class="bi bi-pencil d-none"></i><i class="bi bi-pencil-fill"></i></button>
+                        <div class="card-body pb-2">
+                        </div>
 
-                                            <button class="delete-session-button btn btn-outline-danger btn-sm" title="Delete session" data-session-id="<?php echo esc_attr($session->id); ?>" data-class-id="<?php echo esc_attr($session->class_id); ?>"><i class="bi bi-trash d-none"></i><i class="bi bi-trash-fill"></i></button>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    <?php else: ?>
-                        <p class="mb-0 text-muted text-center py-4">There are no sessions created yet.</p>
-                    <?php endif; ?>
-                </div>
-
-                <div class="card-footer py-3">
-                    <button id="create-session" class="btn btn-secondary" <?php echo $remaining_hours <= 0 ? 'disabled' : '' ; ?>>Create new session</button>
+                        <div class="card-footer py-3">
+                            <button id="add-student" class="btn btn-secondary" <?php echo $remaining_hours <= 0 ? 'disabled' : '' ; ?>>Add student</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -157,7 +180,7 @@ get_header();
             <div class="card bg-white shadow-sm">
                 <div class="card-header py-3 d-flex align-items-center justify-content-between">
                     <h4 class="mb-0">Records</h4>
-                    <button id="create-record" class="btn btn-secondary">Create new record</button>
+                    <button id="create-record" class="btn btn-secondary" <?php echo $remaining_hours <= 0 ? 'disabled' : '' ; ?>>Create new record</button>
                 </div>
 
                 <div class="card-body">
