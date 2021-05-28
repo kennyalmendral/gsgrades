@@ -22,17 +22,21 @@ function gsg_enqueue() {
 	$uri = get_theme_file_uri();
 	$version = GSG_DEV_MODE ? time() : false;
 
-	wp_register_style('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css', array(), null);
+	// wp_register_style('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css', array(), null);
+    wp_register_style('bootstrap', GSG_VENDORS_URL . '/bootstrap.min.css', array(), null);
     wp_enqueue_style('bootstrap');
 
-	wp_register_style('bootstrap-icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css', array(), null);
+	// wp_register_style('bootstrap-icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css', array(), null);
+    wp_register_style('bootstrap-icons', GSG_VENDORS_URL . '/bootstrap-icons.css', array(), null);
     wp_enqueue_style('bootstrap-icons');
 
-	wp_register_style('font-awesome', 'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css', array(), null);
+	// wp_register_style('font-awesome', 'https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css', array(), null);
+    wp_register_style('font-awesome', GSG_VENDORS_URL . '/font-awesome.min.css', array(), null);
     wp_enqueue_style('font-awesome');
 
     if (gsg_is_students_page() || gsg_is_classes_page() || gsg_is_class_page()) {
-        wp_register_style('bootstrap-datatables', 'https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css', array('bootstrap'), $version);
+        // wp_register_style('bootstrap-datatables', 'https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css', array('bootstrap'), $version);
+        wp_register_style('bootstrap-datatables', GSG_VENDORS_URL . '/dataTables.bootstrap4.min.css', array('bootstrap'), $version);
         wp_enqueue_style('bootstrap-datatables');
     }
 
@@ -44,14 +48,17 @@ function gsg_enqueue() {
         wp_enqueue_style('gsg-auth-style');
     }
 
-	wp_register_script('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js', array('jquery'), null, true);
+	// wp_register_script('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js', array('jquery'), null, true);
+    wp_register_script('bootstrap', GSG_VENDORS_URL . '/bootstrap.bundle.min.js', array('jquery'), null, true);
 	wp_enqueue_script('bootstrap');
 
     if (gsg_is_students_page() || gsg_is_classes_page() || gsg_is_class_page()) {
-        wp_register_script('datatables', 'https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js', array('jquery'), null, true);
+        // wp_register_script('datatables', 'https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js', array('jquery'), null, true);
+        wp_register_script('datatables', GSG_VENDORS_URL . '/jquery.dataTables.min.js', array('jquery'), null, true);
         wp_enqueue_script('datatables');
 
-        wp_register_script('bootstrap-datatables', 'https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js', array('jquery', 'datatables'), null, true);
+        // wp_register_script('bootstrap-datatables', 'https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js', array('jquery', 'datatables'), null, true);
+        wp_register_script('bootstrap-datatables', GSG_VENDORS_URL . '/dataTables.bootstrap4.min.js', array('jquery', 'datatables'), null, true);
         wp_enqueue_script('bootstrap-datatables');
     }
 
@@ -98,6 +105,7 @@ function gsg_enqueue() {
         'createSessionNonce' => wp_create_nonce('create-session-nonce'),
         'updateSessionNonce' => wp_create_nonce('update-session-nonce'),
         'deleteSessionNonce' => wp_create_nonce('delete-session-nonce'),
+        'getClassStudentsNonce' => wp_create_nonce('get-class-students-nonce'),
         'createRecordNonce' => wp_create_nonce('create-record-nonce'),
         'updateRecordNonce' => wp_create_nonce('update-record-nonce'),
         'deleteRecordNonce' => wp_create_nonce('delete-record-nonce'),

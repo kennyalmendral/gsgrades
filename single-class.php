@@ -24,7 +24,12 @@ $record_query = new WP_Query(array(
     'post_type' => 'record',
     'post_status' => 'publish',
     'posts_per_page' => -1,
-    'author' => $current_user->ID
+    'meta_query' => array(
+        array(
+            'key' => 'class',
+            'value' => $post->ID
+        )
+    )
 ));
 
 $students = array();
@@ -32,6 +37,26 @@ $students = array();
 if (!empty($record_query->posts)) {
     foreach ($record_query->posts as $record) {
         $students[intval(get_field('student', $record->ID))] = get_user_by('ID', get_field('student', $record->ID))->display_name;
+    }
+}
+
+$class_student_query = new WP_Query(array(
+    'post_type' => 'student',
+    'post_status' => 'publish',
+    'posts_per_page' => -1,
+    'meta_query' => array(
+        array(
+            'key' => 'class',
+            'value' => $post->ID
+        )
+    )
+));
+
+$class_students = array();
+
+if (!empty($class_student_query->posts)) {
+    foreach ($class_student_query->posts as $student) {
+        $class_students[intval(get_field('student', $student->ID))] = get_user_by('ID', get_field('student', $student->ID))->display_name;
     }
 }
 
@@ -153,23 +178,63 @@ get_header();
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="row">
-                <div id="students" class="col-12">
-                    <div class="card bg-white shadow-sm mb-4">
-                        <div class="card-header">
-                            <div class="d-flex flex-row align-items-center justify-content-between mb-0">
-                                <h4 class="mb-0">Students</h4>
-                            </div>
-                        </div>
+    <div id="students" class="row align-items-start">
+        <div class="col-12">
+            <div class="card bg-white shadow-sm mb-4">
+                <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0">Students</h4>
+                    <button id="add-student" class="btn btn-secondary" <?php echo $remaining_hours <= 0 ? 'disabled' : '' ; ?>>Add student</button>
+                </div>
 
-                        <div class="card-body pb-2">
-                        </div>
+                <div class="card-body pb-2">
+                    <div id="class-student-filter" class="d-flex align-items-center me-2">
+                        <select id="class-student-filter-select" class="form-select form-select-sm fs-6">
+                            <option value="">Select student</option>
 
-                        <div class="card-footer py-3">
-                            <button id="add-student" class="btn btn-secondary" <?php echo $remaining_hours <= 0 ? 'disabled' : '' ; ?>>Add student</button>
-                        </div>
+                            <?php if (!empty($class_students)): ?>
+                                <?php foreach ($class_students as $id => $display_name): ?>
+                                    <option value="<?php echo esc_attr($id); ?>"><?php echo $display_name; ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
                     </div>
+
+                    <div id="status-filter" class="d-flex align-items-center me-2">
+                        <select id="status-filter-select" class="form-select form-select-sm fs-6">
+                            <option value="">Select status</option>
+                            <option value="active">Active</option>
+                            <option value="dropped">Dropped</option>
+                        </select>
+                    </div>
+
+                    <table id="students-table" class="table table-striped table-responsive w-100">
+                        <thead>
+                            <tr>
+                                <th width="6%">ID</th>
+                                <th width="20%">Student</th>
+                                <th width="12%">Days present</th>
+                                <th width="10%">Status</th>
+                                <th width="15%">Date created</th>
+                                <th width="15%">Last updated</th>
+                                <th width="10%" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tfoot>
+                            <tr>
+                                <th width="6%">ID</th>
+                                <th width="20%">Student</th>
+                                <th width="12%">Days present</th>
+                                <th width="10%">Status</th>
+                                <th width="15%">Date created</th>
+                                <th width="15%">Last updated</th>
+                                <th width="10%" class="text-center">Actions</th>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
         </div>

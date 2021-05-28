@@ -1265,6 +1265,84 @@
                 });
             });
 
+            const studentsTable = $('#students-table');
+
+            const classStudentFilter = $('body').find('#class-student-filter');
+            const classStudentFilterSelect = classStudentFilter.find('select');
+
+            const statusFilter = $('body').find('#status-filter');
+            const statusFilterSelect = statusFilter.find('select');
+
+            const studentsDataTable = studentsTable.DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: gsg.ajaxUrl,
+                    data: function(d) {
+                        d.action = 'gsg_get_class_students';
+                        d.get_class_students_nonce = gsg.getClassStudentsNonce;
+                        d.class_id = classId.val();
+                        d.student = classStudentFilterSelect.val();
+                        d.status = statusFilterSelect.val();
+                    },
+                    columns: [
+                        { data: 'id' },
+                        { data: 'student' },
+                        { data: 'days_present' },
+                        { data: 'status' },
+                        { data: 'date_created' },
+                        { data: 'last_updated' }
+                    ],
+                },
+                columnDefs: [
+                    {
+                        targets: -1,
+                        data: null,
+                        defaultContent: `
+                            <button class="edit-class-student-button btn btn-outline-primary btn-sm me-1" title="Edit student"><i class="bi bi-pencil d-none"></i><i class="bi bi-pencil-fill"></i></button>
+                            <button class="remove-class-student-button btn btn-outline-danger btn-sm" title="Remove student"><i class="bi bi-trash d-none"></i><i class="bi bi-trash-fill"></i></button>
+                        `,
+                        className: 'dt-center',
+                        orderable: false
+                    }
+                ],
+                order: [
+                    [1, 'ASC']
+                ],
+                language: {
+                    search: '',
+                    searchPlaceholder: 'Search...'
+                },
+                initComplete: function(settings, json) {
+                    $('#students-table_length select').removeClass('form-control form-control-sm').addClass('form-select form-select-sm');
+
+                    $('#students-table_wrapper .row:first-of-type').addClass('justify-content-between');
+                    $('#students-table_wrapper .row:first-of-type .col-sm-12:first-of-type').removeClass('col-md-6').addClass('col-md-7');
+                    $('#students-table_wrapper .row:first-of-type .col-sm-12:last-of-type').removeClass('col-md-6').addClass('col-md-5');
+
+                    $('#students-table_wrapper .row:first-of-type .col-sm-12:last-of-type').addClass('d-flex align-items-center justify-content-between')
+                        .prepend(statusFilter)
+                        .prepend(classStudentFilter);
+
+                    $('#students-table_filter input').css('margin-left', 0).attr('placeholder', 'Search student ID');
+
+                    $('#students').fadeIn();
+                }
+            });
+
+            $('body').on('keyup', '#students-table_filter input', function() {
+                classStudentFilterSelect.val('');
+                statusFilterSelect.val('');
+            });
+
+            classStudentFilterSelect.change(function() {
+                studentsDataTable.ajax.reload();
+            });
+
+            statusFilterSelect.change(function() {
+                studentsDataTable.ajax.reload();
+            });
+
             const studentFilter = $('body').find('#student-filter');
             const studentFilterSelect = studentFilter.find('select');
 
