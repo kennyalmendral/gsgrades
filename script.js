@@ -1343,6 +1343,270 @@
                 studentsDataTable.ajax.reload();
             });
 
+            const students = $('#students');
+
+            const createClassStudentBtn = students.find('#create-class-student');
+            const createClassStudentModalForm = $('#create-class-student-modal').find('form');
+            const createClassStudentModalFormSubmitBtn = createClassStudentModalForm.find('.modal-footer button');
+
+            const updateClassStudentModalForm = $('#update-class-student-modal').find('form');
+            const updateClassStudentModalFormSubmitBtn = updateClassStudentModalForm.find('.modal-footer button');
+
+            const createClassStudentModal = new bootstrap.Modal(document.getElementById('create-class-student-modal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            createClassStudentBtn.click(function() {
+                createClassStudentModal.show();
+            });
+
+            createClassStudentModalForm.submit(function(e) {
+                e.preventDefault();
+
+                let student = createClassStudentModalForm.find('#class-student');
+                let daysPresent = createClassStudentModalForm.find('#days-present');
+                let status = createClassStudentModalForm.find('#status');
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_create_class_student',
+                        create_class_student_nonce: gsg.createClassStudentNonce,
+                        class_id: classId.val(),
+                        student: student.val(),
+                        days_present: daysPresent.val(),
+                        status: status.val()
+                    },
+                    beforeSend: function() {
+                        createClassStudentModalFormSubmitBtn.attr('disabled', true);
+                        createClassStudentModalFormSubmitBtn.find('span').text('Adding student');
+                        createClassStudentModalFormSubmitBtn.find('i').removeClass('d-none');
+
+                        student.hasClass('is-invalid') && student.removeClass('is-invalid');
+                        daysPresent.hasClass('is-invalid') && daysPresent.removeClass('is-invalid');
+                        status.hasClass('is-invalid') && status.removeClass('is-invalid');
+
+                        createClassStudentModalForm.find('#create-class-student-error').length > 0 && createClassStudentModalForm.find('#create-class-student-error').remove();
+                        createClassStudentModalForm.find('.alert-success').length > 0 && createClassStudentModalForm.find('.alert-success').remove();
+                        createClassStudentModalForm.find('.invalid-feedback').length > 0 && createClassStudentModalForm.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (const key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    keyId = key.replace('_', '-');
+
+                                    if ($(`#${keyId}-error-alert`).length === 0) {
+                                        $(`#${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(createClassStudentModalForm.find(`#${keyId}`));
+                                    }
+
+                                    if (key === 'create_class_student_error') {
+                                        if ($('#create_class_student_error').length === 0) {
+                                            createClassStudentModalForm.find('.modal-body').prepend(`<div id="create-class-student-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    success: function(response) {
+                        console.log(response);
+
+                        if (response.success) {
+                            createClassStudentModalForm.find('.modal-body').prepend(`<div id="create-class-student-success" class="alert alert-success fs-8 px-3 py-2">${response.data.message}</div>`);
+
+                            setTimeout(function() {
+                                createClassStudentModal.hide();
+
+                                createClassStudentModalForm.find('#create-class-student-success').remove();
+
+                                student.val('');
+                                daysPresent.val('');
+                                status.val('');
+
+                                location.reload();
+                            }, 1000);
+                        }
+                    },
+                    complete: function() {
+                        createClassStudentModalFormSubmitBtn.removeAttr('disabled');
+                        createClassStudentModalFormSubmitBtn.find('span').text('Submit');
+                        createClassStudentModalFormSubmitBtn.find('i').addClass('d-none');
+                    }
+                });
+            });
+
+            $('body').on('click', '.remove-class-student-button', function() {
+                let confirmation = confirm('This action cannot be undone. Are you sure you want to remove this student?');
+
+                if (confirmation) {
+                    const me = $(this);
+                    const data = studentsDataTable.row(me.parents('tr')).data();
+                    const classStudentId = data[0];
+                    
+                    $.ajax({
+                        url: gsg.ajaxUrl,
+                        method: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'gsg_remove_class_student',
+                            remove_class_student_nonce: gsg.removeClassStudentNonce,
+                            class_student_id: classStudentId
+                        },
+                        error: function(xhr) {
+                            let response = xhr.responseJSON;
+                            
+                            alert(response.data.remove_class_student_error);
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                location.reload();
+                            }
+                        }
+                    });
+                }
+            });
+
+            const updateClassStudentModal = new bootstrap.Modal(document.getElementById('update-class-student-modal'), {
+                backdrop: 'static',
+                keyboard: false
+            });
+
+            $('body').on('click', '.edit-class-student-button', function() {
+                const me = $(this);
+                const data = studentsDataTable.row(me.parents('tr')).data();
+                const classStudentId = data[0];
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_get_class_student',
+                        get_class_student_nonce: gsg.getClassStudentNonce,
+                        class_student_id: classStudentId
+                    },
+                    beforeSend: function() {
+                        me.attr('disabled', true);
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        alert(response.data);
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            const studentData = response.data;
+
+                            updateClassStudentModalForm.find('#edit-class-student-id').val(studentData.id);
+                            updateClassStudentModalForm.find('#edit-class-student').val(studentData.student);
+                            updateClassStudentModalForm.find('#edit-days-present').val(studentData.days_present);
+                            updateClassStudentModalForm.find('#edit-status').val(studentData.status);
+                            
+                            updateClassStudentModal.show();
+                        }
+                    },
+                    complete: function() {
+                        me.removeAttr('disabled');
+                    }
+                });
+            });
+
+            updateClassStudentModalForm.submit(function(e) {
+                e.preventDefault();
+
+                let classStudentId = updateClassStudentModalForm.find('#edit-class-student-id');
+                let student = updateClassStudentModalForm.find('#edit-class-student');
+                let daysPresent = updateClassStudentModalForm.find('#edit-days-present');
+                let status = updateClassStudentModalForm.find('#edit-status');
+
+                $.ajax({
+                    url: gsg.ajaxUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'gsg_update_class_student',
+                        update_class_student_nonce: gsg.updateClassStudentNonce,
+                        class_id: classId.val(),
+                        class_student_id: classStudentId.val(),
+                        student: student.val(),
+                        days_present: daysPresent.val(),
+                        status: status.val()
+                    },
+                    beforeSend: function() {
+                        updateClassStudentModalFormSubmitBtn.attr('disabled', true);
+                        updateClassStudentModalFormSubmitBtn.find('span').text('Updating student');
+                        updateClassStudentModalFormSubmitBtn.find('i').removeClass('d-none');
+
+                        student.hasClass('is-invalid') && student.removeClass('is-invalid');
+                        daysPresent.hasClass('is-invalid') && daysPresent.removeClass('is-invalid');
+                        status.hasClass('is-invalid') && status.removeClass('is-invalid');
+
+                        updateClassStudentModalForm.find('#update-class-student-error').length > 0 && updateClassStudentModalForm.find('#update-class-student-error').remove();
+                        updateClassStudentModalForm.find('.alert-success').length > 0 && updateClassStudentModalForm.find('.alert-success').remove();
+                        updateClassStudentModalForm.find('.invalid-feedback').length > 0 && updateClassStudentModalForm.find('.invalid-feedback').remove();
+                    },
+                    error: function(xhr) {
+                        let response = xhr.responseJSON;
+
+                        if (!response.success) {
+                            let responseData = response.data;
+
+                            for (const key in responseData) {
+                                if (responseData.hasOwnProperty(key)) {
+                                    keyId = key.replace('_', '-');
+
+                                    if ($(`#edit-${keyId}-error-alert`).length === 0) {
+                                        $(`#edit-${keyId}`).addClass('is-invalid');
+
+                                        $(`<div id="edit-${keyId}-error-alert" class="invalid-feedback text-start fs-8 p-0 mt-1 d-block">${responseData[key]}</div>`).insertAfter(updateClassStudentModalForm.find(`#edit-${keyId}`));
+                                    }
+
+                                    if (key === 'update_class_student_error') {
+                                        if ($('#update_class_student_error').length === 0) {
+                                            updateClassStudentModalForm.find('.modal-body').prepend(`<div id="update-class-student-error" class="alert alert-danger fs-8 px-3 py-2">${responseData[key]}</div>`);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            console.log(response);
+                            updateClassStudentModalForm.find('.modal-body').prepend(`<div id="update-class-student-success" class="alert alert-success fs-8 px-3 py-2">${response.data.message}</div>`);
+
+                            setTimeout(function() {
+                                updateClassStudentModal.hide();
+
+                                updateClassStudentModalForm.find('#update-class-student-success').remove();
+
+                                classStudentId.val('')
+                                student.val('');
+                                daysPresent.val('');
+                                status.val('');
+
+                                location.reload();
+                            }, 1000);
+                        }
+                    },
+                    complete: function() {
+                        updateClassStudentModalFormSubmitBtn.removeAttr('disabled');
+                        updateClassStudentModalFormSubmitBtn.find('span').text('Save changes');
+                        updateClassStudentModalFormSubmitBtn.find('i').addClass('d-none');
+                    }
+                });
+            });
+
             const studentFilter = $('body').find('#student-filter');
             const studentFilterSelect = studentFilter.find('select');
 
@@ -1546,6 +1810,37 @@
                 keyboard: false
             });
 
+            $('body').on('click', '.delete-record-button', function() {
+                let confirmation = confirm('This action cannot be undone. Are you sure you want to delete this record?');
+
+                if (confirmation) {
+                    const me = $(this);
+                    const data = recordsDataTable.row(me.parents('tr')).data();
+                    const recordId = data[0];
+                    
+                    $.ajax({
+                        url: gsg.ajaxUrl,
+                        method: 'POST',
+                        dataType: 'json',
+                        data: {
+                            action: 'gsg_delete_record',
+                            delete_record_nonce: gsg.deleteRecordNonce,
+                            record_id: recordId
+                        },
+                        error: function(xhr) {
+                            let response = xhr.responseJSON;
+
+                            alert(response.data.delete_record_error);
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                location.reload();
+                            }
+                        }
+                    });
+                }
+            });
+
             $('body').on('click', '.edit-record-button', function() {
                 const me = $(this);
                 const data = recordsDataTable.row(me.parents('tr')).data();
@@ -1586,37 +1881,6 @@
                         me.removeAttr('disabled');
                     }
                 });
-            });
-
-            $('body').on('click', '.delete-record-button', function() {
-                let confirmation = confirm('This action cannot be undone. Are you sure you want to delete this record?');
-
-                if (confirmation) {
-                    const me = $(this);
-                    const data = recordsDataTable.row(me.parents('tr')).data();
-                    const recordId = data[0];
-                    
-                    $.ajax({
-                        url: gsg.ajaxUrl,
-                        method: 'POST',
-                        dataType: 'json',
-                        data: {
-                            action: 'gsg_delete_record',
-                            delete_record_nonce: gsg.deleteRecordNonce,
-                            record_id: recordId
-                        },
-                        error: function(xhr) {
-                            let response = xhr.responseJSON;
-
-                            alert(response.data.delete_record_error);
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                location.reload();
-                            }
-                        }
-                    });
-                }
             });
 
             updateRecordModalForm.submit(function(e) {

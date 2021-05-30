@@ -2,7 +2,7 @@
     <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable">
         <form class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Update record</h5>
+                <h5 class="modal-title">Edit record</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 

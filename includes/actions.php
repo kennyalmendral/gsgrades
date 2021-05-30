@@ -1365,6 +1365,171 @@ function gsg_get_class_students() {
 add_action('wp_ajax_gsg_get_class_students', 'gsg_get_class_students');
 add_action('wp_ajax_nopriv_gsg_get_class_students', 'gsg_get_class_students');
 
+function gsg_get_class_student() {
+    check_ajax_referer('get-class-student-nonce', 'get_class_student_nonce');
+
+    $class_student_id = intval($_POST['class_student_id']);
+    $class_student = get_post($class_student_id);
+
+    if (!$class_student) {
+        wp_send_json_error('Student not found.', 404);
+    }
+
+    $class_student_data = array(
+        'id' => $class_student->ID,
+        'student' => intval(get_field('student', $class_student->ID)),
+        'days_present' => get_field('days_present', $class_student->ID),
+        'status' => get_field('status', $class_student->ID)
+    );
+
+    wp_send_json_success($class_student_data);
+}
+
+add_action('wp_ajax_gsg_get_class_student', 'gsg_get_class_student');
+add_action('wp_ajax_nopriv_gsg_get_class_student', 'gsg_get_class_student');
+
+function gsg_create_class_student() {
+    check_ajax_referer('create-class-student-nonce', 'create_class_student_nonce');
+
+    global $current_user;
+
+    $errors = array();
+
+    $class_id = intval($_POST['class_id']);
+    $student = intval($_POST['student']);
+    $days_present = intval($_POST['days_present']);
+    $status = $_POST['status'];
+
+    if (empty($class_id)) {
+        wp_send_json_error(array('create_class_student_error' => 'The class ID field is required.'), 204);
+    }
+
+    if (empty($student)) {
+        $errors['student'] = 'Please select a student.';
+    }
+
+    if (empty($days_present)) {
+        $errors['days_present'] = 'The days present field is required.';
+    }else if ($days_present < 0) {
+        $errors['days_present'] = 'The days present field must not be less than 0.';
+    }
+
+    if (empty($status)) {
+        $errors['status'] = 'Please select a status.';
+    }
+
+    if (!empty($errors)) {
+        wp_send_json_error($errors, 400);
+    }
+
+    $student_query = new WP_Query(array(
+        'post_type' => 'student',
+        'post_status' => 'publish',
+        'posts_per_page' => -1,
+        'meta_query' => array(
+            'relation' => 'AND',
+            array(
+                'key' => 'class',
+                'value' => $class_id
+            ),
+            array(
+                'key' => 'student',
+                'value' => $student
+            )
+        )
+    ));
+
+    if ($student_query->found_posts > 0) {
+        wp_send_json_error(array('create_class_student_error' => 'The student already exists.'), 409);
+    }
+
+    $post_id = wp_insert_post(array(
+        'post_type' => 'student',
+        'post_status' => 'publish',
+        'post_author' => $current_user->ID
+    ));
+
+    wp_update_post(array(
+        'ID' => $post_id,
+        'post_title' => $post_id
+    ));
+
+    update_field('class', $class_id, $post_id);
+    update_field('student', $student, $post_id);
+    update_field('days_present', $days_present, $post_id);
+    update_field('status', $status, $post_id);
+
+    wp_send_json_success(array('message' => 'Student has been added.'), 201);
+}
+
+add_action('wp_ajax_gsg_create_class_student', 'gsg_create_class_student');
+add_action('wp_ajax_nopriv_gsg_create_class_student', 'gsg_create_class_student');
+
+function gsg_update_class_student() {
+    check_ajax_referer('update-class-student-nonce', 'update_class_student_nonce');
+
+    $errors = array();
+
+    $class_id = intval($_POST['class_id']);
+    $class_student_id = intval($_POST['class_student_id']);
+    $student = intval($_POST['student']);
+    $days_present = intval($_POST['days_present']);
+    $status = $_POST['status'];
+
+    if (empty($class_id)) {
+        wp_send_json_error(array('update_class_student_error' => 'The class ID field is required.'), 204);
+    }
+
+    if (empty($class_student_id)) {
+        wp_send_json_error(array('update_class_student_error' => 'The class student ID field is required.'), 204);
+    }
+
+    if (empty($student)) {
+        $errors['student'] = 'Please select a student.';
+    }
+
+    if (empty($days_present)) {
+        $errors['days_present'] = 'The days present field is required.';
+    }else if ($days_present < 0) {
+        $errors['days_present'] = 'The days present field must not be less than 0.';
+    }
+
+    if (empty($status)) {
+        $errors['status'] = 'Please select a status.';
+    }
+
+    if (!empty($errors)) {
+        wp_send_json_error($errors, 400);
+    }
+
+    update_field('class', $class_id, $class_student_id);
+    update_field('student', $student, $class_student_id);
+    update_field('days_present', $days_present, $class_student_id);
+    update_field('status', $status, $class_student_id);
+
+    wp_send_json_success(array('message' => 'Student has been updated.'));
+}
+
+add_action('wp_ajax_gsg_update_class_student', 'gsg_update_class_student');
+add_action('wp_ajax_nopriv_gsg_update_class_student', 'gsg_update_class_student');
+
+function gsg_remove_class_student() {
+    check_ajax_referer('remove-class-student-nonce', 'remove_class_student_nonce');
+
+    $class_student_id = intval($_POST['class_student_id']);
+
+    if (empty($class_student_id)) {
+        wp_send_json_error(array('remove_class_student_error' => 'The student ID field is required.'), 204);
+    }
+
+    wp_delete_post($class_student_id);
+
+    wp_send_json_success();
+}
+
+add_action('wp_ajax_gsg_remove_class_student', 'gsg_remove_class_student');
+add_action('wp_ajax_nopriv_gsg_remove_class_student', 'gsg_remove_class_student');
+
 function gsg_get_records() {
     check_ajax_referer('get-records-nonce', 'get_records_nonce');
 

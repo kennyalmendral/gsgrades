@@ -186,7 +186,7 @@ get_header();
             <div class="card bg-white shadow-sm mb-4">
                 <div class="card-header py-3 d-flex align-items-center justify-content-between">
                     <h4 class="mb-0">Students</h4>
-                    <button id="add-student" class="btn btn-secondary" <?php echo $remaining_hours <= 0 ? 'disabled' : '' ; ?>>Add student</button>
+                    <button id="create-class-student" class="btn btn-secondary" <?php echo $remaining_hours <= 0 ? 'disabled' : '' ; ?>>Add student</button>
                 </div>
 
                 <div class="card-body pb-2">
@@ -319,7 +319,11 @@ get_header();
 
 <?php include_once 'templates/create-session-modal.php'; ?>
 <?php include_once 'templates/update-session-modal.php'; ?>
+
 <?php include_once 'templates/create-record-modal.php'; ?>
 <?php include_once 'templates/update-record-modal.php'; ?>
+
+<?php include_once 'templates/create-class-student-modal.php'; ?>
+<?php include_once 'templates/update-class-student-modal.php'; ?>
 
 <?php get_footer(); ?>
