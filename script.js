@@ -742,11 +742,11 @@
                     columns: [
                         { data: 'id' },
                         { data: 'post_title' },
-                        { data: 'completion_hours' },
-                        { data: 'completed_hours' },
-                        { data: 'remaining_hours' },
+                        { data: 'level' },
+                        { data: 'duration' },
                         { data: 'status' },
-                        { data: 'date_created' }
+                        { data: 'date_created' },
+                        { data: 'last_updated' }
                     ],
                 },
                 columnDefs: [
@@ -889,7 +889,8 @@
                         action: 'gsg_create_class',
                         create_class_nonce: createClassModalForm.find('#gsg_create_class_nonce_field').val(),
                         level: createClassModalForm.find('#level').val(),
-                        completion_hours: createClassModalForm.find('#completion-hours').val()
+                        completion_hours: createClassModalForm.find('#completion-hours').val(),
+                        duration: createClassModalForm.find('#duration').val()
                     },
                     beforeSend: function() {
                         createClassModalFormSubmitBtn.attr('disabled', true);
@@ -898,6 +899,8 @@
 
                         createClassModalForm.find('#level').length > 0 && createClassModalForm.find('#level').removeClass('is-invalid');
                         createClassModalForm.find('#completion-hours').length > 0 && createClassModalForm.find('#completion-hours').removeClass('is-invalid');
+                        createClassModalForm.find('#duration').length > 0 && createClassModalForm.find('#duration').removeClass('is-invalid');
+
                         createClassModalForm.find('#create-class-error').length > 0 && createClassModalForm.find('#create-class-error').remove();
                         createClassModalForm.find('.alert-success').length > 0 && createClassModalForm.find('.alert-success').remove();
                         createClassModalForm.find('.invalid-feedback').length > 0 && createClassModalForm.find('.invalid-feedback').remove();
@@ -933,12 +936,6 @@
 
                             setTimeout(function() {
                                 location.href = response.data.class_permalink;
-                                // createClassModal.hide();
-
-                                // createClassModalForm.find('#create-class-success').remove();
-                                // createClassModalForm.find('#completion-hours').val('');
-
-                                // classesDataTable.ajax.reload();
                             }, 1000);
                         }
                     },
@@ -957,13 +954,20 @@
             const saveChangesBtn = details.find('#save-changes');
             const level = details.find('#level');
             const completionHours = details.find('#completion-hours');
+            const duration = details.find('#duration');
             const generateReport = $('#generate-report');
 
             level.keyup(function(e) {
                 if (e.keyCode === 13) {
                     saveChangesBtn.click();
                 }
-             });
+            });
+
+            duration.keyup(function(e) {
+                if (e.keyCode === 13) {
+                    saveChangesBtn.click();
+                }
+            });
 
             completionHours.keyup(function(e) {
                if (e.keyCode === 13) {
@@ -983,7 +987,8 @@
                         update_class_nonce: gsg.updateClassNonce,
                         class_id: classId.val(),
                         level: level.val(),
-                        completion_hours: completionHours.val()
+                        completion_hours: completionHours.val(),
+                        duration: duration.val()
                     },
                     beforeSend: function() {
                         me.attr('disabled', true);
@@ -992,6 +997,8 @@
 
                         level.hasClass('is-invalid') && level.removeClass('is-invalid');
                         completionHours.hasClass('is-invalid') && completionHours.removeClass('is-invalid');
+                        duration.hasClass('is-invalid') && duration.removeClass('is-invalid');
+
                         details.find('#update-class-error').length > 0 && details.find('#update-class-error').remove();
                         details.find('.alert-success').length > 0 && details.find('.alert-success').remove();
                         details.find('.invalid-feedback').length > 0 && details.find('.invalid-feedback').remove();

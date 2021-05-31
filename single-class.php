@@ -11,6 +11,7 @@ $level = get_field('level', $post->ID);
 $completion_hours = intval(get_field('completion_hours', $post->ID));
 $completed_hours = intval(get_field('completed_hours', $post->ID));
 $remaining_hours = intval(get_field('remaining_hours', $post->ID));
+$duration = intval(get_field('duration', $post->ID));
 
 $sessions = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$wpdb->prefix}class_sessions WHERE class_id = %d ORDER BY created_at ASC", $post->ID));
 
@@ -104,9 +105,20 @@ get_header();
                         <input type="text" id="level" class="form-control" value="<?php echo esc_attr($level); ?>" required />
                     </div>
 
-                    <div class="mb-2">
-                        <label for="completion-hours" class="form-label text-muted">Number of hours to complete</label>
-                        <input type="number" min=0 id="completion-hours" class="form-control" value="<?php echo esc_attr($completion_hours); ?>" required />
+                    <div class="row mb-2">
+                        <div class="col-12 col-md-6">
+                            <label for="completion-hours" class="form-label text-muted">Completion hours</label>
+                            <input type="number" min=0 id="completion-hours" class="form-control" value="<?php echo esc_attr($completion_hours); ?>" required />
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="duration" class="form-label text-muted">Duration</label>
+
+                            <div class="input-group">
+                                <input type="number" min=0 id="duration" class="form-control" value="<?php echo esc_attr($duration); ?>" required />
+                                <span class="input-group-text text-muted">days</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row mb-2">

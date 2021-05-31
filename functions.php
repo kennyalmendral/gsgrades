@@ -7,6 +7,7 @@ if (is_admin()) {
         $columns['completion_hours'] = '# of hours to complete';
         $columns['completed_hours'] = 'Completed hours';
         $columns['remaining_hours'] = 'Remaining hours';
+        $columns['duration'] = 'Duration';
     
         return $columns;
     }
@@ -26,6 +27,9 @@ if (is_admin()) {
                 break;
             case 'remaining_hours':
                 echo get_field('remaining_hours');
+                break;
+            case 'duration':
+                echo !is_null(get_field('duration')) ? get_field('duration') . ' days' : 'N/A';
                 break;
             default:
                 break;
@@ -113,7 +117,7 @@ if (is_admin()) {
     
     add_action('manage_posts_custom_column' , 'gsg_report_columns_data', 10, 2);
 
-    function gsg_custom_student_columns($columns) {
+    function gsg_class_student_columns($columns) {
         //unset($columns['date']);
         $columns['student_class'] = 'Class Code';
         $columns['class_student'] = 'Student';
@@ -123,7 +127,7 @@ if (is_admin()) {
         return $columns;
     }
     
-    add_filter('manage_student_posts_columns', 'gsg_custom_student_columns');
+    add_filter('manage_student_posts_columns', 'gsg_class_student_columns');
     
     function gsg_student_columns_data($column, $post_id) {
         switch ($column) {

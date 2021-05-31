@@ -609,8 +609,7 @@ add_action('wp_ajax_nopriv_gsg_get_student', 'gsg_get_student');
 function gsg_get_classes() {
     check_ajax_referer('get-classes-nonce', 'get_classes_nonce');
 
-    global $wpdb;
-    global $current_user;
+    global $wpdb, $current_user;
 
     $draw = intval($_GET['draw']);
     $offset = intval($_GET['start']);
@@ -646,6 +645,10 @@ function gsg_get_classes() {
             $order_column_meta_key = 'remaining_hours';
             break;
         case 6:
+            $order_column = 'meta_value';
+            $order_column_meta_key = 'duration';
+            break;
+        case 7:
             $order_column = 'post_status';
             break;
         default:
@@ -773,11 +776,10 @@ function gsg_get_classes() {
                     $post->ID,
                     $post->post_title,
                     get_field('level', $post->ID),
-                    get_field('completion_hours', $post->ID),
-                    get_field('completed_hours', $post->ID),
-                    get_field('remaining_hours', $post->ID),
+                    get_field('duration', $post->ID) . ' days',
                     '<span class="badge bg-' . $post_status_badge_bg . '">' . ucfirst($post_status) . '</span>',
-                    get_the_date('M d, Y', $post->ID)
+                    get_the_date('M d, Y', $post->ID),
+                    get_the_modified_date('M d, Y', $post->ID)
                 );
             }
         }
@@ -797,11 +799,10 @@ function gsg_get_classes() {
                 get_the_ID(),
                 get_the_title(),
                 get_field('level'),
-                get_field('completion_hours'),
-                get_field('completed_hours'),
-                get_field('remaining_hours'),
+                get_field('duration', $post->ID) . ' days',
                 '<span class="badge bg-' . $post_status_badge_bg . '">' . ucfirst($post_status) . '</span>',
-                get_the_date('M d, Y')
+                get_the_date('M d, Y'),
+                get_the_modified_date('M d, Y')
             );
         }
 
@@ -830,6 +831,7 @@ function gsg_create_class() {
 
     $level = trim($_POST['level']);
     $completion_hours = intval($_POST['completion_hours']);
+    $duration = intval($_POST['duration']);
 
     if (empty($level)) {
         $errors['level'] = 'The level field is required.';
@@ -843,6 +845,14 @@ function gsg_create_class() {
         $errors['completion_hours'] = 'The completion hours must be numeric.';
     } else if ($completion_hours < 1) {
         $errors['completion_hours'] = 'The completion hours must be greater than 0.';
+    }
+
+    if (empty($duration)) {
+        $errors['duration'] = 'The duration field is required.';
+    } else if (!is_numeric($duration)) {
+        $errors['duration'] = 'The duration must be numeric.';
+    } else if ($duration < 1) {
+        $errors['duration'] = 'The duration must be greater than 0.';
     }
 
     if (!empty($errors)) {
@@ -866,6 +876,7 @@ function gsg_create_class() {
     update_field('completion_hours', $completion_hours, $post_id);
     update_field('completed_hours', 0, $post_id);
     update_field('remaining_hours', $completion_hours, $post_id);
+    update_field('duration', $duration, $post_id);
 
     wp_send_json_success(array(
         'message' => 'Class has been created.',
@@ -884,6 +895,7 @@ function gsg_update_class() {
     $class_id = intval($_POST['class_id']);
     $level = $_POST['level'];
     $completion_hours = intval($_POST['completion_hours']);
+    $duration = intval($_POST['duration']);
 
     if (empty($class_id)) {
         wp_send_json_error(array('update_class_error' => 'The class ID field is required.'), 204);
@@ -899,6 +911,12 @@ function gsg_update_class() {
         $errors['completion_hours'] = 'The completion hours field must be greater than 0.';
     }
 
+    if (empty($duration)) {
+        $errors['duration'] = 'The duration field is required.';
+    } else if ($duration < 1) {
+        $errors['duration'] = 'The duration field must be greater than 0.';
+    }
+
     $sum_total_hours = gsg_get_class_sum_total_hours($class_id);
 
     if ($completion_hours < $sum_total_hours) {
@@ -911,12 +929,15 @@ function gsg_update_class() {
 
     update_field('level', $level, $class_id);
     update_field('completion_hours', $completion_hours, $class_id);
+    update_field('duration', $duration, $class_id);
     
     if ($sum_total_hours > 0) {
         gsg_update_class_hours($class_id, $sum_total_hours);
     } else {
         update_field('remaining_hours', $completion_hours, $class_id);
     }
+
+    // TODO: If the duration field is updated, regenerate the current class report
 
     wp_send_json_success("Details has been updated successfully.");
 }

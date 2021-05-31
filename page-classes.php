@@ -39,24 +39,24 @@ get_header();
                     <th width="9%">ID</th>
                     <th width="12%">Code</th>
                     <th width="9%">Level</th>
-                    <th width="14%"># of hours to complete</th>
-                    <th width="12%">Completed hours</th>
-                    <th width="12%">Remaining hours</th>
+                    <th width="10%">Duration</th>
                     <th width="10%">Status</th>
-                    <th width="20%"class="text-center">Actions</th>
+                    <th width="13%">Date created</th>
+                    <th width="13%">Last updated</th>
+                    <th width="15%"class="text-center">Actions</th>
                 </tr>
             </thead>
 
             <tfoot>
                 <tr>
-                    <th>ID</th>
-                    <th>Code</th>
-                    <th>Level</th>
-                    <th># of hours to complete</th>
-                    <th>Completed hours</th>
-                    <th>Remaining hours</th>
-                    <th>Status</th>
-                    <th class="text-center">Actions</th>
+                    <th width="9%">ID</th>
+                    <th width="12%">Code</th>
+                    <th width="9%">Level</th>
+                    <th width="10%">Duration</th>
+                    <th width="10%">Status</th>
+                    <th width="13%">Date created</th>
+                    <th width="13%">Last updated</th>
+                    <th width="15%"class="text-center">Actions</th>
                 </tr>
             </tfoot>
         </table>
