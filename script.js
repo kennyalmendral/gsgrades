@@ -957,6 +957,16 @@
             const duration = details.find('#duration');
             const generateReport = $('#generate-report');
 
+            if (location.hash) {
+                setTimeout(function() {
+                    window.scrollTo({
+                        top: $(`body ${location.hash}`).offset().top,
+                        left: 0,
+                        behavior: 'smooth'
+                    });
+                }, 1000);
+            }
+
             level.keyup(function(e) {
                 if (e.keyCode === 13) {
                     saveChangesBtn.click();
@@ -1439,7 +1449,8 @@
                                 student.val('');
                                 daysPresent.val('');
                                 status.val('');
-
+                                
+                                location.hash = '#students';
                                 location.reload();
                             }, 1000);
                         }
@@ -1601,7 +1612,8 @@
                                 student.val('');
                                 daysPresent.val('');
                                 status.val('');
-
+                                
+                                location.hash = '#students';
                                 location.reload();
                             }, 1000);
                         }
@@ -1634,15 +1646,15 @@
                         d.action = 'gsg_get_records';
                         d.get_records_nonce = gsg.getRecordsNonce;
                         d.student = studentFilterSelect.val();
-                        d.category = categoryFilterSelect.val();
                         d.type = typeFilterSelect.val();
+                        d.category = categoryFilterSelect.val();
                         d.class_id = classId.val();
                     },
                     columns: [
                         { data: 'id' },
                         { data: 'student' },
-                        { data: 'category' },
                         { data: 'type' },
+                        { data: 'category' },
                         { data: 'score' },
                         { data: 'total_score' },
                         { data: 'date_created' },
@@ -1676,9 +1688,9 @@
                     $('#records-table_wrapper .row:first-of-type .col-sm-12:last-of-type').removeClass('col-md-6').addClass('col-md-8');
 
                     $('#records-table_wrapper .row:first-of-type .col-sm-12:last-of-type').addClass('d-flex align-items-center justify-content-between')
-                        .prepend(typeFilter)
                         .prepend(studentFilter)
-                        .prepend(categoryFilter);
+                        .prepend(categoryFilter)
+                        .prepend(typeFilter);
 
                     $('#records-table_filter input').css('margin-left', 0).attr('placeholder', 'Search record ID');
 
@@ -1692,7 +1704,13 @@
                 typeFilterSelect.val('');
             });
 
-            studentFilterSelect.change(function() {
+            typeFilterSelect.change(function() {
+                if ($(this).val() == 'exam') {
+                    categoryFilterSelect.val('').attr('disabled', true);
+                } else {
+                    categoryFilterSelect.removeAttr('disabled');
+                }
+
                 recordsDataTable.ajax.reload();
             });
 
@@ -1700,7 +1718,7 @@
                 recordsDataTable.ajax.reload();
             });
 
-            typeFilterSelect.change(function() {
+            studentFilterSelect.change(function() {
                 recordsDataTable.ajax.reload();
             });
 
@@ -1716,6 +1734,15 @@
             const createRecordModal = new bootstrap.Modal(document.getElementById('create-record-modal'), {
                 backdrop: 'static',
                 keyboard: false
+            });
+
+            createRecordModalForm.find('#type').change(function() {
+                if ($(this).val() == 'exam') {
+                    createRecordModalForm.find('#category').val('').attr('disabled', true);
+                    
+                } else {
+                    createRecordModalForm.find('#category').removeAttr('disabled');
+                }
             });
 
             createRecordBtn.click(function() {
@@ -1800,6 +1827,7 @@
                                 score.val(0);
                                 totalScore.val(0);
 
+                                location.hash = '#records';
                                 location.reload();
                             }, 1000);
                         }
@@ -1815,6 +1843,15 @@
             const updateRecordModal = new bootstrap.Modal(document.getElementById('update-record-modal'), {
                 backdrop: 'static',
                 keyboard: false
+            });
+
+            updateRecordModalForm.find('#edit-type').change(function() {
+                if ($(this).val() == 'exam') {
+                    updateRecordModalForm.find('#edit-category').val('').attr('disabled', true).removeClass('is-invalid');
+                    updateRecordModalForm.find('#edit-category-error-alert').remove();
+                } else {
+                    updateRecordModalForm.find('#edit-category').removeAttr('disabled');
+                }
             });
 
             $('body').on('click', '.delete-record-button', function() {
@@ -1864,6 +1901,9 @@
                     },
                     beforeSend: function() {
                         me.attr('disabled', true);
+
+                        updateRecordModalForm.find('#edit-category').removeClass('is-invalid');
+                        updateRecordModalForm.find('#edit-category-error-alert').remove();
                     },
                     error: function(xhr) {
                         let response = xhr.responseJSON;
@@ -1876,8 +1916,15 @@
 
                             updateRecordModalForm.find('#edit-record-id').val(recordData.id);
                             updateRecordModalForm.find('#edit-student').val(recordData.student);
-                            updateRecordModalForm.find('#edit-category').val(recordData.category);
+
                             updateRecordModalForm.find('#edit-type').val(recordData.type);
+
+                            if (recordData.type == 'exam') {
+                                updateRecordModalForm.find('#edit-category').val('').attr('disabled', true);
+                            } else {
+                                updateRecordModalForm.find('#edit-category').val(recordData.category).removeAttr('disabled');
+                            }
+                            
                             updateRecordModalForm.find('#edit-score').val(recordData.score);
                             updateRecordModalForm.find('#edit-total-score').val(recordData.total_score);
 
@@ -1971,6 +2018,7 @@
                                 score.val('');
                                 totalScore.val('');
 
+                                location.hash = '#records';
                                 location.reload();
                             }, 1000);
                         }
@@ -1983,7 +2031,7 @@
                 });
             });
 
-            generateReport.click(function() {
+            generateReport.click(function() { 
                 const me = $(this);
 
                 $.ajax({

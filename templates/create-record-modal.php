@@ -14,23 +14,11 @@
                         <select id="student" class="form-select" required>
                             <option value="">Select student</option>
 
-                            <?php foreach ($all_students as $student): ?>
-                                <option value="<?php echo $student->ID; ?>"><?php echo $student->display_name; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="row mb-2">
-                    <div class="col-12">
-                        <label for="category" class="mb-1 text-muted">Category</label>
-                        
-                        <select id="category" class="form-select" required>
-                            <option value="">Select category</option>
-
-                            <?php foreach ($categories as $id => $display_name): ?>
-                                <option value="<?php echo $id; ?>"><?php echo $display_name; ?></option>
-                            <?php endforeach; ?>
+                            <?php if (!empty($class_students)): ?>
+                                <?php foreach ($class_students as $id => $display_name): ?>
+                                    <option value="<?php echo esc_attr($id); ?>"><?php echo $display_name; ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </select>
                     </div>
                 </div>
@@ -43,6 +31,20 @@
                             <option value="">Select type</option>
                             <option value="quiz">Quiz</option>
                             <option value="exam">Exam</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col-12">
+                        <label for="category" class="mb-1 text-muted">Category</label>
+                        
+                        <select id="category" class="form-select">
+                            <option value="">Select category</option>
+
+                            <?php foreach ($categories as $id => $display_name): ?>
+                                <option value="<?php echo $id; ?>"><?php echo $display_name; ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </div>

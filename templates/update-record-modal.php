@@ -23,26 +23,26 @@
 
                 <div class="row mb-2">
                     <div class="col-12">
-                        <label for="edit-category" class="mb-1 text-muted">Category</label>
-                        
-                        <select id="edit-category" class="form-select" required>
-                            <option value="">Select category</option>
-
-                            <?php foreach ($categories as $id => $display_name): ?>
-                                <option value="<?php echo $id; ?>"><?php echo $display_name; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="row mb-2">
-                    <div class="col-12">
                         <label for="edit-type" class="mb-1 text-muted">Type</label>
                         
                         <select id="edit-type" class="form-select" required>
                             <option value="">Select type</option>
                             <option value="quiz">Quiz</option>
                             <option value="exam">Exam</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col-12">
+                        <label for="edit-category" class="mb-1 text-muted">Category</label>
+                        
+                        <select id="edit-category" class="form-select">
+                            <option value="">Select category</option>
+
+                            <?php foreach ($categories as $id => $display_name): ?>
+                                <option value="<?php echo $id; ?>"><?php echo $display_name; ?></option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
                 </div>

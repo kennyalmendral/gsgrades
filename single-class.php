@@ -298,8 +298,8 @@ get_header();
                             <tr>
                                 <th width="6%">ID</th>
                                 <th width="15%">Student</th>
-                                <th width="15%">Category</th>
                                 <th width="8%">Type</th>
+                                <th width="15%">Category</th>
                                 <th width="8%">Score</th>
                                 <th width="10%">Total score</th>
                                 <th width="15%">Date created</th>
@@ -312,8 +312,8 @@ get_header();
                             <tr>
                                 <th width="6%">ID</th>
                                 <th width="15%">Student</th>
-                                <th width="15%">Category</th>
                                 <th width="8%">Type</th>
+                                <th width="15%">Category</th>
                                 <th width="8%">Score</th>
                                 <th width="10%">Total score</th>
                                 <th width="15%">Date created</th>

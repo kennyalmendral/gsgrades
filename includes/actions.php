@@ -1788,7 +1788,7 @@ function gsg_get_records() {
         if (!empty($record_query->posts)) {
             foreach ($record_query->posts as $post) {
                 $user = get_user_by('ID', get_field('student', $post->ID));
-                $category = get_category(get_field('category', $post->ID));
+                $category_name = get_field('category', $post->ID) ? get_category(get_field('category', $post->ID))->name : 'N/A';
                 $type = ucwords(str_replace('-', ' ', get_field('type', $post->ID)));
                 $score = intval(get_field('score', $post->ID));
                 $total_score = intval(get_field('total_score', $post->ID));
@@ -1798,8 +1798,8 @@ function gsg_get_records() {
                 $records[] = array(
                     $post->ID,
                     $user->display_name,
-                    $category->name,
                     $type,
+                    $category_name,
                     $score,
                     $total_score,
                     $date_created,
@@ -1812,7 +1812,7 @@ function gsg_get_records() {
             $record_query->the_post();
 
             $user = get_user_by('ID', get_field('student'));
-            $category = get_category(get_field('category'));
+            $category_name = get_field('category') ? get_category(get_field('category'))->name : 'N/A';
             $type = ucwords(str_replace('-', ' ', get_field('type')));
             $score = intval(get_field('score'));
             $total_score = intval(get_field('total_score'));
@@ -1822,8 +1822,8 @@ function gsg_get_records() {
             $records[] = array(
                 get_the_ID(),
                 $user->display_name,
-                $category->name,
                 $type,
+                $category_name,
                 $score,
                 $total_score,
                 $date_created,
@@ -1862,7 +1862,7 @@ function gsg_get_record() {
     $record = array(
         'id' => $get_record->ID,
         'student' => get_field('student', $get_record->ID),
-        'category' => get_field('category', $get_record->ID),
+        'category' => get_field('category', $get_record->ID) ? get_field('category', $get_record->ID) : 'N/A',
         'type' => get_field('type', $get_record->ID),
         'score' => intval(get_field('score', $get_record->ID)),
         'total_score' => intval(get_field('total_score', $get_record->ID))
@@ -1897,8 +1897,10 @@ function gsg_create_record() {
         $errors['student'] = 'Please select a student.';
     }
 
-    if (empty($category)) {
-        $errors['category'] = 'Please select a category.';
+    if ($type == 'quiz') {
+        if (empty($category)) {
+            $errors['category'] = 'Please select a category.';
+        }
     }
 
     if (empty($type)) {
@@ -1933,7 +1935,15 @@ function gsg_create_record() {
     update_field('class', $class_id, $post_id);
     update_field('teacher', $teacher, $post_id);
     update_field('student', $student, $post_id);
-    update_field('category', $category, $post_id);
+
+    if ($type == 'quiz') {
+        update_field('category', $category, $post_id);
+    } else {
+        if (get_field('category', $post_id)) {
+            delete_field('category', $post_id);
+        }
+    }
+
     update_field('type', $type, $post_id);
     update_field('score', $score, $post_id);
     update_field('total_score', $total_score, $post_id);
@@ -1966,8 +1976,10 @@ function gsg_update_record() {
         $errors['student'] = 'Please select a student.';
     }
 
-    if (empty($category)) {
-        $errors['category'] = 'Please select a category.';
+    if ($type == 'quiz') {
+        if (empty($category)) {
+            $errors['category'] = 'Please select a category.';
+        }
     }
 
     if (empty($type)) {
@@ -1989,7 +2001,15 @@ function gsg_update_record() {
     }
 
     update_field('student', $student, $record_id);
-    update_field('category', $category, $record_id);
+
+    if ($type == 'quiz') {
+        update_field('category', $category, $record_id);
+    } else {
+        if (get_field('category', $record_id)) {
+            delete_field('category', $record_id);
+        }
+    }
+    
     update_field('type', $type, $record_id);
     update_field('score', $score, $record_id);
     update_field('total_score', $total_score, $record_id);
