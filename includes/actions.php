@@ -2080,7 +2080,164 @@ function gsg_generate_report() {
     $student_ids = array_unique($raw_student_ids, SORT_REGULAR);
 
     foreach ($student_ids as $student) {
-        $aufsatz_query = new WP_Query(array(
+        /* Start Leseverstehen und Wortschatz */
+        $leseverstehen_quiz_query = new WP_Query(array(
+            'post_type' => 'record',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'author' => $teacher->ID,
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'class',
+                    'value' => $class_id
+                ),
+                array(
+                    'key' => 'student',
+                    'value' => $student
+                ),
+                array(
+                    'key' => 'category',
+                    'value' => 3
+                ),
+                array(
+                    'key' => 'type',
+                    'value' => 'quiz'
+                )
+            )
+        ));
+
+        $leseverstehen_quiz_scores = array();
+        $leseverstehen_quiz_total_scores = array();
+
+        foreach ($leseverstehen_quiz_query->posts as $item) {
+            $leseverstehen_quiz_scores[] = get_field('score', $item->ID);
+            $leseverstehen_quiz_total_scores[] = get_field('total_score', $item->ID);
+        }
+
+        $total_leseverstehen_quiz_score = array_sum($leseverstehen_quiz_scores);
+        $total_leseverstehen_quiz_percentage_score = round((($total_leseverstehen_quiz_score / array_sum($leseverstehen_quiz_total_scores)) * 0.20) * 100, 2);
+        /* End Leseverstehen und Wortschatz */
+
+        /* Start Horverstehen */
+        $horverstehen_quiz_query = new WP_Query(array(
+            'post_type' => 'record',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'author' => $teacher->ID,
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'class',
+                    'value' => $class_id
+                ),
+                array(
+                    'key' => 'student',
+                    'value' => $student
+                ),
+                array(
+                    'key' => 'category',
+                    'value' => 4
+                ),
+                array(
+                    'key' => 'type',
+                    'value' => 'quiz'
+                )
+            )
+        ));
+
+        $horverstehen_quiz_scores = array();
+        $horverstehen_quiz_total_scores = array();
+
+        foreach ($horverstehen_quiz_query->posts as $item) {
+            $horverstehen_quiz_scores[] = get_field('score', $item->ID);
+            $horverstehen_quiz_total_scores[] = get_field('total_score', $item->ID);
+        }
+
+        $total_horverstehen_quiz_score = array_sum($horverstehen_quiz_scores);
+        $total_horverstehen_quiz_percentage_score = round((($total_horverstehen_quiz_score / array_sum($horverstehen_quiz_total_scores)) * 0.20) * 100, 2);
+        /* End Horverstehen */
+
+        /* Start Grammatik */
+        $grammatik_quiz_query = new WP_Query(array(
+            'post_type' => 'record',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'author' => $teacher->ID,
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'class',
+                    'value' => $class_id
+                ),
+                array(
+                    'key' => 'student',
+                    'value' => $student
+                ),
+                array(
+                    'key' => 'category',
+                    'value' => 5
+                ),
+                array(
+                    'key' => 'type',
+                    'value' => 'quiz'
+                )
+            )
+        ));
+
+        $grammatik_quiz_scores = array();
+        $grammatik_quiz_total_scores = array();
+
+        foreach ($grammatik_quiz_query->posts as $item) {
+            $grammatik_quiz_scores[] = get_field('score', $item->ID);
+            $grammatik_quiz_total_scores[] = get_field('total_score', $item->ID);
+        }
+
+        $total_grammatik_quiz_score = array_sum($grammatik_quiz_scores);
+        $total_grammatik_quiz_percentage_score = round((($total_grammatik_quiz_score / array_sum($grammatik_quiz_total_scores)) * 0.20) * 100, 2);
+        /* End Grammatik */
+
+        /* Start Mundlich */
+        $mundlich_quiz_query = new WP_Query(array(
+            'post_type' => 'record',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'author' => $teacher->ID,
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'class',
+                    'value' => $class_id
+                ),
+                array(
+                    'key' => 'student',
+                    'value' => $student
+                ),
+                array(
+                    'key' => 'category',
+                    'value' => 6
+                ),
+                array(
+                    'key' => 'type',
+                    'value' => 'quiz'
+                )
+            )
+        ));
+
+        $mundlich_quiz_scores = array();
+        $mundlich_quiz_total_scores = array();
+
+        foreach ($mundlich_quiz_query->posts as $item) {
+            $mundlich_quiz_scores[] = get_field('score', $item->ID);
+            $mundlich_quiz_total_scores[] = get_field('total_score', $item->ID);
+        }
+
+        $total_mundlich_quiz_score = array_sum($mundlich_quiz_scores);
+        $total_mundlich_quiz_percentage_score = round((($total_mundlich_quiz_score / array_sum($mundlich_quiz_total_scores)) * 0.20) * 100, 2);
+        /* End Mundlich */
+
+        /* Start Aufsatz */
+        $aufsatz_quiz_query = new WP_Query(array(
             'post_type' => 'record',
             'post_status' => 'publish',
             'posts_per_page' => -1,
@@ -2106,43 +2263,139 @@ function gsg_generate_report() {
             )
         ));
 
-        $aufsatz_scores = array();
-        $aufsatz_total_scores = array();
+        $aufsatz_quiz_scores = array();
+        $aufsatz_quiz_total_scores = array();
 
-        foreach ($aufsatz_query->posts as $item) {
-            $aufsatz_scores[] = get_field('score', $item->ID);
-            $aufsatz_total_scores[] = get_field('total_score', $item->ID);
+        foreach ($aufsatz_quiz_query->posts as $item) {
+            $aufsatz_quiz_scores[] = get_field('score', $item->ID);
+            $aufsatz_quiz_total_scores[] = get_field('total_score', $item->ID);
         }
+
+        $total_aufsatz_quiz_score = array_sum($aufsatz_quiz_scores);
+        $total_aufsatz_quiz_percentage_score = round((($total_aufsatz_quiz_score / array_sum($aufsatz_quiz_total_scores)) * 0.20) * 100, 2);
+        /* End Aufsatz */
+
+        $exam_query = new WP_Query(array(
+            'post_type' => 'record',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'author' => $teacher->ID,
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'class',
+                    'value' => $class_id
+                ),
+                array(
+                    'key' => 'student',
+                    'value' => $student
+                ),
+                array(
+                    'key' => 'type',
+                    'value' => 'exam'
+                )
+            )
+        ));
+
+        $exam_scores = array();
+        $exam_total_scores = array();
+
+        foreach ($exam_query->posts as $item) {
+            $exam_scores[] = get_field('score', $item->ID);
+            $exam_total_scores[] = get_field('total_score', $item->ID);
+        }
+
+        $total_exam_score = array_sum($exam_scores);
+        $total_exam_percentage_score = round((($total_exam_score / array_sum($exam_total_scores)) * 0.30) * 100, 2);
+
+        $student_query = new WP_Query(array(
+            'post_type' => 'student',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'author' => $teacher->ID,
+            'meta_query' => array(
+                'relation' => 'AND',
+                array(
+                    'key' => 'class',
+                    'value' => $class_id
+                ),
+                array(
+                    'key' => 'student',
+                    'value' => $student
+                )
+            )
+        ));
+
+        $student_id = $student_query->posts[0]->ID;
+        $days_present = intval(get_field('days_present', $student_id));
+        $duration = intval(get_field('duration', $class_id));
 
         $records[] = array(
             'student' => get_user_by('ID', $student)->display_name,
-            'leseverstehen_und_wortschatz' => 0,
-            'horverstehen_diktat' => 0,
-            'grammatik' => 0,
-            'mundlich' => 0,
-            'aufsatz' => array_sum($aufsatz_scores),
-            'aufsatz_total' => array_sum($aufsatz_total_scores),
-            'total' => 0,
-            'final_exam' => 0,
-            'attendance' => 0,
-            'final_grade' => 0
+
+            'leseverstehen' => $total_leseverstehen_quiz_score,
+            'leseverstehen_percentage' => "$total_leseverstehen_quiz_percentage_score%",
+            'leseverstehen_total' => array_sum($leseverstehen_quiz_total_scores),
+
+            'horverstehen' => $total_horverstehen_quiz_score,
+            'horverstehen_percentage' => "$total_horverstehen_quiz_percentage_score%",
+            'horverstehen_total' => array_sum($horverstehen_quiz_total_scores),
+
+            'grammatik' => $total_grammatik_quiz_score,
+            'grammatik_percentage' => "$total_grammatik_quiz_percentage_score%",
+            'grammatik_total' => array_sum($grammatik_quiz_total_scores),
+
+            'mundlich' => $total_mundlich_quiz_score,
+            'mundlich_percentage' => "$total_mundlich_quiz_percentage_score%",
+            'mundlich_total' => array_sum($mundlich_quiz_total_scores),
+
+            'aufsatz' => $total_aufsatz_quiz_score,
+            'aufsatz_percentage' => "$total_aufsatz_quiz_percentage_score%",
+            'aufsatz_total' => array_sum($aufsatz_quiz_total_scores),
+
+            'total' => $total_leseverstehen_quiz_score + $total_horverstehen_quiz_score + $total_grammatik_quiz_score + $total_mundlich_quiz_score + $total_aufsatz_quiz_score,
+            'total_percentage' => round((($total_leseverstehen_quiz_percentage_score + $total_horverstehen_quiz_percentage_score + $total_grammatik_quiz_percentage_score + $total_mundlich_quiz_percentage_score + $total_aufsatz_quiz_percentage_score) * 0.60), 2) . '%',
+            'quizzes_total' => array_sum($leseverstehen_quiz_total_scores) + array_sum($horverstehen_quiz_total_scores) + array_sum($grammatik_quiz_total_scores) + array_sum($mundlich_quiz_total_scores) + array_sum($aufsatz_quiz_total_scores),
+
+            'exam' => $total_exam_score,
+            'exam_percentage' => "$total_exam_percentage_score%",
+            'exam_total' => array_sum($exam_total_scores),
+
+            'attendance' => $days_present,
+            'attendance_percentage' => round(((($days_present / $duration) * 0.10) * 100), 2) . '%',
+            'attendance_total' => $duration,
+
+            'final_grade' => round((($total_leseverstehen_quiz_percentage_score + $total_horverstehen_quiz_percentage_score + $total_grammatik_quiz_percentage_score + $total_mundlich_quiz_percentage_score + $total_aufsatz_quiz_percentage_score) * 0.60), 2) + $total_exam_percentage_score + round(((($days_present / $duration) * 0.10) * 100), 2)
         );
     }
 
     foreach ($records as $record) {
         $record_row_html .= '<tr>';
             $record_row_html .= '<td>' . $record['student'] . '</td>';
-            $record_row_html .= '<td>' . $record['leseverstehen_und_wortschatz'] . '</td>';
-            $record_row_html .= '<td>' . $record['horverstehen_diktat'] . '</td>';
-            $record_row_html .= '<td>' . $record['grammatik'] . '</td>';
-            $record_row_html .= '<td>' . $record['mundlich'] . '</td>';
-            $record_row_html .= '<td>' . $record['aufsatz'] . ' (' . $record['aufsatz_total'] . ')</td>';
-            $record_row_html .= '<td>' . $record['total'] . '</td>';
-            $record_row_html .= '<td>' . $record['final_exam'] . '</td>';
-            $record_row_html .= '<td>' . $record['attendance'] . '</td>';
-            $record_row_html .= '<td>' . $record['final_grade'] . '</td>';
+            $record_row_html .= '<td>' . $record['leseverstehen'] . ' (' . $record['leseverstehen_percentage'] . ')</td>';
+            $record_row_html .= '<td>' . $record['horverstehen'] . ' (' . $record['horverstehen_percentage'] . ')</td>';
+            $record_row_html .= '<td>' . $record['grammatik'] . ' (' . $record['grammatik_percentage'] . ')</td>';
+            $record_row_html .= '<td>' . $record['mundlich'] . ' (' . $record['mundlich_percentage'] . ')</td>';
+            $record_row_html .= '<td>' . $record['aufsatz'] . ' (' . $record['aufsatz_percentage'] . ')</td>';
+            $record_row_html .= '<td>' . $record['total'] . ' (' . $record['total_percentage'] . ')</td>';
+            $record_row_html .= '<td>' . $record['exam'] . ' (' . $record['exam_percentage'] . ')</td>';
+            $record_row_html .= '<td>' . $record['attendance'] . ' (' . $record['attendance_percentage'] . ')</td>';
+            $record_row_html .= '<td>' . $record['final_grade'] . '%</td>';
         $record_row_html .= '</tr>';
     }
+
+    $record_row_html .= '<tr>';
+        $record_row_html .= '<th>Over</th>';
+        $record_row_html .= '<th>' . $record['leseverstehen_total'] . '</th>';
+        $record_row_html .= '<th>' . $record['horverstehen_total'] . '</th>';
+        $record_row_html .= '<th>' . $record['grammatik_total'] . '</th>';
+        $record_row_html .= '<th>' . $record['mundlich_total'] . '</th>';
+        $record_row_html .= '<th>' . $record['aufsatz_total'] . '</th>';
+        $record_row_html .= '<th>' . $record['quizzes_total'] . '</th>';
+        $record_row_html .= '<th>' . $record['exam_total'] . '</th>';
+        $record_row_html .= '<th>' . $record['attendance_total'] . '</th>';
+        $record_row_html .= '<th></th>';
+    $record_row_html .= '</tr>';
 
     include_once GSG_VENDORS_PATH . '/dompdf/autoload.inc.php';
 
