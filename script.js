@@ -889,6 +889,7 @@
                         action: 'gsg_create_class',
                         create_class_nonce: createClassModalForm.find('#gsg_create_class_nonce_field').val(),
                         level: createClassModalForm.find('#level').val(),
+                        passing_grade: createClassModalForm.find('#passing-grade').val(),
                         completion_hours: createClassModalForm.find('#completion-hours').val(),
                         duration: createClassModalForm.find('#duration').val()
                     },
@@ -898,6 +899,7 @@
                         createClassModalFormSubmitBtn.find('i').removeClass('d-none');
 
                         createClassModalForm.find('#level').length > 0 && createClassModalForm.find('#level').removeClass('is-invalid');
+                        createClassModalForm.find('#passing-grade').length > 0 && createClassModalForm.find('#passing-grade').removeClass('is-invalid');
                         createClassModalForm.find('#completion-hours').length > 0 && createClassModalForm.find('#completion-hours').removeClass('is-invalid');
                         createClassModalForm.find('#duration').length > 0 && createClassModalForm.find('#duration').removeClass('is-invalid');
 
@@ -953,6 +955,7 @@
             const details = $('#details');
             const saveChangesBtn = details.find('#save-changes');
             const level = details.find('#level');
+            const passingGrade = details.find('#passing-grade');
             const completionHours = details.find('#completion-hours');
             const duration = details.find('#duration');
             const generateReport = $('#generate-report');
@@ -997,6 +1000,7 @@
                         update_class_nonce: gsg.updateClassNonce,
                         class_id: classId.val(),
                         level: level.val(),
+                        passing_grade: passingGrade.val(),
                         completion_hours: completionHours.val(),
                         duration: duration.val()
                     },
@@ -1006,6 +1010,7 @@
                         me.find('i').removeClass('d-none');
 
                         level.hasClass('is-invalid') && level.removeClass('is-invalid');
+                        passingGrade.hasClass('is-invalid') && passingGrade.removeClass('is-invalid');
                         completionHours.hasClass('is-invalid') && completionHours.removeClass('is-invalid');
                         duration.hasClass('is-invalid') && duration.removeClass('is-invalid');
 
@@ -1043,6 +1048,7 @@
                             details.find('.card-body').prepend(`<div id="update-class-success" class="alert alert-success fs-8 px-3 py-2">${response.data}</div>`);
 
                             setTimeout(function() {
+                                location.hash = '#details';
                                 location.reload();
                             }, 1000);
                         }
@@ -1139,6 +1145,7 @@
                                 startTime.val('');
                                 endTime.val('');
 
+                                location.hash = '#sessions';
                                 location.reload();
                             }, 1000);
                         }
@@ -1194,6 +1201,7 @@
                         },
                         success: function(response) {
                             if (response.success) {
+                                location.hash = '#sessions';
                                 location.reload();
                             }
                         }
@@ -1270,6 +1278,7 @@
                                 startTime.val('');
                                 endTime.val('');
 
+                                location.hash = '#sessions';
                                 location.reload();
                             }, 1000);
                         }
@@ -1487,6 +1496,7 @@
                         },
                         success: function(response) {
                             if (response.success) {
+                                location.hash = '#students';
                                 location.reload();
                             }
                         }
@@ -1878,6 +1888,7 @@
                         },
                         success: function(response) {
                             if (response.success) {
+                                location.hash = '#records';
                                 location.reload();
                             }
                         }

@@ -830,6 +830,7 @@ function gsg_create_class() {
     $errors = array();
 
     $level = trim($_POST['level']);
+    $passing_grade = intval($_POST['passing_grade']);
     $completion_hours = intval($_POST['completion_hours']);
     $duration = intval($_POST['duration']);
 
@@ -839,12 +840,18 @@ function gsg_create_class() {
         $errors['level'] = 'The level field must contain alphanumeric characters only.';
     }
 
+    if (empty($passing_grade)) {
+        $errors['passing_grade'] = 'The passing grade field is required.';
+    } else if ($passing_grade < 1) {
+        $errors['passing_grade'] = 'The passing grade field must be greater than 0.';
+    }
+
     if (empty($completion_hours)) {
         $errors['completion_hours'] = 'The completion hours field is required.';
     } else if (!is_numeric($completion_hours)) {
-        $errors['completion_hours'] = 'The completion hours must be numeric.';
+        $errors['completion_hours'] = 'The completion hours field must be numeric.';
     } else if ($completion_hours < 1) {
-        $errors['completion_hours'] = 'The completion hours must be greater than 0.';
+        $errors['completion_hours'] = 'The completion hours field must be greater than 0.';
     }
 
     if (empty($duration)) {
@@ -873,6 +880,7 @@ function gsg_create_class() {
     ));
 
     update_field('level', strtoupper($level), $post_id);
+    update_field('passing_grade', $passing_grade, $post_id);
     update_field('completion_hours', $completion_hours, $post_id);
     update_field('completed_hours', 0, $post_id);
     update_field('remaining_hours', $completion_hours, $post_id);
@@ -894,6 +902,7 @@ function gsg_update_class() {
 
     $class_id = intval($_POST['class_id']);
     $level = $_POST['level'];
+    $passing_grade = intval($_POST['passing_grade']);
     $completion_hours = intval($_POST['completion_hours']);
     $duration = intval($_POST['duration']);
 
@@ -903,6 +912,12 @@ function gsg_update_class() {
 
     if (empty($level)) {
         $errors['level'] = 'The level field is required.';
+    }
+
+    if (empty($passing_grade)) {
+        $errors['passing_grade'] = 'The passing grade field is required.';
+    } else if ($passing_grade < 1) {
+        $errors['passing_grade'] = 'The passing grade field must be greater than 0.';
     }
 
     if (empty($completion_hours)) {
@@ -928,6 +943,7 @@ function gsg_update_class() {
     }
 
     update_field('level', $level, $class_id);
+    update_field('passing_grade', $passing_grade, $class_id);
     update_field('completion_hours', $completion_hours, $class_id);
     update_field('duration', $duration, $class_id);
     
@@ -936,8 +952,6 @@ function gsg_update_class() {
     } else {
         update_field('remaining_hours', $completion_hours, $class_id);
     }
-
-    // TODO: If the duration field is updated, regenerate the current class report
 
     wp_send_json_success("Details has been updated successfully.");
 }

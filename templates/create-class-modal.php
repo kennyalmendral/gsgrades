@@ -16,12 +16,12 @@
 
                 <div class="row mb-2">
                     <div class="col">
-                        <label for="completion-hours" class="mb-1 text-muted">Completion hours</label>
-                        <input type="number" id="completion-hours" class="form-control" required>
+                        <label for="passing-grade" class="mb-1 text-muted">Passing grade</label>
+                        <input type="number" id="passing-grade" class="form-control" required>
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row mb-2">
                     <div class="col">
                         <label for="duration" class="mb-1 text-muted">Duration</label>
 
@@ -29,6 +29,13 @@
                             <input type="number" id="duration" class="form-control" required>
                             <span class="input-group-text text-muted">days</span>
                         </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <label for="completion-hours" class="mb-1 text-muted">Completion hours</label>
+                        <input type="number" id="completion-hours" class="form-control" required>
                     </div>
                 </div>
             </div>

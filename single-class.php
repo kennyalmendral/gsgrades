@@ -8,6 +8,7 @@ if (!is_user_logged_in()) {
 global $post, $wpdb, $current_user;
 
 $level = get_field('level', $post->ID);
+$passing_grade = get_field('passing_grade', $post->ID);
 $completion_hours = intval(get_field('completion_hours', $post->ID));
 $completed_hours = intval(get_field('completed_hours', $post->ID));
 $remaining_hours = intval(get_field('remaining_hours', $post->ID));
@@ -46,9 +47,14 @@ $class_student_query = new WP_Query(array(
     'post_status' => 'publish',
     'posts_per_page' => -1,
     'meta_query' => array(
+        'relation' => 'AND',
         array(
             'key' => 'class',
             'value' => $post->ID
+        ),
+        array(
+            'key' => 'status',
+            'value' => 'active'
         )
     )
 ));
@@ -107,11 +113,6 @@ get_header();
 
                     <div class="row mb-2">
                         <div class="col-12 col-md-6">
-                            <label for="completion-hours" class="form-label text-muted">Completion hours</label>
-                            <input type="number" min=0 id="completion-hours" class="form-control" value="<?php echo esc_attr($completion_hours); ?>" required />
-                        </div>
-
-                        <div class="col-12 col-md-6">
                             <label for="duration" class="form-label text-muted">Duration</label>
 
                             <div class="input-group">
@@ -119,6 +120,16 @@ get_header();
                                 <span class="input-group-text text-muted">days</span>
                             </div>
                         </div>
+
+                        <div class="col-12 col-md-6">
+                            <label for="passing-grade" class="form-label text-muted">Passing Grade</label>
+                            <input type="number" min=0 id="passing-grade" class="form-control" value="<?php echo esc_attr($passing_grade); ?>" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label for="completion-hours" class="form-label text-muted">Completion hours</label>
+                        <input type="number" min=0 id="completion-hours" class="form-control" value="<?php echo esc_attr($completion_hours); ?>" required />
                     </div>
 
                     <div class="row mb-2">
