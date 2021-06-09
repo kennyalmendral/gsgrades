@@ -75,7 +75,7 @@ if (is_admin()) {
                 if (!is_wp_error($category)) {
                     echo '<a href="' . get_edit_term_link($category->term_id) . '" target="_blank" rel="noreferrer">' . $category->name . '</a>';    
                 } else {
-                    echo 'N/A';    
+                    echo 'N/A';
                 }
 
                 break;
