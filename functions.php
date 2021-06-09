@@ -71,7 +71,13 @@ if (is_admin()) {
                 break;
             case 'category':
                 $category = get_category(get_field('category'));
-                echo '<a href="' . get_edit_term_link($category->term_id) . '" target="_blank" rel="noreferrer">' . $category->name . '</a>';
+
+                if (!is_wp_error($category)) {
+                    echo '<a href="' . get_edit_term_link($category->term_id) . '" target="_blank" rel="noreferrer">' . $category->name . '</a>';    
+                } else {
+                    echo 'N/A';    
+                }
+
                 break;
             case 'type':
                 $type = get_field('type');
