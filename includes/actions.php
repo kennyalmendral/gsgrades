@@ -2065,6 +2065,7 @@ function gsg_generate_report() {
     $code = $class->post_title;
     $teacher = get_user_by('ID', $class->post_author);
     $level = get_field('level', $class_id);
+    $passing_grade = floatval(get_field('passing_grade', $class_id));
 
     global $wpdb;
 
@@ -2394,7 +2395,12 @@ function gsg_generate_report() {
             $record_row_html .= '<td>' . $record['total'] . ' (' . $record['total_percentage'] . ')</td>';
             $record_row_html .= '<td>' . $record['exam'] . ' (' . $record['exam_percentage'] . ')</td>';
             $record_row_html .= '<td>' . $record['attendance'] . ' (' . $record['attendance_percentage'] . ')</td>';
-            $record_row_html .= '<td>' . $record['final_grade'] . '%</td>';
+
+            if ($record['final_grade'] < $passing_grade) {
+                $record_row_html .= '<td><strong style="color: red;">' . $record['final_grade']  . '%</strong></td>';
+            } else {
+                $record_row_html .= '<td><strong style="color: green;">' . $record['final_grade']  . '%</strong></td>';
+            }
         $record_row_html .= '</tr>';
     }
 
