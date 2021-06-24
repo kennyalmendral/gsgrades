@@ -34,7 +34,7 @@ function gsg_enqueue() {
     // wp_register_style('font-awesome', GSG_VENDORS_URL . '/font-awesome.min.css', array(), null);
     wp_enqueue_style('font-awesome');
 
-    if (gsg_is_students_page() || gsg_is_classes_page() || gsg_is_class_page()) {
+    if (gsg_is_students_page() || gsg_is_classes_page() || gsg_is_class_page() || gsg_is_grades_page()) {
         wp_register_style('bootstrap-datatables', 'https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css', array('bootstrap'), $version);
         // wp_register_style('bootstrap-datatables', GSG_VENDORS_URL . '/dataTables.bootstrap4.min.css', array('bootstrap'), $version);
         wp_enqueue_style('bootstrap-datatables');
@@ -52,7 +52,7 @@ function gsg_enqueue() {
     // wp_register_script('bootstrap', GSG_VENDORS_URL . '/bootstrap.bundle.min.js', array('jquery'), null, true);
 	wp_enqueue_script('bootstrap');
 
-    if (gsg_is_students_page() || gsg_is_classes_page() || gsg_is_class_page()) {
+    if (gsg_is_students_page() || gsg_is_classes_page() || gsg_is_class_page() || gsg_is_grades_page()) {
         wp_register_script('datatables', 'https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js', array('jquery'), null, true);
         // wp_register_script('datatables', GSG_VENDORS_URL . '/jquery.dataTables.min.js', array('jquery'), null, true);
         wp_enqueue_script('datatables');
@@ -93,6 +93,7 @@ function gsg_enqueue() {
         'isClassesPage' => gsg_is_classes_page() ? true : false,
         'isClassPage' => gsg_is_class_page() ? true : false,
         'isStudentsPage' => gsg_is_students_page() ? true : false,
+        'isGradesPage' => gsg_is_grades_page() ? true : false,
         'logoutNonce' => wp_create_nonce('logout-nonce'),
         'getClassPermalinkNonce' => wp_create_nonce('get-class-permalink-nonce'),
         'getStudentsNonce' => wp_create_nonce('get-students-nonce'),
@@ -114,6 +115,8 @@ function gsg_enqueue() {
         'updateRecordNonce' => wp_create_nonce('update-record-nonce'),
         'deleteRecordNonce' => wp_create_nonce('delete-record-nonce'),
         'generateReportNonce' => wp_create_nonce('generate-report-nonce'),
+        'getStudentGradesNonce' => wp_create_nonce('get-student-grades-nonce'),
+        'viewStudentClassGradeSummaryNonce' => wp_create_nonce('view-student-class-grade-summary-nonce'),
         'currentUser' => is_user_logged_in() ? $current_user : null,
         'currentUserNameInitials' => is_user_logged_in() ? $current_user_name_initials : null,
         'currentUserHasProfilePicture' => $has_profile_picture

@@ -2076,6 +2076,98 @@
             });
         }
 
+        if (gsg.isGradesPage) {
+            const teacherFilter = $('body').find('#teacher-filter');
+            const teacherFilterSelect = teacherFilter.find('select');
+
+            const categoryFilter = $('body').find('#category-filter');
+            const categoryFilterSelect = categoryFilter.find('select');
+
+            const typeFilter = $('body').find('#type-filter');
+            const typeFilterSelect = typeFilter.find('select');
+
+            const gradesTable = $('#grades-table');
+
+            const gradesDataTable = gradesTable.DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: gsg.ajaxUrl,
+                    data: function(d) {
+                        d.action = 'gsg_get_student_grades';
+                        d.get_student_grades_nonce = gsg.getStudentGradesNonce;
+                        d.student = gsg.currentUser.ID;
+                        d.teacher = teacherFilterSelect.val();
+                        d.category = categoryFilterSelect.val();
+                        d.type = typeFilterSelect.val();
+                    },
+                    columns: [
+                        { data: 'id' },
+                        { data: 'class_code' },
+                        { data: 'teacher' },
+                        { data: 'category' },
+                        { data: 'type' },
+                        { data: 'score' },
+                        { data: 'date_created' },
+                        { data: 'last_updated' }
+                    ],
+                },
+                columnDefs: [
+                    {
+                        targets: 5,
+                        orderable: false
+                    }
+                ],
+                order: [
+                    [3, 'DESC']
+                ],
+                language: {
+                    search: '',
+                    searchPlaceholder: 'Search...'
+                },
+                initComplete: function(settings, json) {
+                    $('#grades-table_length select').removeClass('form-control form-control-sm').addClass('form-select form-select-sm');
+
+                    $('#grades-table_wrapper .row:first-of-type').addClass('justify-content-between');
+                    $('#grades-table_wrapper .row:first-of-type .col-sm-12:first-of-type').removeClass('col-md-6').addClass('col-md-5');
+                    $('#grades-table_wrapper .row:first-of-type .col-sm-12:last-of-type').removeClass('col-md-6').addClass('col-md-7');
+
+                    $('#grades-table_wrapper .row:first-of-type .col-sm-12:last-of-type').addClass('d-flex align-items-center justify-content-between')
+                        .prepend(typeFilter)
+                        .prepend(categoryFilter)
+                        .prepend(teacherFilter);
+
+                    $('#grades-table_filter input').css('margin-left', 0).attr('placeholder', 'Search ID');
+
+                    $('#main-content').removeClass('d-none');
+                }
+            });
+
+            $('body').on('keyup', '#grades-table_filter input', function() {
+                teacherFilterSelect.val('');
+                categoryFilterSelect.val('');
+                typeFilterSelect.val('');
+            });
+
+            typeFilterSelect.change(function() {
+                if ($(this).val() == 'exam') {
+                    categoryFilterSelect.val('').attr('disabled', true);
+                } else {
+                    categoryFilterSelect.removeAttr('disabled');
+                }
+
+                gradesDataTable.ajax.reload();
+            });
+
+            categoryFilterSelect.change(function() {
+                gradesDataTable.ajax.reload();
+            });
+
+            teacherFilterSelect.change(function() {
+                gradesDataTable.ajax.reload();
+            });
+        }
+
         $('#logout').click(function(e) {
             e.preventDefault();
 
